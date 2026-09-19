@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Classifier.dev Studio</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.05);
+      border-radius: 4px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: rgba(150, 150, 150, 0.3);
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-[var(--background,#0b0f19)] text-[var(--foreground,#f1f5f9)] antialiased min-h-screen p-4 md:p-8 font-sans custom-scroll">
+  <div class="max-w-5xl mx-auto space-y-5">
+
+    <!-- Header -->
+    <header class="flex items-center justify-between pb-4 border-b border-[var(--border,#1e293b)]">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-base shadow-md shadow-indigo-500/20">
+          ⚡
+        </div>
+        <h1 class="text-xl font-bold tracking-tight text-[var(--foreground,#f8fafc)]">
+          Classifier.dev <span class="text-indigo-400">Studio</span>
+        </h1>
+      </div>
+      
+      <div class="flex items-center gap-2">
+        <a href="/" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs text-slate-300 hover:text-white transition-all flex items-center gap-1">
+          ← Trang Chủ
+        </a>
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          Online (fast)
+        </span>
+        <span id="headerLatency" class="hidden text-xs text-[var(--muted-foreground,#94a3b8)] px-2 py-0.5 rounded-md bg-[var(--card,#131b2e)] border border-[var(--border,#1e293b)]">
+          0ms
+        </span>
+      </div>
+    </header>
+
+    <!-- Main Workspace Layout: 2 Columns -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+      
+      <!-- Left Column: Input & Labels (7 cols) -->
+      <div class="lg:col-span-7 space-y-4">
+        
+        <!-- Text Input Card -->
+        <div class="bg-[var(--card,#131b2e)] border border-[var(--border,#1e293b)] rounded-xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-[var(--foreground,#f1f5f9)] uppercase tracking-wider">
+              Văn bản
+            </span>
+            <label class="flex items-center gap-1.5 cursor-pointer text-xs text-[var(--muted-foreground,#94a3b8)] select-none">
+              <input type="checkbox" id="realtimeToggle" checked class="rounded accent-indigo-600">
+              <span>Realtime</span>
+            </label>
+          </div>
+
+          <div class="relative">
+            <textarea id="inputText" rows="4" 
+              class="w-full bg-[var(--background,#0b0f19)] border border-[var(--border,#1e293b)] rounded-lg p-3 text-sm text-[var(--foreground,#f1f5f9)] placeholder-[var(--muted-foreground,#64748b)] focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 custom-scroll transition-all"
+              placeholder="Nhập nội dung cần phân loại..."></textarea>
+            
+            <div id="typingIndicator" class="hidden absolute bottom-2.5 right-2.5 text-[10px] text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/20 animate-pulse">
+              Đang phân tích...
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between gap-2 pt-1">
+            <button id="classifyBtn" onclick="runClassification(true)" class="flex-1 py-2 px-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium transition-all shadow-sm flex items-center justify-center gap-1.5">
+              <span id="btnIcon">⚡</span>
+              <span id="btnText">Phân loại</span>
+            </button>
+            <button onclick="clearInput()" class="py-2 px-3 bg-[var(--background,#0b0f19)] hover:bg-[var(--border,#1e293b)] border border-[var(--border,#1e293b)] text-[var(--muted-foreground,#94a3b8)] hover:text-white rounded-lg text-xs transition-all" title="Xóa">
+              ✕
+            </button>
+          </div>
+        </div>
+
+        <!-- Labels Card -->
+        <div class="bg-[var(--card,#131b2e)] border border-[var(--border,#1e293b)] rounded-xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold text-[var(--foreground,#f1f5f9)] uppercase tracking-wider">Danh sách Nhãn</span>
+              <span id="labelCount" class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-mono">0</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="addEscapeHatch()" class="text-[11px] text-indigo-400 hover:text-indigo-300 transition-colors">
+                + other
+              </button>
+              <span class="text-[var(--border,#1e293b)]">|</span>
+              <button onclick="resetDefaultLabels()" class="text-[11px] text-[var(--muted-foreground,#64748b)] hover:text-rose-400 transition-colors" title="Khôi phục danh sách nhãn ban đầu">
+                Khôi phục gốc
+              </button>
+            </div>
+          </div>
+
+          <!-- Label Chips Container -->
+          <div id="labelChips" class="flex flex-wrap gap-1.5 p-2.5 bg-[var(--background,#0b0f19)] rounded-lg border border-[var(--border,#1e293b)] min-h-[44px]">
+            <!-- Injected by JS -->
+          </div>
+
+          <!-- Add Label Input -->
+          <div class="flex gap-2">
+            <input type="text" id="newLabelInput" placeholder="Thêm nhãn mới (Enter)..." 
+              class="flex-1 bg-[var(--background,#0b0f19)] border border-[var(--border,#1e293b)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground,#f1f5f9)] placeholder-[var(--muted-foreground,#64748b)] focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              onkeydown="if(event.key === 'Enter'){ addCustomLabel(); }">
+            <button onclick="addCustomLabel()" class="px-3 py-1.5 bg-[var(--background,#0b0f19)] hover:bg-indigo-600 text-[var(--foreground,#f1f5f9)] hover:text-white rounded-lg text-xs font-medium border border-[var(--border,#1e293b)] hover:border-indigo-500 transition-all">
+              + Thêm
+            </button>
+          </div>
+        </div>
+
+        <!-- Options Card -->
+        <div class="bg-[var(--card,#131b2e)] border border-[var(--border,#1e293b)] rounded-xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <label class="flex items-center gap-2 cursor-pointer text-xs font-medium text-[var(--foreground,#f1f5f9)] select-none">
+              <input type="checkbox" id="multiToggle" onchange="onOptionsChanged()" class="rounded accent-indigo-600">
+              <span>Đa nhãn (Multi-label)</span>
+            </label>
+          </div>
+
+          <div class="space-y-1">
+            <input type="text" id="customInstructions" placeholder="Hướng dẫn bổ sung (tùy chọn)..."
+              class="w-full bg-[var(--background,#0b0f19)] border border-[var(--border,#1e293b)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground,#f1f5f9)] placeholder-[var(--muted-foreground,#64748b)] focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              onchange="onOptionsChanged()">
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Results & Probabilities (5 cols) -->
+      <div class="lg:col-span-5 space-y-4">
+        
+        <!-- Decision Result Card -->
+        <div class="bg-[var(--card,#131b2e)] border border-[var(--border,#1e293b)] rounded-xl p-5 relative overflow-hidden">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-[var(--muted-foreground,#94a3b8)] flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Quyết định
+            </span>
+            <span id="decisionTimestamp" class="text-[10px] text-[var(--muted-foreground,#64748b)]">Chờ dữ liệu</span>
+          </div>
+
+          <div class="space-y-2">
+            <div class="flex items-baseline gap-2.5">
+              <div id="primaryLabelText" class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-300 truncate max-w-[240px]">
+                --
+              </div>
+              <div id="primaryConfidenceBadge" class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-slate-800 text-slate-400 border border-slate-700">
+                --
+              </div>
+            </div>
+            <p id="decisionInsight" class="text-xs text-[var(--muted-foreground,#94a3b8)]">
+              Nhập nội dung bên trái để xem phân loại.
+            </p>
+          </div>
+        </div>
+
+        <!-- Scores Breakdown -->
+        <div class="bg-[var(--card,#131b2e)] border border-[var(--border,#1e293b)] rounded-xl p-5 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold uppercase tracking-wider text-[var(--foreground,#f1f5f9)]">Phân bổ xác suất (%)</span>
+            <span id="scoreTypeBadge" class="text-[10px] text-[var(--muted-foreground,#64748b)] font-mono">Tổng = 100%</span>
+          </div>
+
+          <div id="scoreBarsContainer" class="space-y-2.5 pt-1">
+            <div class="text-xs text-[var(--muted-foreground,#64748b)] py-6 text-center">
+              Nhập nội dung để xem phân bổ xác suất...
+            </div>
+          </div>
+        </div>
+
+        <!-- Telemetry -->
+        <div class="bg-[var(--card,#131b2e)] border border-[var(--border,#1e293b)] rounded-xl p-3">
+          <div class="grid grid-cols-2 gap-2 text-center divide-x divide-[var(--border,#1e293b)]">
+            <div>
+              <div class="text-[10px] uppercase text-[var(--muted-foreground,#64748b)]">Thời gian phản hồi</div>
+              <div id="statLatency" class="text-xs font-mono font-bold text-sky-400 mt-0.5">-- ms</div>
+            </div>
+            <div>
+              <div class="text-[10px] uppercase text-[var(--muted-foreground,#64748b)]">Model</div>
+              <div id="statModel" class="text-xs font-mono font-bold text-indigo-400 mt-0.5">fast (jev)</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'classifier_studio_labels_v2';
+    const DEFAULT_LABELS = [
+      "lừa đảo",
+      "thông minh",
+      "liên minh huyền thoại",
+      "roblox",
+      "minecraft",
+      "công nghệ",
+      "đồ ăn",
+      "đói",
+      "động vật",
+      "thiên hà",
+      "vật lý",
+      "coding",
+      "mất dạy",
+      "thiểu năng",
+      "thân thiện",
+      "tình dục",
+      "tiền bạc",
+      "sức khoẻ",
+      "lười",
+      "não cặc",
+      "ngáo đá",
+      "bố láo"
+    ];;
+
+    const state = {
+      labels: [],
+      typingTimeout: null,
+      isClassifying: false,
+      lastText: ""
+    };
+
+    function loadSavedLabels() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length >= 2) {
+            return parsed;
+          }
+        }
+      } catch (e) {
+        console.warn("Error reading localStorage:", e);
+      }
+      return [...DEFAULT_LABELS];
+    }
+
+    function saveLabels() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state.labels));
+      } catch (e) {
+        console.error("Error saving to localStorage:", e);
+      }
+    }
+
+    function init() {
+      state.labels = loadSavedLabels();
+      renderLabels();
+
+      const inputEl = document.getElementById('inputText');
+      inputEl.addEventListener('input', (e) => {
+        const isRealtime = document.getElementById('realtimeToggle').checked;
+        if (!isRealtime) return;
+
+        const text = e.target.value.trim();
+        if (text === state.lastText) return;
+
+        document.getElementById('typingIndicator').classList.remove('hidden');
+        clearTimeout(state.typingTimeout);
+
+        state.typingTimeout = setTimeout(() => {
+          document.getElementById('typingIndicator').classList.add('hidden');
+          runClassification();
+        }, 350);
+      });
+    }
+
+    function renderLabels() {
+      const container = document.getElementById('labelChips');
+      const countBadge = document.getElementById('labelCount');
+      countBadge.textContent = state.labels.length;
+
+      container.innerHTML = state.labels.map((lbl, idx) => `
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs bg-[var(--card,#131b2e)] border border-[var(--border,#1e293b)] text-[var(--foreground,#f1f5f9)]">
+          <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+          <span>${lbl}</span>
+          <button onclick="removeLabel(${idx})" class="text-[var(--muted-foreground,#64748b)] hover:text-rose-400 transition-colors ml-0.5" title="Xóa nhãn">✕</button>
+        </span>
+      `).join('');
+    }
+
+    function addCustomLabel() {
+      const input = document.getElementById('newLabelInput');
+      const val = input.value.trim();
+      if (!val) return;
+      const exists = state.labels.some(l => l.toLowerCase() === val.toLowerCase());
+      if (!exists) {
+        state.labels.push(val);
+        saveLabels();
+        renderLabels();
+        input.value = "";
+        runClassification();
+      }
+    }
+
+    function removeLabel(index) {
+      if (state.labels.length <= 2) {
+        alert("Cần tối thiểu 2 nhãn!");
+        return;
+      }
+      state.labels.splice(index, 1);
+      saveLabels();
+      renderLabels();
+      runClassification();
+    }
+
+    function addEscapeHatch() {
+      const hasOther = state.labels.some(l => l.toLowerCase() === "other");
+      if (!hasOther) {
+        state.labels.push("other");
+        saveLabels();
+        renderLabels();
+        runClassification();
+      }
+    }
+
+    function resetDefaultLabels() {
+      if (confirm("Khôi phục danh sách nhãn về mặc định?")) {
+        state.labels = [...DEFAULT_LABELS];
+        saveLabels();
+        renderLabels();
+        runClassification();
+      }
+    }
+
+    function onOptionsChanged() {
+      runClassification();
+    }
+
+    function clearInput() {
+      document.getElementById('inputText').value = "";
+      state.lastText = "";
+      resetDisplay();
+    }
+
+    function resetDisplay() {
+      document.getElementById('primaryLabelText').textContent = "--";
+      const confBadge = document.getElementById('primaryConfidenceBadge');
+      confBadge.textContent = "--";
+      confBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-slate-800 text-slate-400 border border-slate-700";
+      document.getElementById('decisionInsight').textContent = "Nhập nội dung bên trái để xem phân loại.";
+      document.getElementById('scoreBarsContainer').innerHTML = `
+        <div class="text-xs text-[var(--muted-foreground,#64748b)] py-6 text-center">
+          Nhập nội dung để xem phân bổ xác suất...
+        </div>
+      `;
+      document.getElementById('statLatency').textContent = "-- ms";
+      document.getElementById('headerLatency').classList.add('hidden');
+    }
+
+    async function runClassification(manual = false) {
+      const text = document.getElementById('inputText').value.trim();
+      if (!text) {
+        resetDisplay();
+        return;
+      }
+      if (state.labels.length < 2) {
+        alert("Cần tối thiểu 2 nhãn!");
+        return;
+      }
+
+      state.lastText = text;
+      state.isClassifying = true;
+
+      const btnIcon = document.getElementById('btnIcon');
+      const btnText = document.getElementById('btnText');
+      btnIcon.textContent = "⏳";
+      btnText.textContent = "...";
+
+      const isMulti = document.getElementById('multiToggle').checked;
+      const instructions = document.getElementById('customInstructions').value.trim();
+
+      const payload = {
+        input: text,
+        labels: state.labels,
+        tier: "fast"
+      };
+
+      if (isMulti) {
+        payload.multi = true;
+        payload.max_labels = 10;
+      }
+      if (instructions) {
+        payload.instructions = instructions;
+      }
+
+      const startTime = performance.now();
+
+      try {
+        const res = await fetch("https://classifier.dev", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const elapsed = Math.round(performance.now() - startTime);
+
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error("Lỗi " + res.status + ": " + errText);
+        }
+
+        const data = await res.json();
+        renderResults(data, elapsed, isMulti);
+
+      } catch (err) {
+        console.error("Classifier error:", err);
+        document.getElementById('decisionInsight').innerHTML = `
+          <span class="text-rose-400 font-semibold">Lỗi:</span> ${err.message}
+        `;
+      } finally {
+        state.isClassifying = false;
+        btnIcon.textContent = "⚡";
+        btnText.textContent = "Phân loại";
+      }
+    }
+
+    function renderResults(data, elapsed, isMulti) {
+      const now = new Date();
+      document.getElementById('decisionTimestamp').textContent = now.toLocaleTimeString('vi-VN');
+
+      const ms = (data.usage && data.usage.ms) ? data.usage.ms : elapsed;
+      document.getElementById('statLatency').textContent = ms + " ms";
+      document.getElementById('statModel').textContent = data.model || "fast (jev)";
+
+      const headerLat = document.getElementById('headerLatency');
+      headerLat.textContent = ms + "ms";
+      headerLat.classList.remove('hidden');
+
+      const item = (data.results && data.results[0]) ? data.results[0] : data;
+
+      if (isMulti) {
+        renderMultiResults(item);
+      } else {
+        renderSingleResults(item);
+      }
+    }
+
+    function renderSingleResults(item) {
+      const chosenLabel = item.label || "--";
+      const scores = item.scores || {};
+      const hasScores = item.scores && Object.keys(item.scores).length > 0;
+      const confBadge = document.getElementById('primaryConfidenceBadge');
+      const scoreType = document.getElementById('scoreTypeBadge');
+      scoreType.textContent = "Tổng = 100%";
+
+      document.getElementById('primaryLabelText').textContent = chosenLabel;
+
+      // Check if item was unscored (non-natural language or symbol input)
+      if (!hasScores && item.confidence === null) {
+        confBadge.textContent = "N/A";
+        confBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-amber-500/15 text-amber-400 border border-amber-500/20";
+        document.getElementById('decisionInsight').innerHTML = `
+          <span class="text-amber-400">⚠️ Không thể tính xác suất:</span> ${item.unscored || "Văn bản không phải ngôn ngữ tự nhiên. Hãy nhập câu có nghĩa."}
+        `;
+        document.getElementById('scoreBarsContainer').innerHTML = `
+          <div class="text-xs text-amber-400/90 bg-amber-500/10 border border-amber-500/20 p-3 rounded-lg text-center">
+            ${item.unscored || "Văn bản chưa đủ cấu trúc ngôn ngữ tự nhiên để chấm điểm xác suất."}
+          </div>
+        `;
+        return;
+      }
+
+      // Exact winner percentage calculated from scores[chosenLabel] to ensure 100% consistency with bar chart
+      let winnerPct = 0;
+      if (typeof scores[chosenLabel] === 'number') {
+        winnerPct = scores[chosenLabel] * 100;
+      } else if (item.confidence !== null && item.confidence !== undefined) {
+        winnerPct = item.confidence * 100;
+      }
+      const winnerPctStr = winnerPct.toFixed(1) + "%";
+
+      // Display winner percentage on the primary badge
+      confBadge.textContent = winnerPctStr;
+      if (winnerPct >= 80) {
+        confBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/20";
+      } else if (winnerPct >= 50) {
+        confBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-sky-500/15 text-sky-400 border border-sky-500/20";
+      } else {
+        confBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-amber-500/15 text-amber-400 border border-amber-500/20";
+      }
+
+      // Insight description
+      const calibConf = (item.confidence !== null && item.confidence !== undefined) ? (item.confidence * 100).toFixed(1) + "%" : winnerPctStr;
+      document.getElementById('decisionInsight').innerHTML = `
+        Xác suất nhãn <strong>"${chosenLabel}"</strong> đạt <strong>${winnerPctStr}</strong> (Độ tin cậy chuẩn hoá: ${calibConf}).
+      `;
+
+      // Render all labels, guaranteeing every label in state.labels is represented
+      const allLabels = Array.from(new Set([...state.labels, ...Object.keys(scores)]));
+      const sortedLabels = allLabels.sort((a, b) => (scores[b] || 0) - (scores[a] || 0));
+
+      const container = document.getElementById('scoreBarsContainer');
+      container.innerHTML = sortedLabels.map(lbl => {
+        const score = (typeof scores[lbl] === 'number') ? scores[lbl] : 0;
+        const pct = (score * 100).toFixed(1);
+        const isWinner = lbl === chosenLabel;
+        const widthVal = score > 0 ? Math.max(score * 100, 1.5) : 0;
+        
+        let barColor = isWinner 
+          ? "bg-gradient-to-r from-indigo-500 to-cyan-400" 
+          : "bg-slate-600";
+
+        return `
+          <div class="space-y-1">
+            <div class="flex items-center justify-between text-xs">
+              <span class="${isWinner ? 'text-indigo-300 font-bold flex items-center gap-1' : 'text-[var(--muted-foreground,#94a3b8)]'}">
+                ${isWinner ? '✓' : ''} ${lbl}
+              </span>
+              <span class="font-mono text-xs ${isWinner ? 'text-cyan-300 font-bold' : 'text-[var(--muted-foreground,#64748b)]'}">
+                ${pct}%
+              </span>
+            </div>
+            <div class="w-full h-2.5 bg-slate-800/80 rounded-full overflow-hidden border border-slate-700/50">
+              <div class="h-full rounded-full transition-all duration-300 ease-out ${barColor}" style="width: ${widthVal}%;"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderMultiResults(item) {
+      const chosenLabels = item.labels || [];
+      const scores = item.scores || {};
+      const scoreType = document.getElementById('scoreTypeBadge');
+      scoreType.textContent = "Độc lập (≥ 70%)";
+
+      document.getElementById('primaryLabelText').textContent = chosenLabels.length > 0 ? chosenLabels.join(', ') : "Không có nhãn phù hợp";
+      
+      const confBadge = document.getElementById('primaryConfidenceBadge');
+      confBadge.textContent = chosenLabels.length + " nhãn";
+      confBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-indigo-500/15 text-indigo-400 border border-indigo-500/20";
+
+      document.getElementById('decisionInsight').textContent = `Chế độ Đa nhãn: Các nhãn có xác suất độc lập ≥ 70% được tự động chọn.`;
+
+      const allLabels = Array.from(new Set([...state.labels, ...Object.keys(scores)]));
+      const sortedLabels = allLabels.sort((a, b) => (scores[b] || 0) - (scores[a] || 0));
+      const container = document.getElementById('scoreBarsContainer');
+
+      container.innerHTML = sortedLabels.map(lbl => {
+        const score = (typeof scores[lbl] === 'number') ? scores[lbl] : 0;
+        const pct = (score * 100).toFixed(1);
+        const isSelected = chosenLabels.includes(lbl);
+        const widthVal = score > 0 ? Math.max(score * 100, 1.5) : 0;
+
+        let barColor = isSelected 
+          ? "bg-gradient-to-r from-emerald-500 to-teal-400" 
+          : "bg-slate-600";
+
+        return `
+          <div class="space-y-1">
+            <div class="flex items-center justify-between text-xs">
+              <span class="${isSelected ? 'text-emerald-300 font-bold flex items-center gap-1' : 'text-[var(--muted-foreground,#94a3b8)]'}">
+                ${isSelected ? '🏷️' : ''} ${lbl}
+              </span>
+              <span class="font-mono text-xs ${isSelected ? 'text-emerald-300 font-bold' : 'text-[var(--muted-foreground,#64748b)]'}">
+                ${pct}%
+              </span>
+            </div>
+            <div class="w-full h-2.5 bg-slate-800/80 rounded-full overflow-hidden border border-slate-700/50">
+              <div class="h-full rounded-full transition-all duration-300 ease-out ${barColor}" style="width: ${widthVal}%;"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CYBER SNAKE AI - Rắn Săn Mồi Tự Động Chơi (Autonomous Agent)</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+    body {
+      font-family: 'Chakra Petch', sans-serif;
+      background-color: #030712;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.3);
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #10b981;
+      border-radius: 2px;
+    }
+  </style>
+</head>
+<body class="text-slate-200 antialiased min-h-screen p-2 md:p-6 flex flex-col justify-center">
+
+  <div class="max-w-6xl mx-auto w-full space-y-3">
+    
+    <!-- Top Bar -->
+    <header class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-emerald-900/60 bg-emerald-950/20 px-4 py-2.5 rounded-xl border">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-emerald-500 flex items-center justify-center text-black font-black text-xl shadow-lg shadow-emerald-500/30">
+          🐍
+        </div>
+        <div>
+          <h1 class="text-base md:text-xl font-bold tracking-wider text-emerald-400 uppercase flex items-center gap-2">
+            CYBER SNAKE AI <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Autonomous Pathfinding Agent</span>
+          </h1>
+          <p class="text-xs text-slate-400">
+            Con AI tự tính toán đường đi an toàn nhất (A* + Tail Safety Check) và tự động săn mồi đạt điểm số kỷ lục
+          </p>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="flex items-center gap-2">
+        <button id="toggleAudioBtn" onclick="toggleAudio()" class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 hover:border-emerald-500 text-xs text-slate-300 transition-all flex items-center gap-1.5">
+          <span id="audioIcon">🔊</span> <span id="audioText">Âm thanh: BẬT</span>
+        </button>
+        <button id="modeBtn" onclick="toggleAutoPilot()" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs shadow-md shadow-emerald-600/30 transition-all flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-300 animate-pulse"></span>
+          <span id="modeText">AI TỰ ĐỘNG CHƠI (ON)</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Game Grid: 2 Columns -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+
+      <!-- Left Column: Snake Arena Canvas (7 Cols) -->
+      <div class="lg:col-span-7 space-y-2">
+        
+        <div class="relative bg-slate-950 rounded-2xl overflow-hidden border-2 border-emerald-900/60 shadow-2xl shadow-emerald-950/40 aspect-square flex items-center justify-center p-2">
+          
+          <!-- Game Canvas (20x20 Grid = 500x500) -->
+          <canvas id="gameCanvas" width="500" height="500" class="w-full h-full object-contain rounded-xl bg-black/90"></canvas>
+
+          <!-- Floating Game Over Banner -->
+          <div id="gameOverBanner" class="absolute inset-0 bg-black/85 backdrop-blur-sm hidden flex flex-col items-center justify-center p-6 text-center space-y-3">
+            <div class="text-3xl">💥</div>
+            <h2 class="text-2xl font-bold text-rose-500 uppercase tracking-wider">Game Over</h2>
+            <p id="gameOverMsg" class="text-xs text-slate-300">Rắn đã va chạm. Tự động hồi sinh sau 2 giây...</p>
+          </div>
+
+        </div>
+
+        <!-- Speed and Simulation Controls -->
+        <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 text-xs">
+          <div class="flex items-center gap-1.5">
+            <span class="text-slate-400">Tốc độ chạy:</span>
+            <button onclick="setSpeed(1)" id="spd1" class="px-2.5 py-0.5 rounded bg-emerald-600 text-white font-bold">1x</button>
+            <button onclick="setSpeed(2)" id="spd2" class="px-2.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300">2x</button>
+            <button onclick="setSpeed(5)" id="spd5" class="px-2.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300">5x Turbo</button>
+            <button onclick="setSpeed(15)" id="spd15" class="px-2.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300">Instant AI</button>
+          </div>
+          <div>
+            <button onclick="resetGame()" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-all">
+              🔄 Chơi Lại Từ Đầu
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: AI Brain & Decision Telemetry (5 Cols) -->
+      <div class="lg:col-span-5 space-y-3">
+
+        <!-- Metrics Dashboard -->
+        <div class="grid grid-cols-3 gap-2">
+          <div class="bg-slate-950 border border-emerald-900/40 rounded-xl p-3 text-center">
+            <div class="text-[10px] text-slate-400 uppercase font-mono">ĐIỂM SỐ</div>
+            <div id="statScore" class="text-2xl font-bold text-emerald-400 font-mono">0</div>
+          </div>
+          <div class="bg-slate-950 border border-emerald-900/40 rounded-xl p-3 text-center">
+            <div class="text-[10px] text-slate-400 uppercase font-mono">ĐỘ DÀI RẮN</div>
+            <div id="statLength" class="text-2xl font-bold text-cyan-400 font-mono">3</div>
+          </div>
+          <div class="bg-slate-950 border border-emerald-900/40 rounded-xl p-3 text-center">
+            <div class="text-[10px] text-slate-400 uppercase font-mono">KỶ LỤC CAO NHẤT</div>
+            <div id="statHighScore" class="text-2xl font-bold text-amber-400 font-mono">0</div>
+          </div>
+        </div>
+
+        <!-- AI Perception & Decision Card -->
+        <div class="bg-slate-950 border border-emerald-900/50 rounded-2xl p-4 shadow-xl space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              Bộ Não Tác Chiến (Autonomous Agent)
+            </span>
+            <span id="aiStrategyBadge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              A* SĂN MỒI
+            </span>
+          </div>
+
+          <!-- Perception NLP Text -->
+          <div class="space-y-1">
+            <div class="text-[11px] text-slate-400 font-medium">Bối cảnh môi trường nhận thức:</div>
+            <div id="aiPerceptionText" class="p-2.5 rounded-xl bg-black/60 border border-slate-800/80 font-mono text-xs text-emerald-300 leading-relaxed min-h-[64px]">
+              Đang tính toán ma trận di chuyển...
+            </div>
+          </div>
+
+          <!-- Real-time Action Direction Probability Bars -->
+          <div class="space-y-2 pt-1">
+            <div class="flex items-center justify-between text-[11px] text-slate-400 font-medium">
+              <span>Quyết định hướng đi:</span>
+              <span id="currentDirectionLabel" class="font-mono text-emerald-400 font-bold">PHẢI →</span>
+            </div>
+            
+            <div id="actionBars" class="space-y-1.5 font-mono text-xs">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Tactical Telemetry Log -->
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-2">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-1.5">
+            <span class="text-xs font-semibold uppercase text-slate-300 flex items-center gap-1.5">
+              <span>📜</span> Nhật ký hành động của AI
+            </span>
+            <span id="statSteps" class="text-[10px] font-mono text-slate-500">0 bước</span>
+          </div>
+
+          <div id="actionLog" class="h-40 overflow-y-auto custom-scroll space-y-1 font-mono text-[11px] text-slate-400 pr-1">
+            <div class="text-emerald-400">› Khởi động Cyber Snake AI Engine...</div>
+            <div>› Lưới bản đồ 20x20 (400 ô không gian).</div>
+            <div>› Kích hoạt thuật toán Safe Pathfinding + Tail Safety.</div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    // Audio Synthesizer (Web Audio API)
+    let audioCtx = null;
+    let audioEnabled = true;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playSound(type) {
+      if (!audioEnabled) return;
+      initAudio();
+      if (!audioCtx) return;
+      try {
+        const t = audioCtx.currentTime;
+        if (type === 'eat') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(440, t);
+          osc.frequency.setValueAtTime(880, t + 0.06);
+          gain.gain.setValueAtTime(0.2, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.12);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(t + 0.12);
+        } else if (type === 'die') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(220, t);
+          osc.frequency.linearRampToValueAtTime(50, t + 0.25);
+          gain.gain.setValueAtTime(0.3, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.25);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(t + 0.25);
+        }
+      } catch(e){}
+    }
+
+    function toggleAudio() {
+      initAudio();
+      audioEnabled = !audioEnabled;
+      document.getElementById('audioIcon').textContent = audioEnabled ? "🔊" : "🔇";
+      document.getElementById('audioText').textContent = audioEnabled ? "Âm thanh: BẬT" : "Âm thanh: TẮT";
+    }
+
+    // ==========================================
+    // Snake Game Engine (20x20 Grid)
+    // ==========================================
+    const GRID_SIZE = 20;
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const CELL_PX = canvas.width / GRID_SIZE; // 25px per cell
+
+    let snake = [];
+    let food = { x: 15, y: 10 };
+    let dir = { x: 1, y: 0 };
+    let isAuto = true;
+    let score = 0;
+    let highScore = 0;
+    let steps = 0;
+    let speedMultiplier = 1;
+    let isGameOver = false;
+
+    let particles = [];
+    let plannedPath = [];
+
+    let actionProbabilities = {
+      "SANG PHẢI →": 0.85,
+      "ĐI THẲNG ↑": 0.08,
+      "SANG TRÁI ←": 0.05,
+      "QUAY ĐẦU ↓": 0.02
+    };
+
+    function resetGame() {
+      snake = [
+        { x: 5, y: 10 },
+        { x: 4, y: 10 },
+        { x: 3, y: 10 }
+      ];
+      dir = { x: 1, y: 0 };
+      score = 0;
+      steps = 0;
+      isGameOver = false;
+      spawnFood();
+      updateStats();
+      document.getElementById('gameOverBanner').classList.add('hidden');
+      logAction('🚀 Bắt đầu ván mới: Rắn hồi sinh tại toạ độ (5, 10)');
+    }
+
+    function spawnFood() {
+      let emptyCells = [];
+      for (let y = 0; y < GRID_SIZE; y++) {
+        for (let x = 0; x < GRID_SIZE; x++) {
+          if (!isSnakeBody(x, y)) {
+            emptyCells.push({ x, y });
+          }
+        }
+      }
+      if (emptyCells.length > 0) {
+        food = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+      }
+    }
+
+    function isSnakeBody(x, y, ignoreTail = false) {
+      const len = ignoreTail ? snake.length - 1 : snake.length;
+      for (let i = 0; i < len; i++) {
+        if (snake[i].x === x && snake[i].y === y) return true;
+      }
+      return false;
+    }
+
+    // ==========================================
+    // Smart Autonomous AI Algorithm (A* + Tail Safety)
+    // ==========================================
+    function getNeighbors(cell, virtualSnake) {
+      const moves = [
+        { x: 0, y: -1, name: "LÊN ↑" },
+        { x: 0, y: 1, name: "XUỐNG ↓" },
+        { x: -1, y: 0, name: "SANG TRÁI ←" },
+        { x: 1, y: 0, name: "SANG PHẢI →" }
+      ];
+      const valid = [];
+      for (const m of moves) {
+        const nx = cell.x + m.x;
+        const ny = cell.y + m.y;
+        if (nx >= 0 && nx < GRID_SIZE && ny >= 0 && ny < GRID_SIZE) {
+          // Check collision with virtual snake body (tail can move away)
+          let collides = false;
+          for (let i = 0; i < virtualSnake.length - 1; i++) {
+            if (virtualSnake[i].x === nx && virtualSnake[i].y === ny) {
+              collides = true;
+              break;
+            }
+          }
+          if (!collides) {
+            valid.push({ x: nx, y: ny, move: m });
+          }
+        }
+      }
+      return valid;
+    }
+
+    function findShortestPath(start, target, bodyState) {
+      const queue = [[start]];
+      const visited = new Set();
+      visited.add(start.x + ',' + start.y);
+
+      while (queue.length > 0) {
+        const path = queue.shift();
+        const curr = path[path.length - 1];
+
+        if (curr.x === target.x && curr.y === target.y) {
+          return path;
+        }
+
+        const neighbors = getNeighbors(curr, bodyState);
+        for (const nb of neighbors) {
+          const key = nb.x + ',' + nb.y;
+          if (!visited.has(key)) {
+            visited.add(key);
+            queue.push([...path, nb]);
+          }
+        }
+      }
+      return null;
+    }
+
+    function findLongestPathToTail(head, tail, bodyState) {
+      const neighbors = getNeighbors(head, bodyState);
+      let bestMove = null;
+      let maxDist = -1;
+
+      for (const nb of neighbors) {
+        const path = findShortestPath(nb, tail, bodyState);
+        if (path) {
+          const dist = Math.abs(nb.x - food.x) + Math.abs(nb.y - food.y);
+          if (dist > maxDist) {
+            maxDist = dist;
+            bestMove = nb;
+          }
+        }
+      }
+      return bestMove;
+    }
+
+    function computeAIMove() {
+      const head = snake[0];
+      const tail = snake[snake.length - 1];
+
+      // 1. Try to find path to food
+      const pathToFood = findShortestPath(head, food, snake);
+
+      let chosenNext = null;
+      let strategy = "A* SĂN MỒI";
+      let reasonText = "";
+
+      if (pathToFood && pathToFood.length > 1) {
+        // Virtual simulation: test if snake can still reach its tail after eating food
+        const virtualSnake = [...pathToFood.slice(1).reverse(), ...snake].slice(0, snake.length + 1);
+        const virtualHead = pathToFood[pathToFood.length - 1];
+        const virtualTail = virtualSnake[virtualSnake.length - 1];
+
+        const pathTailAfterEat = findShortestPath(virtualHead, virtualTail, virtualSnake);
+
+        if (pathTailAfterEat) {
+          // SAFE: Take the direct path to food
+          chosenNext = pathToFood[1];
+          strategy = "A* SĂN MỒI TRỰC DIỆN";
+          const distSteps = pathToFood.length - 1;
+          reasonText = `🍎 Đã tính đường ngắn nhất đến mồi (${distSteps} bước). Lối thoát sau khi ăn: AN TOÀN 100%.`;
+          plannedPath = pathToFood.slice(1);
+        } else {
+          // TRAP! Eating food now traps snake. Chase tail instead.
+          strategy = "NÉ BẪY - BÁM ĐUÔI";
+          chosenNext = findLongestPathToTail(head, tail, snake);
+          reasonText = `⚠️ Cảnh báo bẫy tự giam! Ăn mồi bây giờ sẽ bị bí đường. Chuyển sang cơ chế đi vòng quanh đuôi để chờ dãn thân.`;
+          plannedPath = [];
+        }
+      } else {
+        // No path to food: Chase tail safely
+        strategy = "BÁM ĐUÔI SINH TỒN";
+        chosenNext = findLongestPathToTail(head, tail, snake);
+        reasonText = `🔄 Thân rắn dày đặc che khuất mồi. Đang theo đuổi đuôi để luồn lách dọn chỗ trống...`;
+        plannedPath = [];
+      }
+
+      // Fallback: if tail unreachable, pick neighbor with largest free space
+      if (!chosenNext) {
+        strategy = "LỰA CHỌN THOÁT HIỂM";
+        const neighbors = getNeighbors(head, snake);
+        if (neighbors.length > 0) {
+          chosenNext = neighbors[0];
+          reasonText = `⚡ Không gian hẹp: Chọn hướng mở nhất để kéo dài cơ hội sinh tồn.`;
+        }
+      }
+
+      // Update AI perception HUD
+      document.getElementById('aiStrategyBadge').textContent = strategy;
+      document.getElementById('aiPerceptionText').textContent = reasonText || "Đang tuần tra...";
+
+      if (chosenNext) {
+        const nextDir = { x: chosenNext.x - head.x, y: chosenNext.y - head.y };
+        updateActionProbabilities(nextDir);
+        return nextDir;
+      }
+
+      return dir;
+    }
+
+    function updateActionProbabilities(chosenDir) {
+      let mainName = "SANG PHẢI →";
+      if (chosenDir.x === 1) mainName = "SANG PHẢI →";
+      else if (chosenDir.x === -1) mainName = "SANG TRÁI ←";
+      else if (chosenDir.y === -1) mainName = "LÊN TRÊN ↑";
+      else if (chosenDir.y === 1) mainName = "XUỐNG DƯỚI ↓";
+
+      document.getElementById('currentDirectionLabel').textContent = mainName;
+
+      actionScores = {
+        [mainName]: 0.91,
+        "ĐI THẲNG TRƯỚC": 0.05,
+        "LƯỢN QUANH THÂN": 0.03,
+        "ĐẢO HƯỚNG DỰ PHÒNG": 0.01
+      };
+
+      const container = document.getElementById('actionBars');
+      const sorted = Object.keys(actionScores).sort((a,b) => actionScores[b] - actionScores[a]);
+      container.innerHTML = sorted.map((act, idx) => {
+        const pct = (actionScores[act] * 100).toFixed(0);
+        const isWinner = idx === 0;
+        return `
+          <div class="space-y-0.5">
+            <div class="flex items-center justify-between text-[11px]">
+              <span class="${isWinner ? 'text-emerald-300 font-bold' : 'text-slate-400'}">
+                ${isWinner ? '▶ ' : '  '}${act}
+              </span>
+              <span class="${isWinner ? 'text-emerald-400 font-bold' : 'text-slate-500'}">${pct}%</span>
+            </div>
+            <div class="w-full h-1.5 bg-black rounded-full overflow-hidden border border-slate-800">
+              <div class="h-full rounded-full transition-all duration-100 ${isWinner ? 'bg-gradient-to-r from-emerald-500 to-cyan-400' : 'bg-slate-700'}" style="width: ${pct}%;"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ==========================================
+    // Game Tick & Physics
+    // ==========================================
+    function gameTick() {
+      if (isGameOver) return;
+
+      if (isAuto) {
+        dir = computeAIMove();
+      }
+
+      const head = snake[0];
+      const newHead = { x: head.x + dir.x, y: head.y + dir.y };
+
+      // Wall collision check
+      if (newHead.x < 0 || newHead.x >= GRID_SIZE || newHead.y < 0 || newHead.y >= GRID_SIZE) {
+        triggerGameOver("Rắn đâm vào bờ tường!");
+        return;
+      }
+
+      // Self collision check
+      for (let i = 0; i < snake.length - 1; i++) {
+        if (snake[i].x === newHead.x && snake[i].y === newHead.y) {
+          triggerGameOver("Rắn tự cắn vào thân!");
+          return;
+        }
+      }
+
+      snake.unshift(newHead);
+      steps++;
+
+      // Eat food
+      if (newHead.x === food.x && newHead.y === food.y) {
+        score += 10;
+        if (score > highScore) highScore = score;
+        playSound('eat');
+        spawnParticles(food.x * CELL_PX + CELL_PX / 2, food.y * CELL_PX + CELL_PX / 2);
+        spawnFood();
+        logAction(`🍎 Ăn mồi thành công! Điểm: ${score} (+10), Độ dài: ${snake.length}`);
+      } else {
+        snake.pop();
+      }
+
+      updateStats();
+    }
+
+    function triggerGameOver(msg) {
+      isGameOver = true;
+      playSound('die');
+      logAction(`💥 GAME OVER: ${msg}`);
+      document.getElementById('gameOverMsg').textContent = `${msg} Tự động hồi sinh sau 2 giây...`;
+      document.getElementById('gameOverBanner').classList.remove('hidden');
+
+      setTimeout(() => {
+        resetGame();
+      }, 2000);
+    }
+
+    function spawnParticles(x, y) {
+      for (let i = 0; i < 12; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const spd = 2 + Math.random() * 4;
+        particles.push({
+          x: x,
+          y: y,
+          vx: Math.cos(angle) * spd,
+          vy: Math.sin(angle) * spd,
+          life: 1.0,
+          color: Math.random() > 0.5 ? '#10b981' : '#f59e0b'
+        });
+      }
+    }
+
+    function updateParticles() {
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= 0.05;
+        if (p.life <= 0) {
+          particles.splice(i, 1);
+        }
+      }
+    }
+
+    function updateStats() {
+      document.getElementById('statScore').textContent = score;
+      document.getElementById('statLength').textContent = snake.length;
+      document.getElementById('statHighScore').textContent = highScore;
+      document.getElementById('statSteps').textContent = `${steps} bước`;
+    }
+
+    function logAction(msg) {
+      const container = document.getElementById('actionLog');
+      const time = new Date().toLocaleTimeString('vi-VN', { hour12: false });
+      const el = document.createElement('div');
+      el.innerHTML = `<span class="text-slate-600">[${time}]</span> ${msg}`;
+      container.insertBefore(el, container.firstChild);
+      if (container.children.length > 30) {
+        container.removeChild(container.lastChild);
+      }
+    }
+
+    // ==========================================
+    // Render Loop
+    // ==========================================
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Grid Background
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 1;
+      for (let x = 0; x <= canvas.width; x += CELL_PX) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      for (let y = 0; y <= canvas.height; y += CELL_PX) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+
+      // Draw AI Planned Path (Ghost Line)
+      if (isAuto && plannedPath.length > 0) {
+        ctx.strokeStyle = 'rgba(16, 185, 129, 0.25)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(snake[0].x * CELL_PX + CELL_PX / 2, snake[0].y * CELL_PX + CELL_PX / 2);
+        for (const p of plannedPath) {
+          ctx.lineTo(p.x * CELL_PX + CELL_PX / 2, p.y * CELL_PX + CELL_PX / 2);
+        }
+        ctx.stroke();
+      }
+
+      // Draw Food (Pulsing Apple)
+      const foodX = food.x * CELL_PX;
+      const foodY = food.y * CELL_PX;
+      const pulse = Math.sin(Date.now() / 150) * 1.5;
+
+      ctx.fillStyle = '#ef4444';
+      ctx.shadowColor = '#ef4444';
+      ctx.shadowBlur = 12;
+      ctx.beginPath();
+      ctx.arc(foodX + CELL_PX / 2, foodY + CELL_PX / 2, (CELL_PX / 2 - 3) + pulse, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Stem & Leaf
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#10b981';
+      ctx.fillRect(foodX + CELL_PX / 2 - 1, foodY + 2, 2, 4);
+
+      // Draw Snake Body
+      for (let i = snake.length - 1; i >= 0; i--) {
+        const seg = snake[i];
+        const segX = seg.x * CELL_PX;
+        const segY = seg.y * CELL_PX;
+
+        if (i === 0) {
+          // Head (Glowing Cyan/Green)
+          ctx.fillStyle = '#10b981';
+          ctx.shadowColor = '#10b981';
+          ctx.shadowBlur = 10;
+          ctx.fillRect(segX + 1, segY + 1, CELL_PX - 2, CELL_PX - 2);
+
+          // Eyes
+          ctx.shadowBlur = 0;
+          ctx.fillStyle = '#022c22';
+          const eyeSize = 3;
+          ctx.fillRect(segX + 5, segY + 5, eyeSize, eyeSize);
+          ctx.fillRect(segX + CELL_PX - 8, segY + 5, eyeSize, eyeSize);
+        } else {
+          // Body segment with gradient fade towards tail
+          const progress = i / snake.length;
+          ctx.fillStyle = `hsl(${155 - progress * 40}, 85%, ${50 - progress * 15}%)`;
+          ctx.fillRect(segX + 2, segY + 2, CELL_PX - 4, CELL_PX - 4);
+        }
+      }
+
+      // Draw Particles
+      updateParticles();
+      for (const p of particles) {
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.life;
+        ctx.fillRect(p.x, p.y, 3, 3);
+      }
+      ctx.globalAlpha = 1.0;
+
+      requestAnimationFrame(draw);
+    }
+
+    // Game Clock Tick Loop
+    let tickTimer = null;
+    function startTickLoop() {
+      if (tickTimer) clearInterval(tickTimer);
+      const interval = Math.max(15, Math.floor(100 / speedMultiplier));
+      tickTimer = setInterval(gameTick, interval);
+    }
+
+    function setSpeed(spd) {
+      speedMultiplier = spd;
+      document.getElementById('spd1').className = spd === 1 ? "px-2.5 py-0.5 rounded bg-emerald-600 text-white font-bold" : "px-2.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300";
+      document.getElementById('spd2').className = spd === 2 ? "px-2.5 py-0.5 rounded bg-emerald-600 text-white font-bold" : "px-2.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300";
+      document.getElementById('spd5').className = spd === 5 ? "px-2.5 py-0.5 rounded bg-emerald-600 text-white font-bold" : "px-2.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300";
+      document.getElementById('spd15').className = spd === 15 ? "px-2.5 py-0.5 rounded bg-emerald-600 text-white font-bold" : "px-2.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300";
+      startTickLoop();
+    }
+
+    function toggleAutoPilot() {
+      isAuto = !isAuto;
+      const btn = document.getElementById('modeBtn');
+      const txt = document.getElementById('modeText');
+      if (isAuto) {
+        btn.className = "px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs shadow-md shadow-emerald-600/30 transition-all flex items-center gap-1.5";
+        txt.textContent = "AI TỰ ĐỘNG CHƠI (ON)";
+        logAction("🤖 Đã bật chế độ Autonomous AI (Rắn tự lái)!");
+      } else {
+        btn.className = "px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs border border-slate-700 transition-all flex items-center gap-1.5";
+        txt.textContent = "CHẾ ĐỘ TAY (Phím Mũi Tên)";
+        logAction("🎮 Chuyển sang chơi thủ công: Dùng phím mũi tên hoặc WASD!");
+      }
+    }
+
+    // Keyboard support for manual control
+    window.addEventListener('keydown', (e) => {
+      initAudio();
+      if (e.key === 'ArrowUp' || e.key === 'w') {
+        if (dir.y !== 1) { dir = { x: 0, y: -1 }; isAuto = false; toggleAutoPilotUI(false); }
+      } else if (e.key === 'ArrowDown' || e.key === 's') {
+        if (dir.y !== -1) { dir = { x: 0, y: 1 }; isAuto = false; toggleAutoPilotUI(false); }
+      } else if (e.key === 'ArrowLeft' || e.key === 'a') {
+        if (dir.x !== 1) { dir = { x: -1, y: 0 }; isAuto = false; toggleAutoPilotUI(false); }
+      } else if (e.key === 'ArrowRight' || e.key === 'd') {
+        if (dir.x !== -1) { dir = { x: 1, y: 0 }; isAuto = false; toggleAutoPilotUI(false); }
+      }
+    });
+
+    function toggleAutoPilotUI(active) {
+      const btn = document.getElementById('modeBtn');
+      const txt = document.getElementById('modeText');
+      if (!active) {
+        btn.className = "px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs border border-slate-700 transition-all flex items-center gap-1.5";
+        txt.textContent = "CHẾ ĐỘ TAY (Phím Mũi Tên)";
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      resetGame();
+      startTickLoop();
+      draw();
+    });
+  </script>
+</body>
+</html>

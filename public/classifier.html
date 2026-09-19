@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Classifier.dev Studio</title>
+  <title>Classifier.dev Studio - Đối Đầu TypeSafe Jev vs Convai Laya</title>
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
   <style>
     .custom-scroll::-webkit-scrollbar {
@@ -18,180 +18,297 @@
       background: rgba(150, 150, 150, 0.3);
       border-radius: 4px;
     }
+    .model-card-active {
+      box-shadow: 0 0 20px -5px rgba(99, 102, 241, 0.25);
+    }
   </style>
 </head>
-<body class="bg-[var(--background,#0b0f19)] text-[var(--foreground,#f1f5f9)] antialiased min-h-screen p-4 md:p-8 font-sans custom-scroll">
-  <div class="max-w-5xl mx-auto space-y-5">
+<body class="bg-[#0b0f19] text-[#f1f5f9] antialiased min-h-screen p-3 sm:p-5 md:p-8 font-sans custom-scroll selection:bg-indigo-500/30 selection:text-indigo-300">
+  <div class="max-w-7xl mx-auto space-y-5">
 
-    <!-- Header -->
-    <header class="flex items-center justify-between pb-4 border-b border-[var(--border,#1e293b)]">
-      <div class="flex items-center gap-2.5">
-        <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-base shadow-md shadow-indigo-500/20">
+    <!-- Top Header -->
+    <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-cyan-500 to-emerald-400 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-indigo-500/20">
           ⚡
         </div>
-        <h1 class="text-xl font-bold tracking-tight text-[var(--foreground,#f8fafc)]">
-          Classifier.dev <span class="text-indigo-400">Studio</span>
-        </h1>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-xl font-bold tracking-tight text-white">
+              Classifier.dev <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-cyan-400 to-emerald-400">Studio & Arena</span>
+            </h1>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+              v2.0 Dual Engine
+            </span>
+          </div>
+          <p class="text-xs text-slate-400">
+            Trải nghiệm & đối chiếu song song: <strong>TypeSafe Jev (Cloud Fast)</strong> vs <strong>Convai Laya (Open-Source RLCD)</strong>
+          </p>
+        </div>
       </div>
       
       <div class="flex items-center gap-2">
-        <a href="/" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs text-slate-300 hover:text-white transition-all flex items-center gap-1">
+        <a href="/" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs text-slate-300 hover:text-white transition-all flex items-center gap-1">
           ← Trang Chủ
         </a>
-        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-          Online (fast)
-        </span>
-        <span id="headerLatency" class="hidden text-xs text-[var(--muted-foreground,#94a3b8)] px-2 py-0.5 rounded-md bg-[var(--card,#131b2e)] border border-[var(--border,#1e293b)]">
-          0ms
+        <a href="/laya.html" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs text-slate-300 hover:text-white transition-all flex items-center gap-1">
+          Laya Studio ↗
+        </a>
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          2 Models Live
         </span>
       </div>
     </header>
 
-    <!-- Main Workspace Layout: 2 Columns -->
+    <!-- Model Mode Selection Bar -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-[#131b2e] border border-slate-800 rounded-xl p-3 shadow-sm">
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Chế độ phân loại:</span>
+        <div class="inline-flex p-1 bg-[#0b0f19] rounded-lg border border-slate-800 text-xs font-medium">
+          <button id="btnModeDual" onclick="setEngineMode('dual')" class="px-3 py-1.5 rounded-md transition-all bg-indigo-600 text-white shadow-sm flex items-center gap-1.5">
+            <span>⚔️</span> So Sánh Song Song (Jev vs Laya)
+          </button>
+          <button id="btnModeJev" onclick="setEngineMode('jev')" class="px-3 py-1.5 rounded-md transition-all text-slate-400 hover:text-white flex items-center gap-1.5">
+            <span>⚡</span> Chỉ TypeSafe Jev
+          </button>
+          <button id="btnModeLaya" onclick="setEngineMode('laya')" class="px-3 py-1.5 rounded-md transition-all text-slate-400 hover:text-white flex items-center gap-1.5">
+            <span>🧠</span> Chỉ Convai Laya
+          </button>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 text-xs font-mono text-slate-400">
+        <span class="inline-flex items-center gap-1 text-indigo-300">
+          <span class="w-2 h-2 rounded-full bg-indigo-500"></span> TypeSafe Jev ($0.042/MTok)
+        </span>
+        <span class="text-slate-600">&bull;</span>
+        <span class="inline-flex items-center gap-1 text-cyan-300">
+          <span class="w-2 h-2 rounded-full bg-cyan-400"></span> Convai Laya (Open $0.00)
+        </span>
+      </div>
+    </div>
+
+    <!-- Live Comparison Scorecard Banner (Visible in Dual Mode) -->
+    <div id="dualScorecard" class="bg-gradient-to-r from-indigo-950/40 via-slate-900 to-cyan-950/40 border border-slate-800 rounded-xl p-3.5 text-xs text-slate-300 transition-all">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+        <div class="flex items-center gap-2">
+          <span class="text-base" id="scorecardIcon">⚔️</span>
+          <div>
+            <span class="font-bold text-white uppercase text-[11px] tracking-wider block">Bảng So Kè Thời Gian Thực:</span>
+            <span id="scorecardConsensus" class="text-slate-300">
+              Nhập nội dung bên dưới và bấm "Phân Loại" để xem hai mô hình đọ sức đồng thời.
+            </span>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 font-mono text-[11px] self-start sm:self-auto">
+          <div class="px-2.5 py-1 rounded bg-slate-900/90 border border-slate-700/80">
+            Jev: <span id="scJevMs" class="text-indigo-400 font-bold">-- ms</span>
+          </div>
+          <div class="px-2.5 py-1 rounded bg-slate-900/90 border border-slate-700/80">
+            Laya: <span id="scLayaMs" class="text-cyan-400 font-bold">-- ms</span>
+          </div>
+          <div id="scSpeedWinner" class="px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold hidden">
+            --
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Workspace Layout -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
       
-      <!-- Left Column: Input & Labels (7 cols) -->
-      <div class="lg:col-span-7 space-y-4">
+      <!-- Left Column: Input & Labels (5 cols) -->
+      <div class="lg:col-span-5 space-y-4">
         
         <!-- Text Input Card -->
-        <div class="bg-[var(--card,#131b2e)] border border-[var(--border,#1e293b)] rounded-xl p-4 space-y-3">
+        <div class="bg-[#131b2e] border border-slate-800 rounded-xl p-4 space-y-3">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-semibold text-[var(--foreground,#f1f5f9)] uppercase tracking-wider">
-              Văn bản
+            <span class="text-xs font-semibold text-white uppercase tracking-wider">
+              Văn bản đầu vào (State)
             </span>
-            <label class="flex items-center gap-1.5 cursor-pointer text-xs text-[var(--muted-foreground,#94a3b8)] select-none">
+            <label class="flex items-center gap-1.5 cursor-pointer text-xs text-slate-400 select-none">
               <input type="checkbox" id="realtimeToggle" checked class="rounded accent-indigo-600">
-              <span>Realtime</span>
+              <span>Realtime (350ms)</span>
             </label>
           </div>
 
           <div class="relative">
             <textarea id="inputText" rows="4" 
-              class="w-full bg-[var(--background,#0b0f19)] border border-[var(--border,#1e293b)] rounded-lg p-3 text-sm text-[var(--foreground,#f1f5f9)] placeholder-[var(--muted-foreground,#64748b)] focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 custom-scroll transition-all"
-              placeholder="Nhập nội dung cần phân loại..."></textarea>
+              class="w-full bg-[#0b0f19] border border-slate-800 rounded-lg p-3 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 custom-scroll transition-all"
+              placeholder="Nhập nội dung bất kỳ bằng tiếng Việt hoặc tiếng Anh..."></textarea>
             
-            <div id="typingIndicator" class="hidden absolute bottom-2.5 right-2.5 text-[10px] text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/20 animate-pulse">
-              Đang phân tích...
+            <div id="typingIndicator" class="hidden absolute bottom-2.5 right-2.5 text-[10px] text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20 animate-pulse">
+              Đang phân tích song song...
+            </div>
+          </div>
+
+          <!-- Quick Samples -->
+          <div class="space-y-1.5">
+            <span class="text-[11px] text-slate-400 block">Thử nhanh câu mẫu:</span>
+            <div class="flex flex-wrap gap-1.5">
+              <button onclick="setSample(1)" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] text-slate-300 transition-colors">
+                💳 Bị trừ tiền ngân hàng
+              </button>
+              <button onclick="setSample(2)" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] text-slate-300 transition-colors">
+                💻 Lỗi lập trình Python
+              </button>
+              <button onclick="setSample(3)" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] text-slate-300 transition-colors">
+                🍕 Đói bụng ăn pizza
+              </button>
+              <button onclick="setSample(4)" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] text-slate-300 transition-colors">
+                🚨 Web lừa đảo chiếm đoạt
+              </button>
             </div>
           </div>
 
           <div class="flex items-center justify-between gap-2 pt-1">
-            <button id="classifyBtn" onclick="runClassification(true)" class="flex-1 py-2 px-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium transition-all shadow-sm flex items-center justify-center gap-1.5">
+            <button id="classifyBtn" onclick="runDualClassification(true)" class="flex-1 py-2 px-4 bg-gradient-to-r from-indigo-600 via-indigo-500 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white rounded-lg text-xs font-bold transition-all shadow-md shadow-indigo-600/20 flex items-center justify-center gap-1.5">
               <span id="btnIcon">⚡</span>
-              <span id="btnText">Phân loại</span>
+              <span id="btnText">Phân loại ngay</span>
             </button>
-            <button onclick="clearInput()" class="py-2 px-3 bg-[var(--background,#0b0f19)] hover:bg-[var(--border,#1e293b)] border border-[var(--border,#1e293b)] text-[var(--muted-foreground,#94a3b8)] hover:text-white rounded-lg text-xs transition-all" title="Xóa">
+            <button onclick="clearInput()" class="py-2 px-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 hover:text-white rounded-lg text-xs transition-all" title="Xóa nội dung">
               ✕
             </button>
           </div>
         </div>
 
         <!-- Labels Card -->
-        <div class="bg-[var(--card,#131b2e)] border border-[var(--border,#1e293b)] rounded-xl p-4 space-y-3">
+        <div class="bg-[#131b2e] border border-slate-800 rounded-xl p-4 space-y-3">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <span class="text-xs font-semibold text-[var(--foreground,#f1f5f9)] uppercase tracking-wider">Danh sách Nhãn</span>
+              <span class="text-xs font-semibold text-white uppercase tracking-wider">Danh sách Nhãn</span>
               <span id="labelCount" class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-mono">0</span>
             </div>
-            <div class="flex items-center gap-2">
-              <button onclick="addEscapeHatch()" class="text-[11px] text-indigo-400 hover:text-indigo-300 transition-colors">
+            <div class="flex items-center gap-2 text-[11px]">
+              <button onclick="addEscapeHatch()" class="text-indigo-400 hover:text-indigo-300 transition-colors">
                 + other
               </button>
-              <span class="text-[var(--border,#1e293b)]">|</span>
-              <button onclick="resetDefaultLabels()" class="text-[11px] text-[var(--muted-foreground,#64748b)] hover:text-rose-400 transition-colors" title="Khôi phục danh sách nhãn ban đầu">
+              <span class="text-slate-700">|</span>
+              <button onclick="resetDefaultLabels()" class="text-slate-400 hover:text-rose-400 transition-colors" title="Khôi phục danh sách nhãn ban đầu">
                 Khôi phục gốc
               </button>
             </div>
           </div>
 
           <!-- Label Chips Container -->
-          <div id="labelChips" class="flex flex-wrap gap-1.5 p-2.5 bg-[var(--background,#0b0f19)] rounded-lg border border-[var(--border,#1e293b)] min-h-[44px]">
+          <div id="labelChips" class="flex flex-wrap gap-1.5 p-2.5 bg-[#0b0f19] rounded-lg border border-slate-800 min-h-[44px]">
             <!-- Injected by JS -->
           </div>
 
           <!-- Add Label Input -->
           <div class="flex gap-2">
             <input type="text" id="newLabelInput" placeholder="Thêm nhãn mới (Enter)..." 
-              class="flex-1 bg-[var(--background,#0b0f19)] border border-[var(--border,#1e293b)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground,#f1f5f9)] placeholder-[var(--muted-foreground,#64748b)] focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              class="flex-1 bg-[#0b0f19] border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
               onkeydown="if(event.key === 'Enter'){ addCustomLabel(); }">
-            <button onclick="addCustomLabel()" class="px-3 py-1.5 bg-[var(--background,#0b0f19)] hover:bg-indigo-600 text-[var(--foreground,#f1f5f9)] hover:text-white rounded-lg text-xs font-medium border border-[var(--border,#1e293b)] hover:border-indigo-500 transition-all">
+            <button onclick="addCustomLabel()" class="px-3 py-1.5 bg-slate-800 hover:bg-indigo-600 text-slate-200 hover:text-white rounded-lg text-xs font-medium border border-slate-700 hover:border-indigo-500 transition-all">
               + Thêm
             </button>
           </div>
-        </div>
 
-        <!-- Options Card -->
-        <div class="bg-[var(--card,#131b2e)] border border-[var(--border,#1e293b)] rounded-xl p-4 space-y-3">
-          <div class="flex items-center justify-between">
-            <label class="flex items-center gap-2 cursor-pointer text-xs font-medium text-[var(--foreground,#f1f5f9)] select-none">
-              <input type="checkbox" id="multiToggle" onchange="onOptionsChanged()" class="rounded accent-indigo-600">
-              <span>Đa nhãn (Multi-label)</span>
-            </label>
-          </div>
-
-          <div class="space-y-1">
-            <input type="text" id="customInstructions" placeholder="Hướng dẫn bổ sung (tùy chọn)..."
-              class="w-full bg-[var(--background,#0b0f19)] border border-[var(--border,#1e293b)] rounded-lg px-3 py-1.5 text-xs text-[var(--foreground,#f1f5f9)] placeholder-[var(--muted-foreground,#64748b)] focus:outline-none focus:ring-1 focus:ring-indigo-500"
-              onchange="onOptionsChanged()">
-          </div>
+          <p class="text-[10px] text-slate-500 leading-normal">
+            💡 <em>Mẹo:</em> TypeSafe Jev hỗ trợ tới 255 nhãn; Laya hỗ trợ tốt nhất $\le$ 16 nhãn cùng lúc. Cả 2 đều tính toán phân phối xác suất toán học 100%.
+          </p>
         </div>
 
       </div>
 
-      <!-- Right Column: Results & Probabilities (5 cols) -->
-      <div class="lg:col-span-5 space-y-4">
-        
-        <!-- Decision Result Card -->
-        <div class="bg-[var(--card,#131b2e)] border border-[var(--border,#1e293b)] rounded-xl p-5 relative overflow-hidden">
-          <div class="flex items-center justify-between mb-3">
-            <span class="text-xs font-bold uppercase tracking-wider text-[var(--muted-foreground,#94a3b8)] flex items-center gap-1.5">
-              <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Quyết định
-            </span>
-            <span id="decisionTimestamp" class="text-[10px] text-[var(--muted-foreground,#64748b)]">Chờ dữ liệu</span>
-          </div>
+      <!-- Right Area: Results Columns (7 cols) -->
+      <div class="lg:col-span-7 space-y-4">
 
-          <div class="space-y-2">
-            <div class="flex items-baseline gap-2.5">
-              <div id="primaryLabelText" class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-300 truncate max-w-[240px]">
-                --
+        <!-- Dual Arena View (Default: 2 Columns Side-by-Side) -->
+        <div id="dualViewGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+          <!-- Left Model: TypeSafe Jev -->
+          <div id="jevColumn" class="bg-[#131b2e] border border-indigo-500/30 rounded-xl p-4 space-y-3.5 relative overflow-hidden transition-all">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-800/80">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
+                <span class="text-xs font-bold text-white uppercase tracking-wider">TypeSafe Jev</span>
               </div>
-              <div id="primaryConfidenceBadge" class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-slate-800 text-slate-400 border border-slate-700">
-                --
+              <span id="jevLatencyBadge" class="text-[10px] font-mono text-indigo-300 bg-indigo-500/15 px-2 py-0.5 rounded border border-indigo-500/30">
+                Chờ lệnh
+              </span>
+            </div>
+
+            <!-- Primary Decision Box -->
+            <div class="bg-[#0b0f19] p-3 rounded-lg border border-slate-800/80 space-y-1">
+              <span class="text-[10px] text-slate-400 uppercase font-mono block">Nhãn Chiến Thắng (Top 1)</span>
+              <div class="flex items-baseline justify-between gap-2">
+                <div id="jevWinnerLabel" class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-300 truncate max-w-[180px]">
+                  --
+                </div>
+                <div id="jevWinnerConfidence" class="px-2 py-0.5 rounded text-xs font-mono font-bold bg-slate-800 text-slate-400 border border-slate-700">
+                  --%
+                </div>
               </div>
             </div>
-            <p id="decisionInsight" class="text-xs text-[var(--muted-foreground,#94a3b8)]">
-              Nhập nội dung bên trái để xem phân loại.
-            </p>
-          </div>
-        </div>
 
-        <!-- Scores Breakdown -->
-        <div class="bg-[var(--card,#131b2e)] border border-[var(--border,#1e293b)] rounded-xl p-5 space-y-3">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-semibold uppercase tracking-wider text-[var(--foreground,#f1f5f9)]">Phân bổ xác suất (%)</span>
-            <span id="scoreTypeBadge" class="text-[10px] text-[var(--muted-foreground,#64748b)] font-mono">Tổng = 100%</span>
-          </div>
+            <!-- Probability Bars -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between text-[11px]">
+                <span class="text-slate-400 font-semibold">Phân bổ xác suất:</span>
+                <span class="text-[10px] text-slate-500 font-mono">Parallel Sampler</span>
+              </div>
+              <div id="jevBarsContainer" class="space-y-2 max-h-64 overflow-y-auto custom-scroll pr-1">
+                <div class="text-[11px] text-slate-500 py-6 text-center italic">
+                  Chờ dữ liệu từ Jev...
+                </div>
+              </div>
+            </div>
 
-          <div id="scoreBarsContainer" class="space-y-2.5 pt-1">
-            <div class="text-xs text-[var(--muted-foreground,#64748b)] py-6 text-center">
-              Nhập nội dung để xem phân bổ xác suất...
+            <!-- Jev Footer Telemetry -->
+            <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[10px] text-slate-500 font-mono">
+              <span>tokens_out: 0</span>
+              <span class="text-indigo-400">Zero-Shot Pretrained</span>
             </div>
           </div>
-        </div>
 
-        <!-- Telemetry -->
-        <div class="bg-[var(--card,#131b2e)] border border-[var(--border,#1e293b)] rounded-xl p-3">
-          <div class="grid grid-cols-2 gap-2 text-center divide-x divide-[var(--border,#1e293b)]">
-            <div>
-              <div class="text-[10px] uppercase text-[var(--muted-foreground,#64748b)]">Thời gian phản hồi</div>
-              <div id="statLatency" class="text-xs font-mono font-bold text-sky-400 mt-0.5">-- ms</div>
+          <!-- Right Model: Convai Laya -->
+          <div id="layaColumn" class="bg-[#131b2e] border border-cyan-500/30 rounded-xl p-4 space-y-3.5 relative overflow-hidden transition-all">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-800/80">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
+                <span class="text-xs font-bold text-white uppercase tracking-wider">Convai Laya</span>
+              </div>
+              <span id="layaLatencyBadge" class="text-[10px] font-mono text-cyan-300 bg-cyan-500/15 px-2 py-0.5 rounded border border-cyan-500/30">
+                Chờ lệnh
+              </span>
             </div>
-            <div>
-              <div class="text-[10px] uppercase text-[var(--muted-foreground,#64748b)]">Model</div>
-              <div id="statModel" class="text-xs font-mono font-bold text-indigo-400 mt-0.5">fast (jev)</div>
+
+            <!-- Primary Decision Box -->
+            <div class="bg-[#0b0f19] p-3 rounded-lg border border-slate-800/80 space-y-1">
+              <span class="text-[10px] text-slate-400 uppercase font-mono block">Nhãn Chiến Thắng (Top 1)</span>
+              <div class="flex items-baseline justify-between gap-2">
+                <div id="layaWinnerLabel" class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-300 truncate max-w-[180px]">
+                  --
+                </div>
+                <div id="layaWinnerConfidence" class="px-2 py-0.5 rounded text-xs font-mono font-bold bg-slate-800 text-slate-400 border border-slate-700">
+                  --%
+                </div>
+              </div>
+            </div>
+
+            <!-- Probability Bars -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between text-[11px]">
+                <span class="text-slate-400 font-semibold">Phân bổ xác suất:</span>
+                <span class="text-[10px] text-slate-500 font-mono">ModernBERT + RLCD</span>
+              </div>
+              <div id="layaBarsContainer" class="space-y-2 max-h-64 overflow-y-auto custom-scroll pr-1">
+                <div class="text-[11px] text-slate-500 py-6 text-center italic">
+                  Chờ dữ liệu từ Laya...
+                </div>
+              </div>
+            </div>
+
+            <!-- Laya Footer Telemetry -->
+            <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[10px] text-slate-500 font-mono">
+              <span id="layaActProb">act_prob: --</span>
+              <span class="text-cyan-400">Apache 2.0 (Open)</span>
             </div>
           </div>
+
         </div>
 
       </div>
@@ -205,33 +322,33 @@
     const DEFAULT_LABELS = [
       "lừa đảo",
       "thông minh",
-      "liên minh huyền thoại",
-      "roblox",
-      "minecraft",
       "công nghệ",
       "đồ ăn",
-      "đói",
-      "động vật",
-      "thiên hà",
-      "vật lý",
-      "coding",
-      "mất dạy",
-      "thiểu năng",
-      "thân thiện",
-      "tình dục",
       "tiền bạc",
       "sức khoẻ",
-      "lười",
-      "não cặc",
-      "ngáo đá",
-      "bố láo"
-    ];;
+      "coding",
+      "thân thiện",
+      "game",
+      "vật lý"
+    ];
+
+    const SAMPLES = {
+      1: "Tôi vừa bị trừ tiền 500k trong tài khoản ngân hàng lúc nửa đêm mà không nhận được mã OTP kích hoạt nào!",
+      2: "Làm thế nào để sửa lỗi vòng lặp vô tận while(true) gây sập ứng dụng Node.js trong môi trường Docker?",
+      3: "Tối nay đi làm về đói bụng quá, chắc phải gọi một phần gà rán phô mai kèm pizza cỡ lớn ăn cho đã.",
+      4: "Cảnh báo trang web mạo danh cơ quan công an lừa người dân chuyển tiền xác minh tài khoản rồi chiếm đoạt!"
+    };
 
     const state = {
       labels: [],
+      engineMode: 'dual', // 'dual', 'jev', 'laya'
       typingTimeout: null,
       isClassifying: false,
-      lastText: ""
+      lastText: "",
+      jevData: null,
+      layaData: null,
+      jevMs: null,
+      layaMs: null
     };
 
     function loadSavedLabels() {
@@ -253,7 +370,429 @@
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state.labels));
       } catch (e) {
-        console.error("Error saving to localStorage:", e);
+        console.error("Error saving labels:", e);
+      }
+    }
+
+    function setEngineMode(mode) {
+      state.engineMode = mode;
+      
+      const btnDual = document.getElementById('btnModeDual');
+      const btnJev = document.getElementById('btnModeJev');
+      const btnLaya = document.getElementById('btnModeLaya');
+      const jevCol = document.getElementById('jevColumn');
+      const layaCol = document.getElementById('layaColumn');
+      const grid = document.getElementById('dualViewGrid');
+      const scorecard = document.getElementById('dualScorecard');
+
+      [btnDual, btnJev, btnLaya].forEach(b => {
+        b.className = "px-3 py-1.5 rounded-md transition-all text-slate-400 hover:text-white flex items-center gap-1.5";
+      });
+
+      if (mode === 'dual') {
+        btnDual.className = "px-3 py-1.5 rounded-md transition-all bg-indigo-600 text-white shadow-sm flex items-center gap-1.5";
+        grid.className = "grid grid-cols-1 md:grid-cols-2 gap-4";
+        jevCol.classList.remove('hidden');
+        layaCol.classList.remove('hidden');
+        scorecard.classList.remove('hidden');
+      } else if (mode === 'jev') {
+        btnJev.className = "px-3 py-1.5 rounded-md transition-all bg-indigo-600 text-white shadow-sm flex items-center gap-1.5";
+        grid.className = "grid grid-cols-1 gap-4";
+        jevCol.classList.remove('hidden');
+        layaCol.classList.add('hidden');
+        scorecard.classList.add('hidden');
+      } else if (mode === 'laya') {
+        btnLaya.className = "px-3 py-1.5 rounded-md transition-all bg-cyan-600 text-white shadow-sm flex items-center gap-1.5";
+        grid.className = "grid grid-cols-1 gap-4";
+        jevCol.classList.add('hidden');
+        layaCol.classList.remove('hidden');
+        scorecard.classList.add('hidden');
+      }
+
+      runDualClassification();
+    }
+
+    function setSample(idx) {
+      document.getElementById('inputText').value = SAMPLES[idx];
+      runDualClassification(true);
+    }
+
+    function renderLabels() {
+      const container = document.getElementById('labelChips');
+      const countBadge = document.getElementById('labelCount');
+      countBadge.textContent = state.labels.length;
+
+      container.innerHTML = state.labels.map((lbl, idx) => `
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs bg-[#131b2e] border border-slate-800 text-slate-200">
+          <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+          <span>${lbl}</span>
+          <button onclick="removeLabel(${idx})" class="text-slate-500 hover:text-rose-400 transition-colors ml-0.5" title="Xóa nhãn">✕</button>
+        </span>
+      `).join('');
+    }
+
+    function addCustomLabel() {
+      const input = document.getElementById('newLabelInput');
+      const val = input.value.trim();
+      if (!val) return;
+      const exists = state.labels.some(l => l.toLowerCase() === val.toLowerCase());
+      if (!exists) {
+        state.labels.push(val);
+        saveLabels();
+        renderLabels();
+        input.value = "";
+        runDualClassification();
+      }
+    }
+
+    function removeLabel(index) {
+      if (state.labels.length <= 2) {
+        alert("Cần tối thiểu 2 nhãn để phân loại!");
+        return;
+      }
+      state.labels.splice(index, 1);
+      saveLabels();
+      renderLabels();
+      runDualClassification();
+    }
+
+    function addEscapeHatch() {
+      const hasOther = state.labels.some(l => l.toLowerCase() === "other");
+      if (!hasOther) {
+        state.labels.push("other");
+        saveLabels();
+        renderLabels();
+        runDualClassification();
+      }
+    }
+
+    function resetDefaultLabels() {
+      if (confirm("Khôi phục danh sách nhãn về mặc định?")) {
+        state.labels = [...DEFAULT_LABELS];
+        saveLabels();
+        renderLabels();
+        runDualClassification();
+      }
+    }
+
+    function clearInput() {
+      document.getElementById('inputText').value = "";
+      state.lastText = "";
+      resetDisplay();
+    }
+
+    function resetDisplay() {
+      document.getElementById('jevWinnerLabel').textContent = "--";
+      document.getElementById('jevWinnerConfidence').textContent = "--%";
+      document.getElementById('jevLatencyBadge').textContent = "Chờ lệnh";
+      document.getElementById('jevBarsContainer').innerHTML = `
+        <div class="text-[11px] text-slate-500 py-6 text-center italic">
+          Chờ dữ liệu từ Jev...
+        </div>
+      `;
+
+      document.getElementById('layaWinnerLabel').textContent = "--";
+      document.getElementById('layaWinnerConfidence').textContent = "--%";
+      document.getElementById('layaLatencyBadge').textContent = "Chờ lệnh";
+      document.getElementById('layaBarsContainer').innerHTML = `
+        <div class="text-[11px] text-slate-500 py-6 text-center italic">
+          Chờ dữ liệu từ Laya...
+        </div>
+      `;
+
+      document.getElementById('scJevMs').textContent = "-- ms";
+      document.getElementById('scLayaMs').textContent = "-- ms";
+      document.getElementById('scSpeedWinner').classList.add('hidden');
+      document.getElementById('scorecardConsensus').textContent = "Nhập nội dung bên dưới để xem hai mô hình đọ sức đồng thời.";
+    }
+
+    // Call TypeSafe Jev API
+    async function callJev(text, labels) {
+      const start = performance.now();
+      const res = await fetch("https://classifier.dev", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          input: text,
+          labels: labels,
+          tier: "fast"
+        })
+      });
+
+      const elapsed = Math.round(performance.now() - start);
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`Jev HTTP ${res.status}: ${errText}`);
+      }
+
+      const data = await res.json();
+      return { data, ms: elapsed };
+    }
+
+    // Call Convai Laya Gradio Playground API
+    async function callLaya(text, labels) {
+      const start = performance.now();
+      // Cap labels to 16 for token budget safety
+      const activeLabels = labels.slice(0, 16);
+      const criteria = {};
+      activeLabels.forEach(l => { criteria[l] = l; });
+
+      const questions_text = JSON.stringify({
+        category: {
+          type: "choice",
+          instructions: "Chọn 1 nhãn phù hợp nhất",
+          criteria: criteria
+        }
+      });
+
+      const initRes = await fetch("https://convaiinnovations-laya-demo.hf.space/gradio_api/call/run_playground", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data: [text, questions_text] })
+      });
+
+      if (!initRes.ok) throw new Error("Không thể kết nối đến Laya Hugging Face Space");
+      const { event_id } = await initRes.json();
+
+      const eventRes = await fetch("https://convaiinnovations-laya-demo.hf.space/gradio_api/call/run_playground/" + event_id);
+      const sseText = await eventRes.text();
+      const elapsed = Math.round(performance.now() - start);
+
+      const lines = sseText.split('\n');
+      let dataJson = null;
+      for (const line of lines) {
+        if (line.startsWith('data:')) {
+          try {
+            const parsed = JSON.parse(line.substring(5).trim());
+            if (Array.isArray(parsed) && parsed.length >= 2) {
+              dataJson = typeof parsed[1] === 'string' ? JSON.parse(parsed[1]) : parsed[1];
+            }
+          } catch (e) {}
+        }
+      }
+
+      if (!dataJson) throw new Error("Dữ liệu Laya trả về không đúng định dạng");
+      return { data: dataJson, ms: elapsed };
+    }
+
+    async function runDualClassification(manual = false) {
+      const text = document.getElementById('inputText').value.trim();
+      if (!text) {
+        resetDisplay();
+        return;
+      }
+      if (state.labels.length < 2) {
+        alert("Cần tối thiểu 2 nhãn!");
+        return;
+      }
+
+      state.lastText = text;
+      state.isClassifying = true;
+
+      const btnIcon = document.getElementById('btnIcon');
+      const btnText = document.getElementById('btnText');
+      btnIcon.textContent = "⏳";
+      btnText.textContent = "Đang xử lý...";
+
+      const indicator = document.getElementById('typingIndicator');
+      indicator.classList.remove('hidden');
+
+      state.jevData = null;
+      state.layaData = null;
+      state.jevMs = null;
+      state.layaMs = null;
+
+      const shouldCallJev = state.engineMode === 'dual' || state.engineMode === 'jev';
+      const shouldCallLaya = state.engineMode === 'dual' || state.engineMode === 'laya';
+
+      const promises = [];
+
+      if (shouldCallJev) {
+        promises.push(
+          callJev(text, state.labels)
+            .then(res => {
+              state.jevData = res.data;
+              state.jevMs = res.ms;
+              renderJevResults(res.data, res.ms);
+            })
+            .catch(err => {
+              console.error("Jev error:", err);
+              renderJevError(err.message);
+            })
+        );
+      }
+
+      if (shouldCallLaya) {
+        promises.push(
+          callLaya(text, state.labels)
+            .then(res => {
+              state.layaData = res.data;
+              state.layaMs = res.ms;
+              renderLayaResults(res.data, res.ms);
+            })
+            .catch(err => {
+              console.error("Laya error:", err);
+              renderLayaError(err.message);
+            })
+        );
+      }
+
+      await Promise.allSettled(promises);
+
+      indicator.classList.add('hidden');
+      btnIcon.textContent = "⚡";
+      btnText.textContent = "Phân loại ngay";
+      state.isClassifying = false;
+
+      if (state.engineMode === 'dual') {
+        updateDualScorecard();
+      }
+    }
+
+    function renderJevResults(data, elapsed) {
+      document.getElementById('jevLatencyBadge').textContent = `${elapsed} ms`;
+      const item = (data.results && data.results[0]) ? data.results[0] : data;
+      const chosenLabel = item.label || "--";
+      const scores = item.scores || {};
+
+      let winnerPct = 0;
+      if (typeof scores[chosenLabel] === 'number') {
+        winnerPct = scores[chosenLabel] * 100;
+      } else if (item.confidence !== null && item.confidence !== undefined) {
+        winnerPct = item.confidence * 100;
+      }
+
+      document.getElementById('jevWinnerLabel').textContent = chosenLabel;
+      const confEl = document.getElementById('jevWinnerConfidence');
+      confEl.textContent = winnerPct.toFixed(1) + "%";
+      confEl.className = "px-2 py-0.5 rounded text-xs font-mono font-bold " + 
+        (winnerPct >= 70 ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30" : "bg-slate-800 text-slate-300 border border-slate-700");
+
+      const allLabels = Array.from(new Set([...state.labels, ...Object.keys(scores)]));
+      const sorted = allLabels.sort((a, b) => (scores[b] || 0) - (scores[a] || 0));
+
+      const container = document.getElementById('jevBarsContainer');
+      container.innerHTML = sorted.map(lbl => {
+        const score = (typeof scores[lbl] === 'number') ? scores[lbl] : 0;
+        const pct = (score * 100).toFixed(1);
+        const isWinner = lbl === chosenLabel;
+        const barColor = isWinner ? "bg-gradient-to-r from-indigo-500 to-cyan-400" : "bg-slate-700";
+
+        return `
+          <div class="space-y-1">
+            <div class="flex items-center justify-between text-[11px]">
+              <span class="${isWinner ? 'text-indigo-300 font-bold' : 'text-slate-400'}">${isWinner ? '✓ ' : ''}${lbl}</span>
+              <span class="font-mono ${isWinner ? 'text-indigo-300 font-bold' : 'text-slate-500'}">${pct}%</span>
+            </div>
+            <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+              <div class="h-full rounded-full transition-all duration-300 ${barColor}" style="width: ${pct}%;"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderLayaResults(data, elapsed) {
+      document.getElementById('layaLatencyBadge').textContent = `${elapsed} ms`;
+      const answers = data.answers || {};
+      const cat = answers.category || {};
+      const chosenLabel = cat.choice || "--";
+      const probs = cat.probabilities || {};
+
+      let winnerPct = (probs[chosenLabel] || 0) * 100;
+      if (winnerPct === 0 && cat.confidence) {
+        winnerPct = cat.confidence * 100;
+      }
+
+      document.getElementById('layaWinnerLabel').textContent = chosenLabel;
+      const confEl = document.getElementById('layaWinnerConfidence');
+      confEl.textContent = winnerPct.toFixed(1) + "%";
+      confEl.className = "px-2 py-0.5 rounded text-xs font-mono font-bold " + 
+        (winnerPct >= 70 ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30" : "bg-slate-800 text-slate-300 border border-slate-700");
+
+      if (cat.rl_agent && cat.rl_agent.act_probability !== undefined) {
+        document.getElementById('layaActProb').textContent = `act_prob: ${(cat.rl_agent.act_probability * 100).toFixed(0)}%`;
+      }
+
+      const allLabels = Array.from(new Set([...state.labels, ...Object.keys(probs)]));
+      const sorted = allLabels.sort((a, b) => (probs[b] || 0) - (probs[a] || 0));
+
+      const container = document.getElementById('layaBarsContainer');
+      container.innerHTML = sorted.map(lbl => {
+        const score = (typeof probs[lbl] === 'number') ? probs[lbl] : 0;
+        const pct = (score * 100).toFixed(1);
+        const isWinner = lbl === chosenLabel;
+        const barColor = isWinner ? "bg-gradient-to-r from-cyan-400 to-emerald-400" : "bg-slate-700";
+
+        return `
+          <div class="space-y-1">
+            <div class="flex items-center justify-between text-[11px]">
+              <span class="${isWinner ? 'text-cyan-300 font-bold' : 'text-slate-400'}">${isWinner ? '✓ ' : ''}${lbl}</span>
+              <span class="font-mono ${isWinner ? 'text-cyan-300 font-bold' : 'text-slate-500'}">${pct}%</span>
+            </div>
+            <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+              <div class="h-full rounded-full transition-all duration-300 ${barColor}" style="width: ${pct}%;"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderJevError(msg) {
+      document.getElementById('jevWinnerLabel').textContent = "Lỗi";
+      document.getElementById('jevWinnerConfidence').textContent = "--";
+      document.getElementById('jevBarsContainer').innerHTML = `
+        <div class="p-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-lg text-xs">
+          Lỗi Jev: ${msg}
+        </div>
+      `;
+    }
+
+    function renderLayaError(msg) {
+      document.getElementById('layaWinnerLabel').textContent = "Lỗi";
+      document.getElementById('layaWinnerConfidence').textContent = "--";
+      document.getElementById('layaBarsContainer').innerHTML = `
+        <div class="p-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-lg text-xs">
+          Lỗi Laya: ${msg}
+        </div>
+      `;
+    }
+
+    function updateDualScorecard() {
+      if (state.jevMs !== null) {
+        document.getElementById('scJevMs').textContent = `${state.jevMs} ms`;
+      }
+      if (state.layaMs !== null) {
+        document.getElementById('scLayaMs').textContent = `${state.layaMs} ms`;
+      }
+
+      const jevWinner = document.getElementById('jevWinnerLabel').textContent.trim();
+      const layaWinner = document.getElementById('layaWinnerLabel').textContent.trim();
+      const consensusEl = document.getElementById('scorecardConsensus');
+      const iconEl = document.getElementById('scorecardIcon');
+      const speedBadge = document.getElementById('scSpeedWinner');
+
+      if (jevWinner !== '--' && layaWinner !== '--' && jevWinner !== 'Lỗi' && layaWinner !== 'Lỗi') {
+        if (jevWinner.toLowerCase() === layaWinner.toLowerCase()) {
+          iconEl.textContent = "🤝";
+          consensusEl.innerHTML = `<strong class="text-emerald-400">ĐỒNG THUẬN TUYỆT ĐỐI (100%):</strong> Cả TypeSafe Jev và Convai Laya đều nhất trí chọn nhãn <code class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">"${jevWinner}"</code>!`;
+        } else {
+          iconEl.textContent = "⚡";
+          consensusEl.innerHTML = `<strong class="text-amber-400">BẤT ĐỒNG QUAN ĐIỂM:</strong> Jev chọn <code class="px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-bold">"${jevWinner}"</code>, trong khi Laya chọn <code class="px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-bold">"${layaWinner}"</code>.`;
+        }
+
+        if (state.jevMs && state.layaMs) {
+          speedBadge.classList.remove('hidden');
+          if (state.layaMs < state.jevMs) {
+            const diff = state.jevMs - state.layaMs;
+            speedBadge.textContent = `⚡ Laya nhanh hơn ${diff}ms`;
+            speedBadge.className = "px-2.5 py-1 rounded bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 font-bold font-mono";
+          } else {
+            const diff = state.layaMs - state.jevMs;
+            speedBadge.textContent = `⚡ Jev nhanh hơn ${diff}ms`;
+            speedBadge.className = "px-2.5 py-1 rounded bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 font-bold font-mono";
+          }
+        }
       }
     }
 
@@ -273,312 +812,13 @@
         clearTimeout(state.typingTimeout);
 
         state.typingTimeout = setTimeout(() => {
-          document.getElementById('typingIndicator').classList.add('hidden');
-          runClassification();
+          runDualClassification();
         }, 350);
       });
-    }
 
-    function renderLabels() {
-      const container = document.getElementById('labelChips');
-      const countBadge = document.getElementById('labelCount');
-      countBadge.textContent = state.labels.length;
-
-      container.innerHTML = state.labels.map((lbl, idx) => `
-        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs bg-[var(--card,#131b2e)] border border-[var(--border,#1e293b)] text-[var(--foreground,#f1f5f9)]">
-          <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
-          <span>${lbl}</span>
-          <button onclick="removeLabel(${idx})" class="text-[var(--muted-foreground,#64748b)] hover:text-rose-400 transition-colors ml-0.5" title="Xóa nhãn">✕</button>
-        </span>
-      `).join('');
-    }
-
-    function addCustomLabel() {
-      const input = document.getElementById('newLabelInput');
-      const val = input.value.trim();
-      if (!val) return;
-      const exists = state.labels.some(l => l.toLowerCase() === val.toLowerCase());
-      if (!exists) {
-        state.labels.push(val);
-        saveLabels();
-        renderLabels();
-        input.value = "";
-        runClassification();
-      }
-    }
-
-    function removeLabel(index) {
-      if (state.labels.length <= 2) {
-        alert("Cần tối thiểu 2 nhãn!");
-        return;
-      }
-      state.labels.splice(index, 1);
-      saveLabels();
-      renderLabels();
-      runClassification();
-    }
-
-    function addEscapeHatch() {
-      const hasOther = state.labels.some(l => l.toLowerCase() === "other");
-      if (!hasOther) {
-        state.labels.push("other");
-        saveLabels();
-        renderLabels();
-        runClassification();
-      }
-    }
-
-    function resetDefaultLabels() {
-      if (confirm("Khôi phục danh sách nhãn về mặc định?")) {
-        state.labels = [...DEFAULT_LABELS];
-        saveLabels();
-        renderLabels();
-        runClassification();
-      }
-    }
-
-    function onOptionsChanged() {
-      runClassification();
-    }
-
-    function clearInput() {
-      document.getElementById('inputText').value = "";
-      state.lastText = "";
-      resetDisplay();
-    }
-
-    function resetDisplay() {
-      document.getElementById('primaryLabelText').textContent = "--";
-      const confBadge = document.getElementById('primaryConfidenceBadge');
-      confBadge.textContent = "--";
-      confBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-slate-800 text-slate-400 border border-slate-700";
-      document.getElementById('decisionInsight').textContent = "Nhập nội dung bên trái để xem phân loại.";
-      document.getElementById('scoreBarsContainer').innerHTML = `
-        <div class="text-xs text-[var(--muted-foreground,#64748b)] py-6 text-center">
-          Nhập nội dung để xem phân bổ xác suất...
-        </div>
-      `;
-      document.getElementById('statLatency').textContent = "-- ms";
-      document.getElementById('headerLatency').classList.add('hidden');
-    }
-
-    async function runClassification(manual = false) {
-      const text = document.getElementById('inputText').value.trim();
-      if (!text) {
-        resetDisplay();
-        return;
-      }
-      if (state.labels.length < 2) {
-        alert("Cần tối thiểu 2 nhãn!");
-        return;
-      }
-
-      state.lastText = text;
-      state.isClassifying = true;
-
-      const btnIcon = document.getElementById('btnIcon');
-      const btnText = document.getElementById('btnText');
-      btnIcon.textContent = "⏳";
-      btnText.textContent = "...";
-
-      const isMulti = document.getElementById('multiToggle').checked;
-      const instructions = document.getElementById('customInstructions').value.trim();
-
-      const payload = {
-        input: text,
-        labels: state.labels,
-        tier: "fast"
-      };
-
-      if (isMulti) {
-        payload.multi = true;
-        payload.max_labels = 10;
-      }
-      if (instructions) {
-        payload.instructions = instructions;
-      }
-
-      const startTime = performance.now();
-
-      try {
-        const res = await fetch("https://classifier.dev", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(payload)
-        });
-
-        const elapsed = Math.round(performance.now() - startTime);
-
-        if (!res.ok) {
-          const errText = await res.text();
-          throw new Error("Lỗi " + res.status + ": " + errText);
-        }
-
-        const data = await res.json();
-        renderResults(data, elapsed, isMulti);
-
-      } catch (err) {
-        console.error("Classifier error:", err);
-        document.getElementById('decisionInsight').innerHTML = `
-          <span class="text-rose-400 font-semibold">Lỗi:</span> ${err.message}
-        `;
-      } finally {
-        state.isClassifying = false;
-        btnIcon.textContent = "⚡";
-        btnText.textContent = "Phân loại";
-      }
-    }
-
-    function renderResults(data, elapsed, isMulti) {
-      const now = new Date();
-      document.getElementById('decisionTimestamp').textContent = now.toLocaleTimeString('vi-VN');
-
-      const ms = (data.usage && data.usage.ms) ? data.usage.ms : elapsed;
-      document.getElementById('statLatency').textContent = ms + " ms";
-      document.getElementById('statModel').textContent = data.model || "fast (jev)";
-
-      const headerLat = document.getElementById('headerLatency');
-      headerLat.textContent = ms + "ms";
-      headerLat.classList.remove('hidden');
-
-      const item = (data.results && data.results[0]) ? data.results[0] : data;
-
-      if (isMulti) {
-        renderMultiResults(item);
-      } else {
-        renderSingleResults(item);
-      }
-    }
-
-    function renderSingleResults(item) {
-      const chosenLabel = item.label || "--";
-      const scores = item.scores || {};
-      const hasScores = item.scores && Object.keys(item.scores).length > 0;
-      const confBadge = document.getElementById('primaryConfidenceBadge');
-      const scoreType = document.getElementById('scoreTypeBadge');
-      scoreType.textContent = "Tổng = 100%";
-
-      document.getElementById('primaryLabelText').textContent = chosenLabel;
-
-      // Check if item was unscored (non-natural language or symbol input)
-      if (!hasScores && item.confidence === null) {
-        confBadge.textContent = "N/A";
-        confBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-amber-500/15 text-amber-400 border border-amber-500/20";
-        document.getElementById('decisionInsight').innerHTML = `
-          <span class="text-amber-400">⚠️ Không thể tính xác suất:</span> ${item.unscored || "Văn bản không phải ngôn ngữ tự nhiên. Hãy nhập câu có nghĩa."}
-        `;
-        document.getElementById('scoreBarsContainer').innerHTML = `
-          <div class="text-xs text-amber-400/90 bg-amber-500/10 border border-amber-500/20 p-3 rounded-lg text-center">
-            ${item.unscored || "Văn bản chưa đủ cấu trúc ngôn ngữ tự nhiên để chấm điểm xác suất."}
-          </div>
-        `;
-        return;
-      }
-
-      // Exact winner percentage calculated from scores[chosenLabel] to ensure 100% consistency with bar chart
-      let winnerPct = 0;
-      if (typeof scores[chosenLabel] === 'number') {
-        winnerPct = scores[chosenLabel] * 100;
-      } else if (item.confidence !== null && item.confidence !== undefined) {
-        winnerPct = item.confidence * 100;
-      }
-      const winnerPctStr = winnerPct.toFixed(1) + "%";
-
-      // Display winner percentage on the primary badge
-      confBadge.textContent = winnerPctStr;
-      if (winnerPct >= 80) {
-        confBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/20";
-      } else if (winnerPct >= 50) {
-        confBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-sky-500/15 text-sky-400 border border-sky-500/20";
-      } else {
-        confBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-amber-500/15 text-amber-400 border border-amber-500/20";
-      }
-
-      // Insight description
-      const calibConf = (item.confidence !== null && item.confidence !== undefined) ? (item.confidence * 100).toFixed(1) + "%" : winnerPctStr;
-      document.getElementById('decisionInsight').innerHTML = `
-        Xác suất nhãn <strong>"${chosenLabel}"</strong> đạt <strong>${winnerPctStr}</strong> (Độ tin cậy chuẩn hoá: ${calibConf}).
-      `;
-
-      // Render all labels, guaranteeing every label in state.labels is represented
-      const allLabels = Array.from(new Set([...state.labels, ...Object.keys(scores)]));
-      const sortedLabels = allLabels.sort((a, b) => (scores[b] || 0) - (scores[a] || 0));
-
-      const container = document.getElementById('scoreBarsContainer');
-      container.innerHTML = sortedLabels.map(lbl => {
-        const score = (typeof scores[lbl] === 'number') ? scores[lbl] : 0;
-        const pct = (score * 100).toFixed(1);
-        const isWinner = lbl === chosenLabel;
-        const widthVal = score > 0 ? Math.max(score * 100, 1.5) : 0;
-        
-        let barColor = isWinner 
-          ? "bg-gradient-to-r from-indigo-500 to-cyan-400" 
-          : "bg-slate-600";
-
-        return `
-          <div class="space-y-1">
-            <div class="flex items-center justify-between text-xs">
-              <span class="${isWinner ? 'text-indigo-300 font-bold flex items-center gap-1' : 'text-[var(--muted-foreground,#94a3b8)]'}">
-                ${isWinner ? '✓' : ''} ${lbl}
-              </span>
-              <span class="font-mono text-xs ${isWinner ? 'text-cyan-300 font-bold' : 'text-[var(--muted-foreground,#64748b)]'}">
-                ${pct}%
-              </span>
-            </div>
-            <div class="w-full h-2.5 bg-slate-800/80 rounded-full overflow-hidden border border-slate-700/50">
-              <div class="h-full rounded-full transition-all duration-300 ease-out ${barColor}" style="width: ${widthVal}%;"></div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function renderMultiResults(item) {
-      const chosenLabels = item.labels || [];
-      const scores = item.scores || {};
-      const scoreType = document.getElementById('scoreTypeBadge');
-      scoreType.textContent = "Độc lập (≥ 70%)";
-
-      document.getElementById('primaryLabelText').textContent = chosenLabels.length > 0 ? chosenLabels.join(', ') : "Không có nhãn phù hợp";
-      
-      const confBadge = document.getElementById('primaryConfidenceBadge');
-      confBadge.textContent = chosenLabels.length + " nhãn";
-      confBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-indigo-500/15 text-indigo-400 border border-indigo-500/20";
-
-      document.getElementById('decisionInsight').textContent = `Chế độ Đa nhãn: Các nhãn có xác suất độc lập ≥ 70% được tự động chọn.`;
-
-      const allLabels = Array.from(new Set([...state.labels, ...Object.keys(scores)]));
-      const sortedLabels = allLabels.sort((a, b) => (scores[b] || 0) - (scores[a] || 0));
-      const container = document.getElementById('scoreBarsContainer');
-
-      container.innerHTML = sortedLabels.map(lbl => {
-        const score = (typeof scores[lbl] === 'number') ? scores[lbl] : 0;
-        const pct = (score * 100).toFixed(1);
-        const isSelected = chosenLabels.includes(lbl);
-        const widthVal = score > 0 ? Math.max(score * 100, 1.5) : 0;
-
-        let barColor = isSelected 
-          ? "bg-gradient-to-r from-emerald-500 to-teal-400" 
-          : "bg-slate-600";
-
-        return `
-          <div class="space-y-1">
-            <div class="flex items-center justify-between text-xs">
-              <span class="${isSelected ? 'text-emerald-300 font-bold flex items-center gap-1' : 'text-[var(--muted-foreground,#94a3b8)]'}">
-                ${isSelected ? '🏷️' : ''} ${lbl}
-              </span>
-              <span class="font-mono text-xs ${isSelected ? 'text-emerald-300 font-bold' : 'text-[var(--muted-foreground,#64748b)]'}">
-                ${pct}%
-              </span>
-            </div>
-            <div class="w-full h-2.5 bg-slate-800/80 rounded-full overflow-hidden border border-slate-700/50">
-              <div class="h-full rounded-full transition-all duration-300 ease-out ${barColor}" style="width: ${widthVal}%;"></div>
-            </div>
-          </div>
-        `;
-      }).join('');
+      // Load sample 1 initially
+      document.getElementById('inputText').value = SAMPLES[1];
+      runDualClassification(true);
     }
 
     window.addEventListener('DOMContentLoaded', init);

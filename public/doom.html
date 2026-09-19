@@ -9,50 +9,43 @@
     @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
     body {
       font-family: 'Chakra Petch', sans-serif;
-      background-color: #05070d;
+      background-color: #04060a;
     }
     .font-mono {
       font-family: 'JetBrains Mono', monospace;
     }
     .custom-scroll::-webkit-scrollbar {
-      width: 5px;
+      width: 4px;
     }
     .custom-scroll::-webkit-scrollbar-track {
-      background: rgba(0,0,0,0.2);
+      background: rgba(0,0,0,0.3);
     }
     .custom-scroll::-webkit-scrollbar-thumb {
-      background: #dc2626;
-      border-radius: 3px;
+      background: #ef4444;
+      border-radius: 2px;
     }
     .scanline {
-      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%);
       background-size: 100% 4px;
-    }
-    @keyframes muzzle-flash {
-      0% { opacity: 1; transform: scale(1.1); }
-      100% { opacity: 0; transform: scale(0.9); }
-    }
-    .animate-flash {
-      animation: muzzle-flash 0.08s ease-out forwards;
     }
   </style>
 </head>
-<body class="text-slate-200 antialiased min-h-screen p-3 md:p-6 flex flex-col justify-center">
+<body class="text-slate-200 antialiased min-h-screen p-2 md:p-6 flex flex-col justify-center">
 
-  <div class="max-w-7xl mx-auto w-full space-y-4">
+  <div class="max-w-7xl mx-auto w-full space-y-3">
     
     <!-- Top Bar -->
-    <header class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-red-950/80 bg-red-950/20 px-4 py-2.5 rounded-xl border">
+    <header class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-red-900/60 bg-red-950/20 px-4 py-2.5 rounded-xl border">
       <div class="flex items-center gap-3">
         <div class="w-9 h-9 rounded-lg bg-red-600 flex items-center justify-center text-black font-black text-xl shadow-lg shadow-red-600/40">
           ☠️
         </div>
         <div>
-          <h1 class="text-lg md:text-xl font-bold tracking-wider text-red-500 uppercase flex items-center gap-2">
-            AI DOOM SLAYER <span class="text-xs px-2 py-0.5 rounded bg-red-600/20 text-red-400 border border-red-500/30">Autonomous Agent Loop</span>
+          <h1 class="text-base md:text-xl font-bold tracking-wider text-red-500 uppercase flex items-center gap-2">
+            AI DOOM SLAYER <span class="text-[10px] px-2 py-0.5 rounded bg-red-600/20 text-red-400 border border-red-500/30">Autonomous Raycaster 2.5D</span>
           </h1>
           <p class="text-xs text-slate-400">
-            Con AI tự quan sát chiến trường 2.5D, phân tích tình huống và tự động ra quyết định tác chiến 100%
+            Con AI tự quan sát chiến trường, tìm đường bằng thuật toán BFS, tự ngắm bắn và né đòn 100%
           </p>
         </div>
       </div>
@@ -70,22 +63,25 @@
     </header>
 
     <!-- Main Battlefield Layout: 2 Columns -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 items-start">
 
-      <!-- Left Column: 2.5D Doom Raycaster Viewport (7 Cols) -->
-      <div class="lg:col-span-8 space-y-3">
+      <!-- Left Column: 2.5D Doom Raycaster Viewport (8 Cols) -->
+      <div class="lg:col-span-8 space-y-2">
         
-        <div class="relative bg-black rounded-2xl overflow-hidden border-2 border-red-900/60 shadow-2xl shadow-red-950/40 aspect-[4/3] md:aspect-[16/10] flex items-center justify-center">
+        <div class="relative bg-black rounded-2xl overflow-hidden border-2 border-red-900/60 shadow-2xl shadow-red-950/40 aspect-[16/10] flex items-center justify-center">
           
           <!-- Raycaster Canvas -->
-          <canvas id="gameCanvas" width="480" height="320" class="w-full h-full object-contain image-rendering-pixelated"></canvas>
+          <canvas id="gameCanvas" width="480" height="300" class="w-full h-full object-cover"></canvas>
 
           <!-- Retro CRT Scanline Overlay -->
-          <div class="absolute inset-0 scanline pointer-events-none opacity-40"></div>
+          <div class="absolute inset-0 scanline pointer-events-none opacity-30"></div>
+
+          <!-- Red Damage Flash Overlay -->
+          <div id="damageFlash" class="absolute inset-0 bg-red-600/30 pointer-events-none opacity-0 transition-opacity duration-100"></div>
 
           <!-- Minimap Overlay (Top Left) -->
-          <div class="absolute top-3 left-3 bg-black/80 border border-red-900/80 rounded-lg p-1.5 shadow-lg backdrop-blur-sm pointer-events-none">
-            <canvas id="minimapCanvas" width="90" height="90" class="rounded"></canvas>
+          <div class="absolute top-3 left-3 bg-black/85 border border-red-900/80 rounded-lg p-1.5 shadow-lg backdrop-blur-sm pointer-events-none">
+            <canvas id="minimapCanvas" width="100" height="100" class="rounded"></canvas>
             <div class="text-[9px] font-mono text-center text-slate-400 mt-0.5">RADAR MAP</div>
           </div>
 
@@ -93,66 +89,66 @@
           <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div class="relative w-7 h-7 flex items-center justify-center">
               <div class="w-1.5 h-1.5 rounded-full bg-red-500/80"></div>
-              <div class="absolute w-6 h-[1px] bg-red-500/40"></div>
-              <div class="absolute h-6 w-[1px] bg-red-500/40"></div>
+              <div class="absolute w-5 h-[1px] bg-red-500/40"></div>
+              <div class="absolute h-5 w-[1px] bg-red-500/40"></div>
             </div>
           </div>
 
           <!-- Hit marker indicator -->
           <div id="hitMarker" class="absolute inset-0 pointer-events-none hidden flex items-center justify-center">
-            <div class="w-12 h-12 border-2 border-red-500 rotate-45 animate-ping opacity-75"></div>
+            <div class="w-10 h-10 border-2 border-red-500 rotate-45 opacity-80"></div>
           </div>
 
-          <!-- AI Tactical Overlay (Top Center) -->
-          <div class="absolute top-3 right-3 bg-black/80 border border-red-900/80 px-3 py-1.5 rounded-lg text-right backdrop-blur-sm pointer-events-none">
-            <div class="text-[10px] uppercase tracking-wider text-slate-400">AI Target Lock</div>
-            <div id="hudTargetText" class="text-xs font-mono font-bold text-red-400">QUÉT MỤC TIÊU...</div>
+          <!-- AI Tactical Overlay (Top Right) -->
+          <div class="absolute top-3 right-3 bg-black/85 border border-red-900/80 px-3 py-1.5 rounded-lg text-right backdrop-blur-sm pointer-events-none">
+            <div class="text-[9px] uppercase tracking-wider text-slate-400">Target Lock</div>
+            <div id="hudTargetText" class="text-xs font-mono font-bold text-red-400">QUÉT RADAR...</div>
           </div>
 
           <!-- Bottom HUD Bar inside viewport -->
-          <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black via-black/90 to-transparent p-3 pt-6 flex items-end justify-between font-mono text-sm pointer-events-none border-t border-red-900/30">
+          <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black via-black/95 to-transparent p-2.5 pt-6 flex items-end justify-between font-mono text-xs pointer-events-none border-t border-red-900/40">
             <!-- Health -->
             <div class="flex items-center gap-2">
-              <span class="text-xl">❤️</span>
+              <span class="text-lg">❤️</span>
               <div>
-                <div class="text-[10px] text-slate-400">HEALTH</div>
-                <div id="hudHealth" class="text-xl font-bold text-emerald-400 leading-none">100%</div>
+                <div class="text-[9px] text-slate-400">HEALTH</div>
+                <div id="hudHealth" class="text-base md:text-lg font-bold text-emerald-400 leading-none">100%</div>
               </div>
             </div>
 
             <!-- Armor -->
             <div class="flex items-center gap-2">
-              <span class="text-xl">🛡️</span>
+              <span class="text-lg">🛡️</span>
               <div>
-                <div class="text-[10px] text-slate-400">ARMOR</div>
-                <div id="hudArmor" class="text-xl font-bold text-sky-400 leading-none">50%</div>
+                <div class="text-[9px] text-slate-400">ARMOR</div>
+                <div id="hudArmor" class="text-base md:text-lg font-bold text-sky-400 leading-none">50%</div>
               </div>
             </div>
 
             <!-- Current Action (AI Action Stamp) -->
-            <div class="text-center px-4 py-1.5 rounded-xl bg-red-950/80 border border-red-600/50 shadow-lg shadow-red-600/20">
-              <div class="text-[10px] text-slate-400 uppercase">HÀNH ĐỘNG AI</div>
+            <div class="text-center px-3 py-1 rounded-xl bg-red-950/90 border border-red-600/60 shadow-lg shadow-red-600/20">
+              <div class="text-[9px] text-slate-400 uppercase">HÀNH ĐỘNG AI</div>
               <div id="hudAction" class="text-xs md:text-sm font-bold text-yellow-300 uppercase animate-pulse">
-                TIẾN LÊN
+                TIẾN LÊN TRINH SÁT
               </div>
             </div>
 
             <!-- Ammo -->
             <div class="flex items-center gap-2">
-              <span class="text-xl">💥</span>
+              <span class="text-lg">💥</span>
               <div>
-                <div class="text-[10px] text-slate-400">AMMO</div>
-                <div id="hudAmmo" class="text-xl font-bold text-amber-400 leading-none">32 / 32</div>
+                <div class="text-[9px] text-slate-400">AMMO</div>
+                <div id="hudAmmo" class="text-base md:text-lg font-bold text-amber-400 leading-none">32 / 32</div>
               </div>
             </div>
 
             <!-- Kills Score -->
             <div class="flex items-center gap-2 text-right">
               <div>
-                <div class="text-[10px] text-slate-400">KILLS</div>
-                <div id="hudKills" class="text-xl font-bold text-red-400 leading-none">0</div>
+                <div class="text-[9px] text-slate-400">KILLS</div>
+                <div id="hudKills" class="text-base md:text-lg font-bold text-red-400 leading-none">0</div>
               </div>
-              <span class="text-xl">💀</span>
+              <span class="text-lg">💀</span>
             </div>
           </div>
 
@@ -160,15 +156,14 @@
 
         <!-- Quick Game Controls & Speed -->
         <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 text-xs">
-          <div class="flex items-center gap-2">
-            <span class="text-slate-400">Tốc độ tư duy:</span>
-            <button onclick="setSpeed(1)" id="spd1" class="px-2.5 py-1 rounded bg-red-600 text-white font-bold">1x</button>
-            <button onclick="setSpeed(2)" id="spd2" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300">2x</button>
-            <button onclick="setSpeed(4)" id="spd4" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300">4x Turbo</button>
+          <div class="flex items-center gap-1.5">
+            <span class="text-slate-400">Tốc độ:</span>
+            <button onclick="setSpeed(1)" id="spd1" class="px-2.5 py-0.5 rounded bg-red-600 text-white font-bold">1x</button>
+            <button onclick="setSpeed(2)" id="spd2" class="px-2.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300">2x</button>
+            <button onclick="setSpeed(3)" id="spd3" class="px-2.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300">3x Turbo</button>
           </div>
           <div class="flex items-center gap-2 text-slate-400">
-            <span>Sinh quái tự động:</span>
-            <button onclick="spawnWave()" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-red-700 text-slate-200 border border-slate-700 transition-all">
+            <button onclick="spawnWave()" class="px-3 py-1 rounded-lg bg-red-950 hover:bg-red-800 text-red-300 border border-red-800/60 transition-all text-xs font-semibold">
               + Thả đợt quái mới
             </button>
           </div>
@@ -181,47 +176,47 @@
 
         <!-- AI Decision Mind Card -->
         <div class="bg-slate-950 border border-red-900/50 rounded-2xl p-4 shadow-xl space-y-3">
-          <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
             <span class="text-xs font-bold uppercase tracking-wider text-red-400 flex items-center gap-1.5">
               <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-              Bộ Não Tác Chiến (NLP Sensor)
+              Bộ Não Tác Chiến (Autonomous Agent)
             </span>
-            <span id="aiHz" class="text-[10px] font-mono text-slate-400">10 decisions/sec</span>
+            <span id="aiHz" class="text-[10px] font-mono text-slate-400">12 decisions/s</span>
           </div>
 
           <!-- Current Situation NLP Text -->
-          <div class="space-y-1.5">
-            <div class="text-[11px] text-slate-400 font-medium">Bối cảnh môi trường nhận thức:</div>
-            <div id="aiPerceptionText" class="p-2.5 rounded-xl bg-black/60 border border-slate-800/80 font-mono text-xs text-emerald-300 leading-relaxed min-h-[58px]">
-              Đang phân tích không gian xung quanh...
+          <div class="space-y-1">
+            <div class="text-[11px] text-slate-400 font-medium">Nhận thức bối cảnh (Perception):</div>
+            <div id="aiPerceptionText" class="p-2.5 rounded-xl bg-black/60 border border-slate-800/80 font-mono text-xs text-emerald-300 leading-relaxed min-h-[64px]">
+              Khởi động hệ thống cảm biến...
             </div>
           </div>
 
           <!-- Real-time Action Probability Bars -->
           <div class="space-y-2 pt-1">
             <div class="flex items-center justify-between text-[11px] text-slate-400 font-medium">
-              <span>Phân loại hành vi tối ưu:</span>
-              <span class="font-mono text-red-400">Zero-Shot Action</span>
+              <span>Phân bổ xác suất hành vi:</span>
+              <span class="font-mono text-red-400">Zero-Shot Decision</span>
             </div>
             
             <div id="actionBars" class="space-y-1.5 font-mono text-xs">
-              <!-- Rendered by JS -->
+              <!-- Injected by JS -->
             </div>
           </div>
         </div>
 
         <!-- Live Combat Telemetry Log -->
-        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-3">
-          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-2">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-1.5">
             <span class="text-xs font-semibold uppercase text-slate-300 flex items-center gap-1.5">
-              <span>📜</span> Nhật ký tác chiến AI
+              <span>📜</span> Nhật ký hành động
             </span>
             <span id="combatClock" class="text-[10px] font-mono text-slate-500">00:00</span>
           </div>
 
-          <div id="combatLog" class="h-44 overflow-y-auto custom-scroll space-y-1.5 font-mono text-[11px] text-slate-400 pr-1">
+          <div id="combatLog" class="h-44 overflow-y-auto custom-scroll space-y-1 font-mono text-[11px] text-slate-400 pr-1">
             <div class="text-emerald-400">› Khởi động hệ thống tác chiến Autonomous AI Slayer...</div>
-            <div>› Tải bản đồ dungeon 2.5D & radar định vị quái.</div>
+            <div>› Tải bản đồ dungeon 2.5D & định vị 148 ô di chuyển.</div>
             <div>› Kích hoạt chế độ tự lái (Auto-pilot ON).</div>
           </div>
         </div>
@@ -241,56 +236,66 @@
       if (!audioCtx) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
     }
 
-    function playGunshotSound() {
-      if (!audioEnabled || !audioCtx) return;
+    function playSound(type) {
+      if (!audioEnabled) return;
+      initAudio();
+      if (!audioCtx) return;
       try {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(140, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.15);
-        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.15);
-      } catch(e){}
-    }
-
-    function playMonsterHurtSound() {
-      if (!audioEnabled || !audioCtx) return;
-      try {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'square';
-        osc.frequency.setValueAtTime(80, audioCtx.currentTime);
-        osc.frequency.linearRampToValueAtTime(40, audioCtx.currentTime + 0.2);
-        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.2);
-      } catch(e){}
-    }
-
-    function playPickupSound() {
-      if (!audioEnabled || !audioCtx) return;
-      try {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(440, audioCtx.currentTime);
-        osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.08);
-        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.18);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.18);
+        const t = audioCtx.currentTime;
+        if (type === 'shot') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(160, t);
+          osc.frequency.exponentialRampToValueAtTime(30, t + 0.15);
+          gain.gain.setValueAtTime(0.35, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(t + 0.15);
+        } else if (type === 'hit') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(90, t);
+          osc.frequency.linearRampToValueAtTime(40, t + 0.18);
+          gain.gain.setValueAtTime(0.25, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.18);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(t + 0.18);
+        } else if (type === 'pickup') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(520, t);
+          osc.frequency.setValueAtTime(980, t + 0.08);
+          gain.gain.setValueAtTime(0.2, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.16);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(t + 0.16);
+        } else if (type === 'hurt') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(110, t);
+          osc.frequency.linearRampToValueAtTime(50, t + 0.2);
+          gain.gain.setValueAtTime(0.3, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.2);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(t + 0.2);
+        }
       } catch(e){}
     }
 
@@ -302,70 +307,99 @@
     }
 
     // ==========================================
-    // 2.5D Raycaster Engine & Map Matrix
+    // Clean Open Map & Procedural Textures
     // ==========================================
     const MAP_W = 16;
     const MAP_H = 16;
     const MAP = [
       1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-      1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,
-      1,0,1,1,0,0,1,0,1,1,1,0,1,1,0,1,
-      1,0,1,0,0,0,0,0,0,0,1,0,0,1,0,1,
-      1,0,1,0,1,1,1,1,1,0,1,1,0,1,0,1,
-      1,0,0,0,1,0,0,0,1,0,0,0,0,0,0,1,
-      1,1,1,0,1,0,0,0,1,0,1,1,1,1,0,1,
-      1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,
-      1,0,1,1,1,0,1,1,1,0,1,1,0,1,0,1,
-      1,0,1,0,0,0,0,0,1,0,0,1,0,0,0,1,
-      1,0,1,0,1,1,1,0,1,1,0,1,1,1,0,1,
-      1,0,0,0,1,0,0,0,0,1,0,0,0,1,0,1,
-      1,0,1,1,1,0,1,1,0,1,1,1,0,1,0,1,
-      1,0,1,0,0,0,0,1,0,0,0,1,0,0,0,1,
+      1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,
       1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+      1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,
+      1,0,0,1,1,0,0,0,0,0,0,1,1,0,0,1,
+      1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,
+      1,1,0,1,1,1,0,1,1,0,1,1,1,0,1,1,
+      1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+      1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+      1,1,0,1,1,1,0,1,1,0,1,1,1,0,1,1,
+      1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,
+      1,0,0,1,1,0,0,0,0,0,0,1,1,0,0,1,
+      1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,
+      1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+      1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,
       1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
     ];
 
-    // Player / AI State
+    // Generate Procedural Wall Texture (64x64)
+    const TEX_SIZE = 64;
+    const wallTexCanvas = document.createElement('canvas');
+    wallTexCanvas.width = TEX_SIZE;
+    wallTexCanvas.height = TEX_SIZE;
+    const texCtx = wallTexCanvas.getContext('2d');
+
+    // Stone / Tech Brick pattern
+    texCtx.fillStyle = '#6b1d1d';
+    texCtx.fillRect(0, 0, TEX_SIZE, TEX_SIZE);
+    texCtx.fillStyle = '#450a0a';
+    texCtx.fillRect(0, 31, TEX_SIZE, 3);
+    texCtx.fillRect(0, 62, TEX_SIZE, 2);
+    texCtx.fillRect(31, 0, 3, 31);
+    texCtx.fillRect(15, 33, 3, 31);
+    texCtx.fillRect(47, 33, 3, 31);
+
+    // Tech rivets
+    texCtx.fillStyle = '#991b1b';
+    texCtx.fillRect(8, 8, 4, 4);
+    texCtx.fillRect(40, 8, 4, 4);
+    texCtx.fillRect(24, 40, 4, 4);
+    texCtx.fillRect(52, 40, 4, 4);
+
+    const texData = texCtx.getImageData(0, 0, TEX_SIZE, TEX_SIZE).data;
+
+    // Player State (Spawn in clear open space at 2.5, 2.5)
     const player = {
       x: 2.5,
       y: 2.5,
-      dirX: 1,
-      dirY: 0,
-      planeX: 0,
+      dirX: 1.0,
+      dirY: 0.0,
+      planeX: 0.0,
       planeY: 0.66,
-      rotSpeed: 0.05,
-      moveSpeed: 0.06,
+      moveSpeed: 0.07,
+      rotSpeed: 0.06,
       health: 100,
       armor: 50,
       ammo: 32,
       kills: 0,
       isAuto: true,
       lastShotTime: 0,
-      muzzleFlash: false
+      muzzleFlash: false,
+      currentPath: []
     };
 
-    // Enemies & Items
+    // Enemy and Pickup Entities
     let sprites = [
-      { x: 4.5, y: 3.5, type: 'imp', hp: 50, maxHp: 50, alive: true, shootCooldown: 0 },
-      { x: 9.5, y: 3.5, type: 'imp', hp: 50, maxHp: 50, alive: true, shootCooldown: 0 },
-      { x: 5.5, y: 7.5, type: 'demon', hp: 80, maxHp: 80, alive: true, shootCooldown: 0 },
-      { x: 12.5, y: 9.5, type: 'imp', hp: 50, maxHp: 50, alive: true, shootCooldown: 0 },
-      { x: 10.5, y: 13.5, type: 'demon', hp: 80, maxHp: 80, alive: true, shootCooldown: 0 },
-      { x: 7.5, y: 2.5, type: 'medkit', collected: false },
-      { x: 7.5, y: 7.5, type: 'ammo', collected: false },
-      { x: 3.5, y: 11.5, type: 'medkit', collected: false }
+      { id: 1, x: 5.5, y: 2.5, type: 'imp', hp: 60, maxHp: 60, alive: true, cooldown: 0 },
+      { id: 2, x: 13.5, y: 2.5, type: 'demon', hp: 90, maxHp: 90, alive: true, cooldown: 0 },
+      { id: 3, x: 7.5, y: 7.5, type: 'imp', hp: 60, maxHp: 60, alive: true, cooldown: 0 },
+      { id: 4, x: 13.5, y: 13.5, type: 'demon', hp: 90, maxHp: 90, alive: true, cooldown: 0 },
+      { id: 5, x: 2.5, y: 13.5, type: 'imp', hp: 60, maxHp: 60, alive: true, cooldown: 0 },
+      { id: 6, x: 8.5, y: 4.5, type: 'medkit', collected: false },
+      { id: 7, x: 8.5, y: 10.5, type: 'ammo', collected: false },
+      { id: 8, x: 4.5, y: 7.5, type: 'medkit', collected: false }
     ];
 
-    // AI Action State
+    // Projectiles (Fireballs)
+    let projectiles = [];
+
+    // AI Tactical State
     let simulationSpeed = 1;
-    let aiDecisionTimer = 0;
-    let currentAIAction = "TIẾN LÊN";
+    let currentAIAction = "TIẾN LÊN TRINH SÁT";
     let actionScores = {
+      "TIẾN LÊN TRINH SÁT": 0.65,
       "BẮN SHOTGUN": 0.15,
-      "TIẾN LÊN": 0.45,
-      "NÉ TRÁI": 0.15,
-      "NÉ PHẢI": 0.15,
-      "LÙI LẠI HỒI MÁU": 0.10
+      "NÉ TRÁI": 0.10,
+      "NÉ PHẢI": 0.05,
+      "LÙI LẠI HỒI MÁU": 0.05
     };
 
     const canvas = document.getElementById('gameCanvas');
@@ -374,208 +408,96 @@
     const mapCtx = mapCanvas.getContext('2d');
 
     // ==========================================
-    // Autonomous AI Brain Loop
+    // BFS Pathfinding Algorithm
     // ==========================================
-    function updateAIBrain() {
-      if (!player.isAuto) return;
+    function findPathBFS(startX, startY, targetX, targetY) {
+      const sx = Math.floor(startX);
+      const sy = Math.floor(startY);
+      const tx = Math.floor(targetX);
+      const ty = Math.floor(targetY);
 
-      // Find visible living enemies
-      let nearestEnemy = null;
-      let minDist = 999;
-      let angleToNearest = 0;
+      if (sx === tx && sy === ty) return [];
 
-      for (const s of sprites) {
-        if ((s.type === 'imp' || s.type === 'demon') && s.alive) {
-          const dx = s.x - player.x;
-          const dy = s.y - player.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
+      const queue = [[sx, sy]];
+      const cameFrom = new Map();
+      cameFrom.set(sx + ',' + sy, null);
 
-          // Check line of sight with ray
-          if (hasLineOfSight(player.x, player.y, s.x, s.y)) {
-            if (dist < minDist) {
-              minDist = dist;
-              nearestEnemy = s;
-              // Angle difference between player direction and enemy
-              const enemyAngle = Math.atan2(dy, dx);
-              const playerAngle = Math.atan2(player.dirY, player.dirX);
-              let diff = enemyAngle - playerAngle;
-              while (diff < -Math.PI) diff += Math.PI * 2;
-              while (diff > Math.PI) diff -= Math.PI * 2;
-              angleToNearest = diff;
+      while (queue.length > 0) {
+        const [cx, cy] = queue.shift();
+        if (cx === tx && cy === ty) break;
+
+        const neighbors = [
+          [cx + 1, cy],
+          [cx - 1, cy],
+          [cx, cy + 1],
+          [cx, cy - 1]
+        ];
+
+        for (const [nx, ny] of neighbors) {
+          if (nx >= 0 && nx < MAP_W && ny >= 0 && ny < MAP_H && MAP[ny * MAP_W + nx] === 0) {
+            const key = nx + ',' + ny;
+            if (!cameFrom.has(key)) {
+              cameFrom.set(key, [cx, cy]);
+              queue.push([nx, ny]);
             }
           }
         }
       }
 
-      // Find nearest medkit if HP is low
-      let nearestMedkit = null;
-      let medkitDist = 999;
-      if (player.health < 60) {
-        for (const s of sprites) {
-          if (s.type === 'medkit' && !s.collected) {
-            const d = Math.hypot(s.x - player.x, s.y - player.y);
-            if (d < medkitDist) {
-              medkitDist = d;
-              nearestMedkit = s;
-            }
-          }
+      const targetKey = tx + ',' + ty;
+      if (!cameFrom.has(targetKey)) return null;
+
+      const path = [];
+      let curr = [tx, ty];
+      while (curr) {
+        const key = curr[0] + ',' + curr[1];
+        const prev = cameFrom.get(key);
+        if (prev) {
+          path.unshift({ x: curr[0] + 0.5, y: curr[1] + 0.5 });
         }
+        curr = prev;
       }
-
-      // Generate Tactical Situation (Perception)
-      let situationText = "";
-      let decidedAction = "TIẾN LÊN";
-
-      if (nearestEnemy) {
-        const distStr = minDist.toFixed(1) + "m";
-        const isAimed = Math.abs(angleToNearest) < 0.25;
-
-        if (isAimed && minDist < 6.5 && player.ammo > 0) {
-          decidedAction = "BẮN SHOTGUN";
-          situationText = `🎯 Khoá mục tiêu ${nearestEnemy.type.toUpperCase()} tại cự ly ${distStr}! Trong tầm ngắm trực diện. Đạn: ${player.ammo} viên.`;
-          actionScores = {
-            "BẮN SHOTGUN": 0.88,
-            "NÉ TRÁI": 0.05,
-            "NÉ PHẢI": 0.04,
-            "TIẾN LÊN": 0.02,
-            "LÙI LẠI HỒI MÁU": 0.01
-          };
-        } else if (angleToNearest < -0.1) {
-          decidedAction = "XOAY TRÁI BẮM MỤC TIÊU";
-          situationText = `⚠️ Phát hiện quái bên cánh TRÁI (${distStr}). Đang xoay góc ngắm để tiêu diệt...`;
-          actionScores = {
-            "NÉ TRÁI": 0.72,
-            "BẮN SHOTGUN": 0.18,
-            "TIẾN LÊN": 0.05,
-            "NÉ PHẢI": 0.03,
-            "LÙI LẠI HỒI MÁU": 0.02
-          };
-        } else if (angleToNearest > 0.1) {
-          decidedAction = "XOAY PHẢI BẮM MỤC TIÊU";
-          situationText = `⚠️ Phát hiện quái bên cánh PHẢI (${distStr}). Đang điều chỉnh góc bắn...`;
-          actionScores = {
-            "NÉ PHẢI": 0.72,
-            "BẮN SHOTGUN": 0.18,
-            "TIẾN LÊN": 0.05,
-            "NÉ TRÁI": 0.03,
-            "LÙI LẠI HỒI MÁU": 0.02
-          };
-        } else if (minDist < 2.0) {
-          decidedAction = "NÉ LÙI";
-          situationText = `🔥 Quái vật quá gần (${distStr})! Thực hiện cơ động lùi để giữ khoảng cách an toàn.`;
-          actionScores = {
-            "LÙI LẠI HỒI MÁU": 0.65,
-            "BẮN SHOTGUN": 0.25,
-            "NÉ TRÁI": 0.05,
-            "NÉ PHẢI": 0.05,
-            "TIẾN LÊN": 0.00
-          };
-        }
-      } else if (nearestMedkit && player.health < 50) {
-        decidedAction = "TÌM HỘP MÁU";
-        situationText = `🚑 Máu thấp (${player.health}%). Đang di chuyển thu thập Medkit cấp cứu gần nhất...`;
-        actionScores = {
-          "LÙI LẠI HỒI MÁU": 0.82,
-          "TIẾN LÊN": 0.12,
-          "BẮN SHOTGUN": 0.02,
-          "NÉ TRÁI": 0.02,
-          "NÉ PHẢI": 0.02
-        };
-      } else {
-        // Explore dungeon
-        decidedAction = "TIẾN LÊN TRINH SÁT";
-        situationText = `🔍 Không có quái trong tầm mắt. Tiến hành tuần tra tìm kiếm mục tiêu trong hành lang...`;
-        actionScores = {
-          "TIẾN LÊN": 0.68,
-          "NÉ PHẢI": 0.16,
-          "NÉ TRÁI": 0.12,
-          "BẮN SHOTGUN": 0.02,
-          "LÙI LẠI HỒI MÁU": 0.02
-        };
-      }
-
-      currentAIAction = decidedAction;
-      document.getElementById('hudAction').textContent = decidedAction;
-      document.getElementById('aiPerceptionText').textContent = situationText;
-      document.getElementById('hudTargetText').textContent = nearestEnemy 
-        ? `${nearestEnemy.type.toUpperCase()} (${minDist.toFixed(1)}m)` 
-        : "TRINH SÁT TỰ DO";
-
-      renderActionBars();
-
-      // Execute AI Motors
-      executeAIMovement(nearestEnemy, angleToNearest, minDist, nearestMedkit);
+      return path;
     }
 
-    function executeAIMovement(enemy, angle, dist, medkit) {
-      const speed = player.moveSpeed * simulationSpeed;
-      const rot = player.rotSpeed * simulationSpeed;
+    function canMoveTo(x, y) {
+      const r = 0.25;
+      const minX = Math.floor(x - r);
+      const maxX = Math.floor(x + r);
+      const minY = Math.floor(y - r);
+      const maxY = Math.floor(y + r);
 
-      if (enemy) {
-        // Rotate towards enemy
-        if (angle < -0.08) {
-          rotatePlayer(-rot);
-        } else if (angle > 0.08) {
-          rotatePlayer(rot);
-        }
-
-        // Action: shoot if aligned
-        if (Math.abs(angle) < 0.3 && dist < 6.0) {
-          shootWeapon();
-        }
-
-        // Movement tactics
-        if (dist > 3.0) {
-          // Advance towards enemy
-          tryMove(player.dirX * speed, player.dirY * speed);
-        } else if (dist < 1.8) {
-          // Strafe or retreat if too close
-          tryMove(-player.dirX * speed * 0.8, -player.dirY * speed * 0.8);
-        } else {
-          // Strafe sideways around enemy
-          tryMove(player.planeX * speed * 0.7, player.planeY * speed * 0.7);
-        }
-      } else {
-        // Wall avoidance & patrol
-        const frontX = player.x + player.dirX * 0.9;
-        const frontY = player.y + player.dirY * 0.9;
-        if (isWall(frontX, frontY)) {
-          // Turn right or left when hitting a wall
-          rotatePlayer(rot * 1.5);
-        } else {
-          tryMove(player.dirX * speed * 0.8, player.dirY * speed * 0.8);
+      for (let my = minY; my <= maxY; my++) {
+        for (let mx = minX; mx <= maxX; mx++) {
+          if (mx < 0 || mx >= MAP_W || my < 0 || my >= MAP_H) return false;
+          if (MAP[my * MAP_W + mx] > 0) return false;
         }
       }
-    }
-
-    function isWall(x, y) {
-      const mx = Math.floor(x);
-      const my = Math.floor(y);
-      if (mx < 0 || mx >= MAP_W || my < 0 || my >= MAP_H) return true;
-      return MAP[my * MAP_W + mx] > 0;
+      return true;
     }
 
     function tryMove(dx, dy) {
       const newX = player.x + dx;
       const newY = player.y + dy;
-      if (!isWall(newX, player.y)) player.x = newX;
-      if (!isWall(player.x, newY)) player.y = newY;
+      if (canMoveTo(newX, player.y)) player.x = newX;
+      if (canMoveTo(player.x, newY)) player.y = newY;
 
-      // Check item collection
+      // Collect items
       for (const s of sprites) {
-        if (!s.collected && Math.hypot(s.x - player.x, s.y - player.y) < 0.6) {
-          if (s.type === 'medkit') {
+        if (!s.collected && (s.type === 'medkit' || s.type === 'ammo')) {
+          if (Math.hypot(s.x - player.x, s.y - player.y) < 0.65) {
             s.collected = true;
-            player.health = Math.min(100, player.health + 35);
-            playPickupSound();
-            logCombat('❤️ Thu thập [Medkit]: Hồi phục +35% Máu!');
-          } else if (s.type === 'ammo') {
-            s.collected = true;
-            player.ammo = Math.min(64, player.ammo + 16);
-            playPickupSound();
-            logCombat('💥 Thu thập [Hộp Đạn]: Nạp thêm +16 viên!');
+            if (s.type === 'medkit') {
+              player.health = Math.min(100, player.health + 40);
+              playSound('pickup');
+              logCombat('❤️ Nhặt [Medkit]: Phục hồi +40% HP!');
+            } else {
+              player.ammo = Math.min(64, player.ammo + 20);
+              playSound('pickup');
+              logCombat('💥 Nhặt [Hộp Đạn]: Nạp thêm +20 viên!');
+            }
+            updateStatsUI();
           }
-          updateStatsUI();
         }
       }
     }
@@ -596,21 +518,282 @@
         const t = i / steps;
         const cx = x0 + (x1 - x0) * t;
         const cy = y0 + (y1 - y0) * t;
-        if (isWall(cx, cy)) return false;
+        const mx = Math.floor(cx);
+        const my = Math.floor(cy);
+        if (mx < 0 || mx >= MAP_W || my < 0 || my >= MAP_H || MAP[my * MAP_W + mx] > 0) {
+          return false;
+        }
       }
       return true;
     }
 
+    // ==========================================
+    // Autonomous AI Brain Loop
+    // ==========================================
+    function updateAIBrain() {
+      if (!player.isAuto) return;
+
+      const livingEnemies = sprites.filter(s => (s.type === 'imp' || s.type === 'demon') && s.alive);
+
+      // Check auto-respawn wave if all clear
+      if (livingEnemies.length === 0) {
+        spawnWave();
+        return;
+      }
+
+      // Check visible enemies in Line of Sight
+      let targetInSight = null;
+      let minSightDist = 999;
+      let angleToTarget = 0;
+
+      for (const e of livingEnemies) {
+        const dx = e.x - player.x;
+        const dy = e.y - player.y;
+        const d = Math.hypot(dx, dy);
+        if (hasLineOfSight(player.x, player.y, e.x, e.y)) {
+          if (d < minSightDist) {
+            minSightDist = d;
+            targetInSight = e;
+            const enemyAngle = Math.atan2(dy, dx);
+            const playerAngle = Math.atan2(player.dirY, player.dirX);
+            let diff = enemyAngle - playerAngle;
+            while (diff < -Math.PI) diff += Math.PI * 2;
+            while (diff > Math.PI) diff -= Math.PI * 2;
+            angleToTarget = diff;
+          }
+        }
+      }
+
+      // Decision & Perception Formulation
+      let situationText = "";
+      let decidedAction = "TIẾN LÊN TRINH SÁT";
+
+      if (targetInSight) {
+        // COMBAT ENGAGEMENT MODE
+        const isAimed = Math.abs(angleToTarget) < 0.22;
+        const distStr = minSightDist.toFixed(1) + "m";
+
+        if (isAimed && minSightDist < 7.5 && player.ammo > 0) {
+          decidedAction = "BẮN SHOTGUN";
+          situationText = `🎯 Khoá mục tiêu ${targetInSight.type.toUpperCase()} tại cự ly ${distStr}! Trong tầm ngắm chuẩn. Bóp cò!`;
+          actionScores = {
+            "BẮN SHOTGUN": 0.89,
+            "NÉ TRÁI": 0.05,
+            "NÉ PHẢI": 0.04,
+            "TIẾN LÊN TRINH SÁT": 0.01,
+            "LÙI LẠI HỒI MÁU": 0.01
+          };
+          shootWeapon();
+        } else if (angleToTarget < -0.05) {
+          decidedAction = "XOAY TRÁI BẮM MỤC TIÊU";
+          situationText = `⚠️ Phát hiện ${targetInSight.type.toUpperCase()} lệch TRÁI (${distStr}). Đang căn chỉnh tâm bắn...`;
+          actionScores = {
+            "NÉ TRÁI": 0.74,
+            "BẮN SHOTGUN": 0.16,
+            "TIẾN LÊN TRINH SÁT": 0.05,
+            "NÉ PHẢI": 0.03,
+            "LÙI LẠI HỒI MÁU": 0.02
+          };
+          rotatePlayer(-player.rotSpeed * simulationSpeed);
+        } else if (angleToTarget > 0.05) {
+          decidedAction = "XOAY PHẢI BẮM MỤC TIÊU";
+          situationText = `⚠️ Phát hiện ${targetInSight.type.toUpperCase()} lệch PHẢI (${distStr}). Đang căn chỉnh tâm bắn...`;
+          actionScores = {
+            "NÉ PHẢI": 0.74,
+            "BẮN SHOTGUN": 0.16,
+            "TIẾN LÊN TRINH SÁT": 0.05,
+            "NÉ TRÁI": 0.03,
+            "LÙI LẠI HỒI MÁU": 0.02
+          };
+          rotatePlayer(player.rotSpeed * simulationSpeed);
+        }
+
+        // Tactical Movement during combat
+        const spd = player.moveSpeed * simulationSpeed;
+        if (minSightDist > 3.5) {
+          tryMove(player.dirX * spd * 0.8, player.dirY * spd * 0.8);
+        } else if (minSightDist < 2.0) {
+          tryMove(-player.dirX * spd * 0.8, -player.dirY * spd * 0.8);
+        } else {
+          // Strafe to evade
+          const strafeDir = (Math.floor(Date.now() / 1000) % 2 === 0) ? 1 : -1;
+          tryMove(player.planeX * spd * 0.6 * strafeDir, player.planeY * spd * 0.6 * strafeDir);
+        }
+
+        document.getElementById('hudTargetText').textContent = `${targetInSight.type.toUpperCase()} (${distStr})`;
+
+      } else {
+        // EXPLORATION & PATHFINDING MODE
+        // Find nearest living enemy on the whole map using BFS
+        let bestTarget = null;
+        let bestPath = null;
+        let shortestSteps = 999;
+
+        // If low HP, prioritize medkit first
+        if (player.health < 60) {
+          for (const s of sprites) {
+            if (s.type === 'medkit' && !s.collected) {
+              const path = findPathBFS(player.x, player.y, s.x, s.y);
+              if (path && path.length < shortestSteps) {
+                shortestSteps = path.length;
+                bestTarget = s;
+                bestPath = path;
+              }
+            }
+          }
+        }
+
+        // If no medkit urgent, hunt nearest enemy
+        if (!bestPath) {
+          for (const e of livingEnemies) {
+            const path = findPathBFS(player.x, player.y, e.x, e.y);
+            if (path && path.length < shortestSteps) {
+              shortestSteps = path.length;
+              bestTarget = e;
+              bestPath = path;
+            }
+          }
+        }
+
+        if (bestPath && bestPath.length > 0) {
+          const nextWaypoint = bestPath[0];
+          const dx = nextWaypoint.x - player.x;
+          const dy = nextWaypoint.y - player.y;
+          const distToWp = Math.hypot(dx, dy);
+
+          const wpAngle = Math.atan2(dy, dx);
+          const playerAngle = Math.atan2(player.dirY, player.dirX);
+          let diff = wpAngle - playerAngle;
+          while (diff < -Math.PI) diff += Math.PI * 2;
+          while (diff > Math.PI) diff -= Math.PI * 2;
+
+          // Turn towards waypoint
+          if (Math.abs(diff) > 0.1) {
+            rotatePlayer(Math.sign(diff) * player.rotSpeed * simulationSpeed);
+          }
+
+          // Advance towards waypoint
+          const spd = player.moveSpeed * simulationSpeed;
+          tryMove(player.dirX * spd, player.dirY * spd);
+
+          decidedAction = "TIẾN LÊN TRINH SÁT";
+          situationText = `🧭 Điều hướng BFS theo hành lang (còn ${bestPath.length} bước) tiếp cận ${bestTarget.type.toUpperCase()}...`;
+          actionScores = {
+            "TIẾN LÊN TRINH SÁT": 0.78,
+            "NÉ PHẢI": 0.10,
+            "NÉ TRÁI": 0.08,
+            "BẮN SHOTGUN": 0.02,
+            "LÙI LẠI HỒI MÁU": 0.02
+          };
+          document.getElementById('hudTargetText').textContent = `HÀNH LANG (BFS: ${bestPath.length}m)`;
+        } else {
+          // Open area wander
+          rotatePlayer(player.rotSpeed * 0.8 * simulationSpeed);
+          tryMove(player.dirX * player.moveSpeed * 0.5 * simulationSpeed, player.dirY * player.moveSpeed * 0.5 * simulationSpeed);
+          decidedAction = "QUÉT BẢN ĐỒ";
+          situationText = `🔄 Quét góc 360 độ tìm kiếm quái vật trong khu vực mở...`;
+        }
+      }
+
+      currentAIAction = decidedAction;
+      document.getElementById('hudAction').textContent = decidedAction;
+      document.getElementById('aiPerceptionText').textContent = situationText;
+      renderActionBars();
+    }
+
+    // ==========================================
+    // Enemies & Projectiles Combat Engine
+    // ==========================================
+    function updateEnemies() {
+      const now = performance.now();
+
+      // Update Enemies
+      for (const e of sprites) {
+        if (!e.alive || (e.type !== 'imp' && e.type !== 'demon')) continue;
+
+        const dx = player.x - e.x;
+        const dy = player.y - e.y;
+        const d = Math.hypot(dx, dy);
+
+        // If enemy sees player, shoot fireball
+        if (d < 9.0 && hasLineOfSight(e.x, e.y, player.x, player.y)) {
+          if (!e.cooldown) e.cooldown = 0;
+          if (now > e.cooldown) {
+            // Shoot fireball towards player
+            const speed = 0.07;
+            projectiles.push({
+              x: e.x,
+              y: e.y,
+              vx: (dx / d) * speed,
+              vy: (dy / d) * speed,
+              alive: true
+            });
+            e.cooldown = now + 1600 + Math.random() * 800; // Attack cooldown
+          }
+        }
+      }
+
+      // Update Projectiles
+      for (let i = projectiles.length - 1; i >= 0; i--) {
+        const p = projectiles[i];
+        p.x += p.vx * simulationSpeed;
+        p.y += p.vy * simulationSpeed;
+
+        // Check wall collision
+        const mx = Math.floor(p.x);
+        const my = Math.floor(p.y);
+        if (mx < 0 || mx >= MAP_W || my < 0 || my >= MAP_H || MAP[my * MAP_W + mx] > 0) {
+          projectiles.splice(i, 1);
+          continue;
+        }
+
+        // Check hit player
+        if (Math.hypot(p.x - player.x, p.y - player.y) < 0.4) {
+          projectiles.splice(i, 1);
+          const dmg = 12;
+          if (player.armor > 0) {
+            player.armor = Math.max(0, player.armor - dmg);
+            player.health = Math.max(0, player.health - Math.floor(dmg * 0.5));
+          } else {
+            player.health = Math.max(0, player.health - dmg);
+          }
+          playSound('hurt');
+
+          // Damage flash
+          const flash = document.getElementById('damageFlash');
+          flash.style.opacity = '0.6';
+          setTimeout(() => { flash.style.opacity = '0'; }, 120);
+
+          logCombat(`⚠️ Bị trúng cầu lửa! (-${dmg} HP)`);
+          updateStatsUI();
+
+          if (player.health <= 0) {
+            logCombat('💀 SLAYER ĐÃ NGÃ XUỐNG! Tự động hồi sinh sau 2s...');
+            setTimeout(respawnPlayer, 2000);
+          }
+        }
+      }
+    }
+
+    function respawnPlayer() {
+      player.x = 2.5;
+      player.y = 2.5;
+      player.health = 100;
+      player.armor = 50;
+      player.ammo = 32;
+      updateStatsUI();
+      logCombat('⚡ HỒI SINH: AI Slayer trở lại chiến trường với đầy đủ trang bị!');
+    }
+
     function shootWeapon() {
       const now = performance.now();
-      if (now - player.lastShotTime < 350 / simulationSpeed) return;
+      if (now - player.lastShotTime < 320 / simulationSpeed) return;
       if (player.ammo <= 0) return;
 
-      initAudio();
       player.ammo--;
       player.lastShotTime = now;
       player.muzzleFlash = true;
-      playGunshotSound();
+      playSound('shot');
 
       setTimeout(() => { player.muzzleFlash = false; }, 80);
 
@@ -627,13 +810,13 @@
           while (diff > Math.PI) diff -= Math.PI * 2;
 
           if (Math.abs(diff) < 0.25 && hasLineOfSight(player.x, player.y, s.x, s.y)) {
-            const damage = Math.floor(35 + Math.random() * 25);
+            const damage = Math.floor(35 + Math.random() * 30);
             s.hp -= damage;
-            playMonsterHurtSound();
+            playSound('hit');
 
             const hitEl = document.getElementById('hitMarker');
             hitEl.classList.remove('hidden');
-            setTimeout(() => hitEl.classList.add('hidden'), 100);
+            setTimeout(() => hitEl.classList.add('hidden'), 90);
 
             if (s.hp <= 0) {
               s.alive = false;
@@ -685,27 +868,34 @@
       const item = document.createElement('div');
       item.innerHTML = `<span class="text-slate-600">[${time}]</span> ${msg}`;
       container.insertBefore(item, container.firstChild);
-      if (container.children.length > 30) {
+      if (container.children.length > 35) {
         container.removeChild(container.lastChild);
       }
     }
 
     // ==========================================
-    // Raycasting Rendering Loop
+    // Raycasting & Texture Rendering Loop
     // ==========================================
     function renderFrame() {
       const w = canvas.width;
       const h = canvas.height;
 
-      // Ceiling & Floor
-      ctx.fillStyle = "#120808";
+      // Ceiling & Floor with gradient
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, h / 2);
+      skyGrad.addColorStop(0, '#0a0505');
+      skyGrad.addColorStop(1, '#240808');
+      ctx.fillStyle = skyGrad;
       ctx.fillRect(0, 0, w, h / 2);
-      ctx.fillStyle = "#1e1414";
+
+      const floorGrad = ctx.createLinearGradient(0, h / 2, 0, h);
+      floorGrad.addColorStop(0, '#151515');
+      floorGrad.addColorStop(1, '#050505');
+      ctx.fillStyle = floorGrad;
       ctx.fillRect(0, h / 2, w, h / 2);
 
       const zBuffer = new Array(w);
 
-      // Cast Ray for each column
+      // Cast rays
       for (let x = 0; x < w; x++) {
         const cameraX = (2 * x) / w - 1;
         const rayDirX = player.dirX + player.planeX * cameraX;
@@ -739,7 +929,6 @@
           sideDistY = (mapY + 1.0 - player.y) * deltaDistY;
         }
 
-        // DDA Loop
         while (hit === 0) {
           if (sideDistX < sideDistY) {
             sideDistX += deltaDistX;
@@ -764,17 +953,62 @@
         let drawEnd = lineHeight / 2 + h / 2;
         if (drawEnd >= h) drawEnd = h - 1;
 
-        // Shading
-        const shade = Math.max(0.15, Math.min(1.0, 1.0 - perpWallDist / 12.0));
-        const r = Math.floor((side === 1 ? 160 : 190) * shade);
-        const g = Math.floor(40 * shade);
-        const b = Math.floor(40 * shade);
+        // Texture Mapping
+        let wallX;
+        if (side === 0) wallX = player.y + perpWallDist * rayDirY;
+        else wallX = player.x + perpWallDist * rayDirX;
+        wallX -= Math.floor(wallX);
 
-        ctx.fillStyle = `rgb(${r},${g},${b})`;
-        ctx.fillRect(x, drawStart, 1, drawEnd - drawStart);
+        let texX = Math.floor(wallX * TEX_SIZE);
+        if (side === 0 && rayDirX > 0) texX = TEX_SIZE - texX - 1;
+        if (side === 1 && rayDirY < 0) texX = TEX_SIZE - texX - 1;
+
+        // Shading with distance fog
+        const shade = Math.max(0.12, Math.min(1.0, 1.0 - perpWallDist / 13.0));
+        const sideMult = side === 1 ? 0.75 : 1.0;
+
+        ctx.drawImage(
+          wallTexCanvas,
+          texX, 0, 1, TEX_SIZE,
+          x, drawStart, 1, drawEnd - drawStart
+        );
+
+        // Darkness shadow overlay
+        const darkness = Math.max(0, 1.0 - shade * sideMult);
+        if (darkness > 0.05) {
+          ctx.fillStyle = `rgba(5, 7, 13, ${darkness})`;
+          ctx.fillRect(x, drawStart, 1, drawEnd - drawStart);
+        }
       }
 
-      // Render Sprites (Monsters & Items)
+      // Render Fireballs & Projectiles
+      for (const p of projectiles) {
+        const spriteX = p.x - player.x;
+        const spriteY = p.y - player.y;
+        const invDet = 1.0 / (player.planeX * player.dirY - player.dirX * player.planeY);
+        const transformX = invDet * (player.dirY * spriteX - player.dirX * spriteY);
+        const transformY = invDet * (-player.planeY * spriteX + player.planeX * spriteY);
+
+        if (transformY > 0.1) {
+          const screenX = Math.floor((w / 2) * (1 + transformX / transformY));
+          const size = Math.abs(Math.floor(h / transformY)) * 0.25;
+          const screenY = h / 2 - size / 2;
+
+          if (screenX >= 0 && screenX < w && transformY < zBuffer[screenX]) {
+            ctx.fillStyle = '#f97316';
+            ctx.beginPath();
+            ctx.arc(screenX, screenY + size / 2, Math.max(2, size), 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#fef08a';
+            ctx.beginPath();
+            ctx.arc(screenX, screenY + size / 2, Math.max(1, size * 0.5), 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      }
+
+      // Render Sprites (Enemies & Items)
       const visibleSprites = sprites
         .map(s => ({
           ...s,
@@ -806,28 +1040,40 @@
         let drawEndX = spriteWidth / 2 + spriteScreenX;
         if (drawEndX >= w) drawEndX = w - 1;
 
-        // Draw Billboarding Sprite
         for (let stripe = drawStartX; stripe < drawEndX; stripe++) {
           if (transformY > 0 && stripe >= 0 && stripe < w && transformY < zBuffer[stripe]) {
             if (s.type === 'imp') {
-              ctx.fillStyle = '#dc2626'; // Red Demon
+              ctx.fillStyle = '#dc2626'; // Imp Red Demon
             } else if (s.type === 'demon') {
-              ctx.fillStyle = '#ea580c'; // Orange Cyber Demon
+              ctx.fillStyle = '#ea580c'; // Cyber Demon
             } else if (s.type === 'medkit') {
               ctx.fillStyle = '#10b981'; // Green Medkit
             } else {
               ctx.fillStyle = '#f59e0b'; // Gold Ammo
             }
 
-            const barW = Math.max(1, (drawEndX - drawStartX) / 10);
-            ctx.fillRect(stripe, drawStartY + spriteHeight * 0.2, 1, (drawEndY - drawStartY) * 0.7);
+            ctx.fillRect(stripe, drawStartY + spriteHeight * 0.15, 1, (drawEndY - drawStartY) * 0.75);
 
-            // Eye glow for demons
+            // Demon eyes
             if (s.type === 'imp' || s.type === 'demon') {
-              ctx.fillStyle = '#fef08a';
-              ctx.fillRect(stripe, drawStartY + spriteHeight * 0.25, 1, 3);
+              ctx.fillStyle = '#fde047';
+              ctx.fillRect(stripe, drawStartY + spriteHeight * 0.25, 1, Math.max(2, spriteHeight * 0.05));
             }
           }
+        }
+
+        // Health bar above living enemies
+        if ((s.type === 'imp' || s.type === 'demon') && s.alive && transformY < 9.0) {
+          const hpPct = Math.max(0, s.hp / s.maxHp);
+          const barW = Math.max(16, spriteWidth * 0.6);
+          const barH = 4;
+          const barX = spriteScreenX - barW / 2;
+          const barY = drawStartY - 8;
+
+          ctx.fillStyle = '#000000';
+          ctx.fillRect(barX - 1, barY - 1, barW + 2, barH + 2);
+          ctx.fillStyle = '#ef4444';
+          ctx.fillRect(barX, barY, barW * hpPct, barH);
         }
       }
 
@@ -839,47 +1085,49 @@
     }
 
     function renderShotgun(w, h) {
-      const gunW = 90;
-      const gunH = 110;
+      const gunW = 100;
+      const gunH = 120;
       const gunX = w / 2 - gunW / 2;
-      const gunY = h - gunH + (player.muzzleFlash ? 15 : 0);
+      const gunY = h - gunH + (player.muzzleFlash ? 16 : 0);
 
-      // Gun barrel
-      ctx.fillStyle = '#334155';
-      ctx.fillRect(gunX + 30, gunY, 30, gunH);
+      // Double barrel
       ctx.fillStyle = '#1e293b';
-      ctx.fillRect(gunX + 38, gunY - 10, 14, 15);
+      ctx.fillRect(gunX + 32, gunY, 16, gunH);
+      ctx.fillRect(gunX + 52, gunY, 16, gunH);
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(gunX + 34, gunY - 12, 12, 14);
+      ctx.fillRect(gunX + 54, gunY - 12, 12, 14);
 
-      // Grip
+      // Wooden grip
       ctx.fillStyle = '#78350f';
-      ctx.fillRect(gunX + 32, gunY + 40, 26, 40);
+      ctx.fillRect(gunX + 36, gunY + 45, 28, 45);
 
       // Muzzle Flash
       if (player.muzzleFlash) {
         ctx.fillStyle = '#fde047';
         ctx.beginPath();
-        ctx.arc(w / 2, gunY - 15, 30, 0, Math.PI * 2);
+        ctx.arc(w / 2, gunY - 18, 36, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.fillStyle = '#ef4444';
         ctx.beginPath();
-        ctx.arc(w / 2, gunY - 15, 16, 0, Math.PI * 2);
+        ctx.arc(w / 2, gunY - 18, 20, 0, Math.PI * 2);
         ctx.fill();
       }
     }
 
     function renderMinimap() {
       mapCtx.fillStyle = '#05070d';
-      mapCtx.fillRect(0, 0, 90, 90);
+      mapCtx.fillRect(0, 0, 100, 100);
 
-      const cellW = 90 / MAP_W;
-      const cellH = 90 / MAP_H;
+      const cellW = 100 / MAP_W;
+      const cellH = 100 / MAP_H;
 
       // Draw walls
       for (let y = 0; y < MAP_H; y++) {
         for (let x = 0; x < MAP_W; x++) {
           if (MAP[y * MAP_W + x] > 0) {
-            mapCtx.fillStyle = '#450a0a';
+            mapCtx.fillStyle = '#3f0c0c';
             mapCtx.fillRect(x * cellW, y * cellH, cellW, cellH);
           }
         }
@@ -900,38 +1148,41 @@
         }
       }
 
-      // Draw Player Position & Direction Cone
+      // Draw Player Position & Vision Cone
       mapCtx.fillStyle = '#38bdf8';
       mapCtx.beginPath();
       mapCtx.arc(player.x * cellW, player.y * cellH, 3, 0, Math.PI * 2);
       mapCtx.fill();
 
-      // Vision Ray
       mapCtx.strokeStyle = '#38bdf8';
-      mapCtx.lineWidth = 1;
+      mapCtx.lineWidth = 1.5;
       mapCtx.beginPath();
       mapCtx.moveTo(player.x * cellW, player.y * cellH);
-      mapCtx.lineTo((player.x + player.dirX * 2) * cellW, (player.y + player.dirY * 2) * cellH);
+      mapCtx.lineTo((player.x + player.dirX * 2.2) * cellW, (player.y + player.dirY * 2.2) * cellH);
       mapCtx.stroke();
     }
 
     // ==========================================
-    // Game Loop & Clock
+    // Game Loop & Ticks
     // ==========================================
-    let gameLoopId = null;
     let startTime = Date.now();
+    let tickCount = 0;
 
     function gameLoop() {
-      // AI Brain runs at high frequency
-      aiDecisionTimer++;
-      if (aiDecisionTimer % 3 === 0) {
+      tickCount++;
+
+      // AI updates every 2 frames
+      if (tickCount % 2 === 0) {
         updateAIBrain();
       }
 
-      // Render 2.5D Frame
+      // Enemy combat logic
+      updateEnemies();
+
+      // Render 2.5D visual frame
       renderFrame();
 
-      // Update timer clock
+      // Combat clock
       const sec = Math.floor((Date.now() - startTime) / 1000);
       const m = String(Math.floor(sec / 60)).padStart(2, '0');
       const s = String(sec % 60).padStart(2, '0');
@@ -942,10 +1193,10 @@
 
     function setSpeed(spd) {
       simulationSpeed = spd;
-      document.getElementById('spd1').className = spd === 1 ? "px-2.5 py-1 rounded bg-red-600 text-white font-bold" : "px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300";
-      document.getElementById('spd2').className = spd === 2 ? "px-2.5 py-1 rounded bg-red-600 text-white font-bold" : "px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300";
-      document.getElementById('spd4').className = spd === 4 ? "px-2.5 py-1 rounded bg-red-600 text-white font-bold" : "px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300";
-      document.getElementById('aiHz').textContent = (10 * spd) + " decisions/sec";
+      document.getElementById('spd1').className = spd === 1 ? "px-2.5 py-0.5 rounded bg-red-600 text-white font-bold" : "px-2.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300";
+      document.getElementById('spd2').className = spd === 2 ? "px-2.5 py-0.5 rounded bg-red-600 text-white font-bold" : "px-2.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300";
+      document.getElementById('spd3').className = spd === 3 ? "px-2.5 py-0.5 rounded bg-red-600 text-white font-bold" : "px-2.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300";
+      document.getElementById('aiHz').textContent = (12 * spd) + " decisions/s";
     }
 
     function toggleAutoPilot() {
@@ -955,11 +1206,11 @@
       if (player.isAuto) {
         btn.className = "px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white font-semibold text-xs shadow-md shadow-red-600/30 transition-all flex items-center gap-1.5";
         txt.textContent = "AI TỰ ĐỘNG CHƠI (ON)";
-        logCombat("🤖 Đã bật lại chế độ Autonomous AI Auto-pilot!");
+        logCombat("🤖 Đã kích hoạt chế độ AI Tự Chơi (Auto-pilot ON)!");
       } else {
         btn.className = "px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs border border-slate-700 transition-all flex items-center gap-1.5";
         txt.textContent = "CHẾ ĐỘ TAY (WASD + Space)";
-        logCombat("🎮 Chuyển sang điều khiển bằng tay (WASD để đi, Space để bắn)!");
+        logCombat("🎮 Chuyển sang chơi tay: Dùng phím WASD để đi, Space để bắn!");
       }
     }
 
@@ -970,21 +1221,23 @@
         do {
           rx = 1 + Math.floor(Math.random() * (MAP_W - 2)) + 0.5;
           ry = 1 + Math.floor(Math.random() * (MAP_H - 2)) + 0.5;
-        } while (isWall(rx, ry) || Math.hypot(rx - player.x, ry - player.y) < 3.0);
+        } while (MAP[Math.floor(ry) * MAP_W + Math.floor(rx)] > 0 || Math.hypot(rx - player.x, ry - player.y) < 3.5);
 
         sprites.push({
+          id: Date.now() + i,
           x: rx,
           y: ry,
           type: types[Math.floor(Math.random() * types.length)],
-          hp: 60,
-          maxHp: 60,
-          alive: true
+          hp: 70,
+          maxHp: 70,
+          alive: true,
+          cooldown: 0
         });
       }
-      logCombat("⚠️ Báo động: Đợt quái mới (+4 monsters) vừa xuất hiện trên bản đồ!");
+      logCombat("⚠️ Báo động: Đợt quái mới (+4 quái vật) xuất hiện trên chiến trường!");
     }
 
-    // Keyboard support for manual testing
+    // Manual controls
     window.addEventListener('keydown', (e) => {
       if (player.isAuto) return;
       initAudio();
@@ -1001,7 +1254,7 @@
     window.addEventListener('DOMContentLoaded', () => {
       updateStatsUI();
       gameLoop();
-      logCombat("🚀 Trò chơi bắt đầu: AI Slayer đang rà soát dungeon...");
+      logCombat("🚀 Trò chơi đã sẵn sàng! AI Slayer đang bắt đầu càn quét...");
     });
   </script>
 </body>

@@ -69,7 +69,7 @@
         </a>
         <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
           <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          4 Ứng Dụng Online
+          10 Ứng Dụng Online
         </div>
       </div>
     </header>
@@ -83,184 +83,314 @@
         Cổng Trải Nghiệm <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-cyan-400 to-emerald-400">AI & Game Tự Chơi</span>
       </h2>
       <p class="text-slate-400 text-sm sm:text-base leading-relaxed">
-        Toàn bộ các module AI, công cụ phân loại xác suất không cần Prompt (TypeSafe Jev) và các tựa game 100% tự động chơi được lưu trữ và triển khai trên máy chủ. Nhấp vào từng ứng dụng để vào trải nghiệm ngay.
+        Tổng hợp toàn bộ 10 công cụ AI phân loại xác suất (TypeSafe Jev), các tựa game tự động chơi 100% bằng thuật toán và thế giới mô phỏng 3D. Bấm vào bất kỳ ứng dụng nào để trải nghiệm ngay.
       </p>
     </div>
 
     <!-- Filter Buttons -->
     <div class="flex flex-wrap items-center justify-center gap-2 pt-2">
       <button onclick="filterCategory('all', event)" class="filter-btn active px-4 py-1.5 rounded-lg text-xs font-medium transition-all bg-indigo-600 text-white shadow-sm">
-        Tất cả (4)
+        Tất cả (10)
       </button>
       <button onclick="filterCategory('game', event)" class="filter-btn px-4 py-1.5 rounded-lg text-xs font-medium transition-all bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700">
-        🎮 Game Tự Động (2)
+        🎮 Game Tự Động (7)
       </button>
       <button onclick="filterCategory('tool', event)" class="filter-btn px-4 py-1.5 rounded-lg text-xs font-medium transition-all bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700">
         ⚡ Công Cụ AI (1)
       </button>
       <button onclick="filterCategory('3d', event)" class="filter-btn px-4 py-1.5 rounded-lg text-xs font-medium transition-all bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700">
-        🔮 3D Simulation (1)
+        🔮 3D Simulation (2)
       </button>
     </div>
 
-    <!-- Application Cards Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Application Cards Grid (10 Items) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
 
       <!-- Card 1: Classifier Studio -->
-      <div class="app-card tool bg-[#131b2e] border border-slate-800 rounded-2xl p-6 flex flex-col justify-between card-hover relative overflow-hidden group">
-        <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-600/10 rounded-full blur-2xl group-hover:bg-indigo-600/20 transition-all pointer-events-none"></div>
-        
-        <div class="space-y-4">
+      <div class="app-card tool bg-[#131b2e] border border-slate-800 rounded-2xl p-5 flex flex-col justify-between card-hover relative overflow-hidden group">
+        <div class="space-y-3">
           <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div class="w-12 h-12 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-2xl text-indigo-400 group-hover:scale-110 transition-transform">
-                ⚡
-              </div>
+            <div class="flex items-center gap-2.5">
+              <div class="w-10 h-10 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-xl text-indigo-400">⚡</div>
               <div>
-                <h3 class="text-lg font-bold text-white group-hover:text-indigo-300 transition-colors">Classifier.dev Studio</h3>
-                <p class="text-xs text-slate-400 font-mono">/classifier.html</p>
+                <h3 class="text-base font-bold text-white group-hover:text-indigo-300 transition-colors">Classifier.dev Studio</h3>
+                <p class="text-[11px] text-slate-400 font-mono">/classifier.html</p>
               </div>
             </div>
-            <span class="px-2.5 py-1 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Ready
-            </span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Ready</span>
           </div>
-
           <p class="text-xs text-slate-300 leading-relaxed">
-            Hệ thống phân loại văn bản tức thì theo thời gian thực (Zero-shot) sử dụng model <strong>TypeSafe AI Jev (Fast)</strong>. Không cần viết prompt, hiển thị phân bổ xác suất toán học 100%, hỗ trợ đa nhãn (multi-label) và thêm/xóa nhãn tùy biến.
+            Phân loại văn bản thời gian thực bằng model <strong>TypeSafe AI Jev (Fast)</strong>. Xuất xác suất toán học 100%, hỗ trợ đa nhãn và thêm/xóa nhãn tùy ý.
           </p>
-
-          <div class="flex flex-wrap gap-1.5 pt-1">
+          <div class="flex flex-wrap gap-1 pt-1">
             <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">TypeSafe Jev</span>
-            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300 border border-slate-700">Zero-shot</span>
-            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300 border border-slate-700">Calibrated Scores</span>
-            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">~30ms Latency</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300">~30ms</span>
           </div>
         </div>
-
-        <div class="pt-6 mt-4 border-t border-slate-800/80 flex items-center justify-between gap-3">
-          <span class="text-[11px] text-slate-500">Đường dẫn: <code class="text-slate-400 font-mono">/classifier.html</code></span>
-          <a href="/classifier.html" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/30 transition-all hover:gap-3">
+        <div class="pt-4 mt-3 border-t border-slate-800/80 flex items-center justify-between">
+          <span class="text-[10px] text-slate-500 font-mono">/classifier.html</span>
+          <a href="/classifier.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-all">
             Mở Studio <span>→</span>
           </a>
         </div>
       </div>
 
       <!-- Card 2: Autonomous AI Snake -->
-      <div class="app-card game bg-[#131b2e] border border-slate-800 rounded-2xl p-6 flex flex-col justify-between card-hover relative overflow-hidden group">
-        <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-600/10 rounded-full blur-2xl group-hover:bg-emerald-600/20 transition-all pointer-events-none"></div>
-
-        <div class="space-y-4">
+      <div class="app-card game bg-[#131b2e] border border-slate-800 rounded-2xl p-5 flex flex-col justify-between card-hover relative overflow-hidden group">
+        <div class="space-y-3">
           <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div class="w-12 h-12 rounded-xl bg-emerald-600/20 border border-emerald-500/30 flex items-center justify-center text-2xl text-emerald-400 group-hover:scale-110 transition-transform">
-                🐍
-              </div>
+            <div class="flex items-center gap-2.5">
+              <div class="w-10 h-10 rounded-xl bg-emerald-600/20 border border-emerald-500/30 flex items-center justify-center text-xl text-emerald-400">🐍</div>
               <div>
-                <h3 class="text-lg font-bold text-white group-hover:text-emerald-300 transition-colors">Rắn Săn Mồi Tự Động (AI Snake)</h3>
-                <p class="text-xs text-slate-400 font-mono">/snake.html</p>
+                <h3 class="text-base font-bold text-white group-hover:text-emerald-300 transition-colors">Rắn Săn Mồi AI</h3>
+                <p class="text-[11px] text-slate-400 font-mono">/snake.html</p>
               </div>
             </div>
-            <span class="px-2.5 py-1 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Auto-play
-            </span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Auto</span>
           </div>
-
           <p class="text-xs text-slate-300 leading-relaxed">
-            Game Rắn săn mồi tự động 100% không cần người bấm phím. Thuật toán <strong>A* Pathfinding</strong> kết hợp <strong>Virtual Tail Safety</strong> (mô phỏng ảo để tránh tự bẫy đuôi) và <strong>Flood-fill BFS</strong> để sinh tồn. Có bảng phân tích xác suất quyết định thời gian thực.
+            Rắn tự săn mồi bằng <strong>A* Pathfinding + Virtual Tail Safety</strong>. Giả lập tránh bẫy đuôi, đo không gian sinh tồn BFS và hiển thị HUD thời gian thực.
           </p>
-
-          <div class="flex flex-wrap gap-1.5 pt-1">
+          <div class="flex flex-wrap gap-1 pt-1">
             <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">A* Algorithm</span>
-            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300 border border-slate-700">Virtual Tail Safety</span>
-            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300 border border-slate-700">Flood-Fill BFS</span>
-            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">Telemetry HUD</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300">Tail Safety</span>
           </div>
         </div>
-
-        <div class="pt-6 mt-4 border-t border-slate-800/80 flex items-center justify-between gap-3">
-          <span class="text-[11px] text-slate-500">Đường dẫn: <code class="text-slate-400 font-mono">/snake.html</code></span>
-          <a href="/snake.html" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-600/30 transition-all hover:gap-3">
-            Xem Rắn Tự Chơi <span>→</span>
+        <div class="pt-4 mt-3 border-t border-slate-800/80 flex items-center justify-between">
+          <span class="text-[10px] text-slate-500 font-mono">/snake.html</span>
+          <a href="/snake.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition-all">
+            Chơi Rắn <span>→</span>
           </a>
         </div>
       </div>
 
       <!-- Card 3: Autonomous AI Doom 3D -->
-      <div class="app-card game bg-[#131b2e] border border-slate-800 rounded-2xl p-6 flex flex-col justify-between card-hover relative overflow-hidden group">
-        <div class="absolute top-0 right-0 w-32 h-32 bg-rose-600/10 rounded-full blur-2xl group-hover:bg-rose-600/20 transition-all pointer-events-none"></div>
-
-        <div class="space-y-4">
+      <div class="app-card game 3d bg-[#131b2e] border border-slate-800 rounded-2xl p-5 flex flex-col justify-between card-hover relative overflow-hidden group">
+        <div class="space-y-3">
           <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div class="w-12 h-12 rounded-xl bg-rose-600/20 border border-rose-500/30 flex items-center justify-center text-2xl text-rose-400 group-hover:scale-110 transition-transform">
-                🔫
-              </div>
+            <div class="flex items-center gap-2.5">
+              <div class="w-10 h-10 rounded-xl bg-rose-600/20 border border-rose-500/30 flex items-center justify-center text-xl text-rose-400">🔫</div>
               <div>
-                <h3 class="text-lg font-bold text-white group-hover:text-rose-300 transition-colors">AI Doom 3D Tự Chơi (FPS AI)</h3>
-                <p class="text-xs text-slate-400 font-mono">/doom.html</p>
+                <h3 class="text-base font-bold text-white group-hover:text-rose-300 transition-colors">AI Doom 3D Tự Chơi</h3>
+                <p class="text-[11px] text-slate-400 font-mono">/doom.html</p>
               </div>
             </div>
-            <span class="px-2.5 py-1 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Auto-play
-            </span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">3D Auto</span>
           </div>
-
           <p class="text-xs text-slate-300 leading-relaxed">
-            Game bắn súng 3D Raycasting cổ điển với <strong>AI tự điều khiển hoàn toàn</strong>. Bot tự định vị quái trong tầm nhìn, ngắm bắn, né đòn, tuần tra mê cung và chủ động tìm bình cứu thương khi lượng máu xuống thấp kèm âm thanh súng đạn sống động.
+            FPS Raycasting 3D tự động chiến đấu: tuần tra mê cung, phát hiện quái vật bằng tia nhìn, tự ngắm bắn, né đòn và tìm bình hồi máu khi nguy cấp.
           </p>
-
-          <div class="flex flex-wrap gap-1.5 pt-1">
+          <div class="flex flex-wrap gap-1 pt-1">
             <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-rose-500/10 text-rose-300 border border-rose-500/20">Raycaster 3D</span>
-            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300 border border-slate-700">Behavior Tree</span>
-            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300 border border-slate-700">Ray Vision</span>
-            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">Action Distribution</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300">Behavior Tree</span>
           </div>
         </div>
-
-        <div class="pt-6 mt-4 border-t border-slate-800/80 flex items-center justify-between gap-3">
-          <span class="text-[11px] text-slate-500">Đường dẫn: <code class="text-slate-400 font-mono">/doom.html</code></span>
-          <a href="/doom.html" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-rose-600 hover:bg-rose-500 text-white shadow-md shadow-rose-600/30 transition-all hover:gap-3">
-            Xem Bot Bắn Doom <span>→</span>
+        <div class="pt-4 mt-3 border-t border-slate-800/80 flex items-center justify-between">
+          <span class="text-[10px] text-slate-500 font-mono">/doom.html</span>
+          <a href="/doom.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-600 hover:bg-rose-500 text-white transition-all">
+            Bắn Doom <span>→</span>
           </a>
         </div>
       </div>
 
-      <!-- Card 4: 3D AI Living Creature -->
-      <div class="app-card 3d bg-[#131b2e] border border-slate-800 rounded-2xl p-6 flex flex-col justify-between card-hover relative overflow-hidden group">
-        <div class="absolute top-0 right-0 w-32 h-32 bg-cyan-600/10 rounded-full blur-2xl group-hover:bg-cyan-600/20 transition-all pointer-events-none"></div>
-
-        <div class="space-y-4">
+      <!-- Card 4: Cyber Flappy AI -->
+      <div class="app-card game bg-[#131b2e] border border-slate-800 rounded-2xl p-5 flex flex-col justify-between card-hover relative overflow-hidden group">
+        <div class="space-y-3">
           <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div class="w-12 h-12 rounded-xl bg-cyan-600/20 border border-cyan-500/30 flex items-center justify-center text-2xl text-cyan-400 group-hover:scale-110 transition-transform">
-                🔮
-              </div>
+            <div class="flex items-center gap-2.5">
+              <div class="w-10 h-10 rounded-xl bg-sky-600/20 border border-sky-500/30 flex items-center justify-center text-xl text-sky-400">🐦</div>
               <div>
-                <h3 class="text-lg font-bold text-white group-hover:text-cyan-300 transition-colors">Lumi's Valley (3D Living AI)</h3>
-                <p class="text-xs text-slate-400 font-mono">/lumi.html</p>
+                <h3 class="text-base font-bold text-white group-hover:text-sky-300 transition-colors">Cyber Flappy Bird AI</h3>
+                <p class="text-[11px] text-slate-400 font-mono">/flappy.html</p>
               </div>
             </div>
-            <span class="px-2.5 py-1 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Interactive 3D
-            </span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">LIDAR</span>
           </div>
-
           <p class="text-xs text-slate-300 leading-relaxed">
-            Thế giới 3D WebGL với sinh vật sống tự động Lumi. Sinh vật có hệ thần kinh mô phỏng nhu cầu (Đói, Mệt, Khám phá, Vui vẻ), tự tìm đường, ngủ dưới gốc cây, hái quả, và phản ứng trực tiếp với chuột và điều khiển của người xem.
+            Chim tự bay vượt cọc vô tận bằng <strong>LIDAR Trajectory Simulation</strong>. Giả lập quỹ đạo rơi parabol 16 frames tương lai và tự đập cánh tối ưu.
           </p>
-
-          <div class="flex flex-wrap gap-1.5 pt-1">
-            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">Three.js WebGL</span>
-            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300 border border-slate-700">Autonomous Creature</span>
-            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300 border border-slate-700">Day/Night Cycle</span>
-            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">Free Orbit Camera</span>
+          <div class="flex flex-wrap gap-1 pt-1">
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-sky-500/10 text-sky-300 border border-sky-500/20">LIDAR Ray</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300">Physics Trajectory</span>
           </div>
         </div>
+        <div class="pt-4 mt-3 border-t border-slate-800/80 flex items-center justify-between">
+          <span class="text-[10px] text-slate-500 font-mono">/flappy.html</span>
+          <a href="/flappy.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-sky-600 hover:bg-sky-500 text-white transition-all">
+            Xem Chim Bay <span>→</span>
+          </a>
+        </div>
+      </div>
 
-        <div class="pt-6 mt-4 border-t border-slate-800/80 flex items-center justify-between gap-3">
-          <span class="text-[11px] text-slate-500">Đường dẫn: <code class="text-slate-400 font-mono">/lumi.html</code></span>
-          <a href="/lumi.html" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-cyan-600 hover:bg-cyan-500 text-white shadow-md shadow-cyan-600/30 transition-all hover:gap-3">
+      <!-- Card 5: Autonomous LIDAR Car -->
+      <div class="app-card game bg-[#131b2e] border border-slate-800 rounded-2xl p-5 flex flex-col justify-between card-hover relative overflow-hidden group">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-10 h-10 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-xl text-indigo-400">🏎️</div>
+              <div>
+                <h3 class="text-base font-bold text-white group-hover:text-indigo-300 transition-colors">Xe Đua Tự Lái 2D (LIDAR)</h3>
+                <p class="text-[11px] text-slate-400 font-mono">/car.html</p>
+              </div>
+            </div>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Autopilot</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Mô phỏng xe tự hành Tesla 2D với <strong>7 tia quét khoảng cách LIDAR</strong>. Tự đánh lái góc vô-lăng, phanh khi cua gấp và đạp hết ga đoạn thẳng.
+          </p>
+          <div class="flex flex-wrap gap-1 pt-1">
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">7-Ray LIDAR</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300">Tesla Telemetry</span>
+          </div>
+        </div>
+        <div class="pt-4 mt-3 border-t border-slate-800/80 flex items-center justify-between">
+          <span class="text-[10px] text-slate-500 font-mono">/car.html</span>
+          <a href="/car.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-all">
+            Xem Xe Lái <span>→</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Card 6: Cyber Pac-Man AI -->
+      <div class="app-card game bg-[#131b2e] border border-slate-800 rounded-2xl p-5 flex flex-col justify-between card-hover relative overflow-hidden group">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-xl text-amber-400">ᗧ</div>
+              <div>
+                <h3 class="text-base font-bold text-white group-hover:text-amber-300 transition-colors">Cyber Pac-Man AI</h3>
+                <p class="text-[11px] text-slate-400 font-mono">/pacman.html</p>
+              </div>
+            </div>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Heatmap</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Pac-Man tự chơi bằng <strong>Multi-agent Threat Heatmap</strong>: tự động luồn lách né 4 con ma và săn ngược lại ma khi ăn hạt năng lượng.
+          </p>
+          <div class="flex flex-wrap gap-1 pt-1">
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-amber-500/10 text-amber-300 border border-amber-500/20">BFS Path</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300">Threat Heatmap</span>
+          </div>
+        </div>
+        <div class="pt-4 mt-3 border-t border-slate-800/80 flex items-center justify-between">
+          <span class="text-[10px] text-slate-500 font-mono">/pacman.html</span>
+          <a href="/pacman.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-black font-bold transition-all">
+            Chơi Pac-Man <span>→</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Card 7: Cyber 2048 AI -->
+      <div class="app-card game bg-[#131b2e] border border-slate-800 rounded-2xl p-5 flex flex-col justify-between card-hover relative overflow-hidden group">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-10 h-10 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-xl text-purple-400">🔢</div>
+              <div>
+                <h3 class="text-base font-bold text-white group-hover:text-purple-300 transition-colors">Cyber 2048 AI</h3>
+                <p class="text-[11px] text-slate-400 font-mono">/2048.html</p>
+              </div>
+            </div>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Expectimax</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            AI tự động leo tới ô <strong>2048 / 4096</strong> bằng thuật toán Expectimax, tối ưu tính đơn điệu, độ liền mạch và ghim ô to nhất vào góc bàn cờ.
+          </p>
+          <div class="flex flex-wrap gap-1 pt-1">
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-purple-500/10 text-purple-300 border border-purple-500/20">Expectimax</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300">Corner Lock</span>
+          </div>
+        </div>
+        <div class="pt-4 mt-3 border-t border-slate-800/80 flex items-center justify-between">
+          <span class="text-[10px] text-slate-500 font-mono">/2048.html</span>
+          <a href="/2048.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-purple-600 hover:bg-purple-500 text-white transition-all">
+            Xem Leo 2048 <span>→</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Card 8: Cyber Tetris AI -->
+      <div class="app-card game bg-[#131b2e] border border-slate-800 rounded-2xl p-5 flex flex-col justify-between card-hover relative overflow-hidden group">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-10 h-10 rounded-xl bg-emerald-600/20 border border-emerald-500/30 flex items-center justify-center text-xl text-emerald-400">🧱</div>
+              <div>
+                <h3 class="text-base font-bold text-white group-hover:text-emerald-300 transition-colors">Cyber Tetris AI</h3>
+                <p class="text-[11px] text-slate-400 font-mono">/tetris.html</p>
+              </div>
+            </div>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Dellacherie</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            AI xếp hình bất bại với thuật toán <strong>Pierre Dellacherie</strong>: quét 34+ vị trí rơi mỗi khối gạch, triệt tiêu lỗ hổng và ăn Tetris combo liên tục.
+          </p>
+          <div class="flex flex-wrap gap-1 pt-1">
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">Dellacherie</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300">0-Hole Tech</span>
+          </div>
+        </div>
+        <div class="pt-4 mt-3 border-t border-slate-800/80 flex items-center justify-between">
+          <span class="text-[10px] text-slate-500 font-mono">/tetris.html</span>
+          <a href="/tetris.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition-all">
+            Xem Xếp Gạch <span>→</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Card 9: Cyber Dino AI -->
+      <div class="app-card game bg-[#131b2e] border border-slate-800 rounded-2xl p-5 flex flex-col justify-between card-hover relative overflow-hidden group">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-xl text-amber-400">🦖</div>
+              <div>
+                <h3 class="text-base font-bold text-white group-hover:text-amber-300 transition-colors">Cyber Dino Runner AI</h3>
+                <p class="text-[11px] text-slate-400 font-mono">/dino.html</p>
+              </div>
+            </div>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">TTI Physics</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Khủng long tự nhảy vượt xương rồng và cúi người né chim bằng <strong>Time-to-Impact (TTI) Physics Scaling</strong> ở tốc độ siêu thanh.
+          </p>
+          <div class="flex flex-wrap gap-1 pt-1">
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-amber-500/10 text-amber-300 border border-amber-500/20">TTI Metric</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300">Auto Duck & Jump</span>
+          </div>
+        </div>
+        <div class="pt-4 mt-3 border-t border-slate-800/80 flex items-center justify-between">
+          <span class="text-[10px] text-slate-500 font-mono">/dino.html</span>
+          <a href="/dino.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-black font-bold transition-all">
+            Xem Khủng Long <span>→</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Card 10: Lumi's Valley 3D -->
+      <div class="app-card 3d bg-[#131b2e] border border-slate-800 rounded-2xl p-5 flex flex-col justify-between card-hover relative overflow-hidden group">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-10 h-10 rounded-xl bg-cyan-600/20 border border-cyan-500/30 flex items-center justify-center text-xl text-cyan-400">🔮</div>
+              <div>
+                <h3 class="text-base font-bold text-white group-hover:text-cyan-300 transition-colors">Lumi's Valley (3D Living AI)</h3>
+                <p class="text-[11px] text-slate-400 font-mono">/lumi.html</p>
+              </div>
+            </div>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">3D WebGL</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Thế giới 3D Three.js với sinh vật sống tự động Lumi: mô phỏng nhu cầu sinh tồn (Đói, Mệt, Khám phá), ngày/đêm và tương tác người xem.
+          </p>
+          <div class="flex flex-wrap gap-1 pt-1">
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">Three.js 3D</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300">Living Creature</span>
+          </div>
+        </div>
+        <div class="pt-4 mt-3 border-t border-slate-800/80 flex items-center justify-between">
+          <span class="text-[10px] text-slate-500 font-mono">/lumi.html</span>
+          <a href="/lumi.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-cyan-600 hover:bg-cyan-500 text-white transition-all">
             Vào Thế Giới 3D <span>→</span>
           </a>
         </div>
@@ -273,9 +403,9 @@
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
           <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-            <span>📑</span> Danh Sách Tất Cả Các Route Trực Tiếp (Direct Endpoints)
+            <span>📑</span> Danh Sách Toàn Bộ 10 Tuyến Đường Trực Tiếp (Endpoints Directory)
           </h3>
-          <p class="text-xs text-slate-400 mt-0.5">Mọi người đều có thể truy cập trực tiếp bằng URL hoặc nhấp vào từng link dưới đây</p>
+          <p class="text-xs text-slate-400 mt-0.5">Truy cập trực tiếp bằng URL hoặc bấm vào từng dòng bên dưới để test ngay</p>
         </div>
         <span class="text-xs font-mono text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/20 self-start sm:self-auto">
           Domain: jev-test.gohans.org
@@ -286,54 +416,102 @@
         <table class="w-full text-left text-xs text-slate-300">
           <thead class="text-[11px] uppercase tracking-wider text-slate-400 border-b border-slate-800 bg-slate-900/50">
             <tr>
-              <th class="py-2.5 px-4 font-semibold">Đường dẫn (Path)</th>
-              <th class="py-2.5 px-4 font-semibold">Tên Ứng Dụng</th>
-              <th class="py-2.5 px-4 font-semibold">Phân Loại</th>
-              <th class="py-2.5 px-4 font-semibold">Công Nghệ Cốt Lõi</th>
-              <th class="py-2.5 px-4 font-semibold">Trạng Thái</th>
-              <th class="py-2.5 px-4 font-semibold text-right">Thao Tác</th>
+              <th class="py-2.5 px-3 font-semibold">Đường dẫn</th>
+              <th class="py-2.5 px-3 font-semibold">Tên Ứng Dụng</th>
+              <th class="py-2.5 px-3 font-semibold">Phân Loại</th>
+              <th class="py-2.5 px-3 font-semibold">Thuật Toán Cốt Lõi</th>
+              <th class="py-2.5 px-3 font-semibold">Trạng Thái</th>
+              <th class="py-2.5 px-3 font-semibold text-right">Thao Tác</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-800/60 font-mono">
-            <tr class="hover:bg-slate-800/40 transition-colors">
-              <td class="py-3 px-4 text-cyan-300 font-semibold font-mono">/</td>
-              <td class="py-3 px-4 text-white font-sans font-medium">Jev AI Hub & Labs</td>
-              <td class="py-3 px-4 font-sans"><span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300">Cổng Trung Tâm</span></td>
-              <td class="py-3 px-4 text-slate-400 font-sans">Cloudflare Workers + Tailwind</td>
-              <td class="py-3 px-4"><span class="text-emerald-400 flex items-center gap-1.5 font-sans"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> 200 OK</span></td>
-              <td class="py-3 px-4 text-right font-sans"><span class="text-slate-500 italic">Trang hiện tại</span></td>
+            <tr class="hover:bg-slate-800/40">
+              <td class="py-2.5 px-3 text-cyan-300 font-semibold font-mono">/</td>
+              <td class="py-2.5 px-3 text-white font-sans font-medium">Jev AI Hub & Labs</td>
+              <td class="py-2.5 px-3 font-sans"><span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300">Cổng Trung Tâm</span></td>
+              <td class="py-2.5 px-3 text-slate-400 font-sans">Cloudflare Workers Directory</td>
+              <td class="py-2.5 px-3"><span class="text-emerald-400 flex items-center gap-1 font-sans">● 200 OK</span></td>
+              <td class="py-2.5 px-3 text-right font-sans text-slate-500 italic">Trang hiện tại</td>
             </tr>
-            <tr class="hover:bg-slate-800/40 transition-colors">
-              <td class="py-3 px-4 text-indigo-300 font-semibold font-mono"><a href="/classifier.html" class="hover:underline">/classifier.html</a></td>
-              <td class="py-3 px-4 text-white font-sans font-medium">Classifier.dev Studio</td>
-              <td class="py-3 px-4 font-sans"><span class="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300">Công Cụ AI</span></td>
-              <td class="py-3 px-4 text-slate-400 font-sans">TypeSafe AI Jev (Fast Model)</td>
-              <td class="py-3 px-4"><span class="text-emerald-400 flex items-center gap-1.5 font-sans"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> 200 OK</span></td>
-              <td class="py-3 px-4 text-right font-sans"><a href="/classifier.html" class="text-indigo-400 hover:text-indigo-300 font-medium font-sans">Mở →</a></td>
+            <tr class="hover:bg-slate-800/40">
+              <td class="py-2.5 px-3 text-indigo-300 font-semibold font-mono"><a href="/classifier.html" class="hover:underline">/classifier.html</a></td>
+              <td class="py-2.5 px-3 text-white font-sans font-medium">Classifier.dev Studio</td>
+              <td class="py-2.5 px-3 font-sans"><span class="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300">Công Cụ AI</span></td>
+              <td class="py-2.5 px-3 text-slate-400 font-sans">TypeSafe AI Jev (Fast Zero-shot)</td>
+              <td class="py-2.5 px-3"><span class="text-emerald-400 flex items-center gap-1 font-sans">● 200 OK</span></td>
+              <td class="py-2.5 px-3 text-right font-sans"><a href="/classifier.html" class="text-indigo-400 hover:underline">Mở →</a></td>
             </tr>
-            <tr class="hover:bg-slate-800/40 transition-colors">
-              <td class="py-3 px-4 text-emerald-300 font-semibold font-mono"><a href="/snake.html" class="hover:underline">/snake.html</a></td>
-              <td class="py-3 px-4 text-white font-sans font-medium">Rắn Săn Mồi Tự Động</td>
-              <td class="py-3 px-4 font-sans"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">Game Tự Động</span></td>
-              <td class="py-3 px-4 text-slate-400 font-sans">A* Pathfinding + Tail Simulation</td>
-              <td class="py-3 px-4"><span class="text-emerald-400 flex items-center gap-1.5 font-sans"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> 200 OK</span></td>
-              <td class="py-3 px-4 text-right font-sans"><a href="/snake.html" class="text-emerald-400 hover:text-emerald-300 font-medium font-sans">Chơi →</a></td>
+            <tr class="hover:bg-slate-800/40">
+              <td class="py-2.5 px-3 text-emerald-300 font-semibold font-mono"><a href="/snake.html" class="hover:underline">/snake.html</a></td>
+              <td class="py-2.5 px-3 text-white font-sans font-medium">Rắn Săn Mồi Tự Động</td>
+              <td class="py-2.5 px-3 font-sans"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">Game Tự Động</span></td>
+              <td class="py-2.5 px-3 text-slate-400 font-sans">A* Pathfinding + Tail Safety</td>
+              <td class="py-2.5 px-3"><span class="text-emerald-400 flex items-center gap-1 font-sans">● 200 OK</span></td>
+              <td class="py-2.5 px-3 text-right font-sans"><a href="/snake.html" class="text-emerald-400 hover:underline">Chơi →</a></td>
             </tr>
-            <tr class="hover:bg-slate-800/40 transition-colors">
-              <td class="py-3 px-4 text-rose-300 font-semibold font-mono"><a href="/doom.html" class="hover:underline">/doom.html</a></td>
-              <td class="py-3 px-4 text-white font-sans font-medium">AI Doom 3D Tự Chơi</td>
-              <td class="py-3 px-4 font-sans"><span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300">Game Tự Động</span></td>
-              <td class="py-3 px-4 text-slate-400 font-sans">3D Raycasting Engine + Tactical AI</td>
-              <td class="py-3 px-4"><span class="text-emerald-400 flex items-center gap-1.5 font-sans"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> 200 OK</span></td>
-              <td class="py-3 px-4 text-right font-sans"><a href="/doom.html" class="text-rose-400 hover:text-rose-300 font-medium font-sans">Bắn →</a></td>
+            <tr class="hover:bg-slate-800/40">
+              <td class="py-2.5 px-3 text-rose-300 font-semibold font-mono"><a href="/doom.html" class="hover:underline">/doom.html</a></td>
+              <td class="py-2.5 px-3 text-white font-sans font-medium">AI Doom 3D Tự Chơi</td>
+              <td class="py-2.5 px-3 font-sans"><span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300">Game Tự Động</span></td>
+              <td class="py-2.5 px-3 text-slate-400 font-sans">Raycasting 3D + Tactical AI</td>
+              <td class="py-2.5 px-3"><span class="text-emerald-400 flex items-center gap-1 font-sans">● 200 OK</span></td>
+              <td class="py-2.5 px-3 text-right font-sans"><a href="/doom.html" class="text-rose-400 hover:underline">Bắn →</a></td>
             </tr>
-            <tr class="hover:bg-slate-800/40 transition-colors">
-              <td class="py-3 px-4 text-cyan-300 font-semibold font-mono"><a href="/lumi.html" class="hover:underline">/lumi.html</a></td>
-              <td class="py-3 px-4 text-white font-sans font-medium">Lumi's Valley (3D AI)</td>
-              <td class="py-3 px-4 font-sans"><span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300">Mô Phỏng 3D</span></td>
-              <td class="py-3 px-4 text-slate-400 font-sans">Three.js WebGL Autonomous Creature</td>
-              <td class="py-3 px-4"><span class="text-emerald-400 flex items-center gap-1.5 font-sans"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> 200 OK</span></td>
-              <td class="py-3 px-4 text-right font-sans"><a href="/lumi.html" class="text-cyan-400 hover:text-cyan-300 font-medium font-sans">Khám phá →</a></td>
+            <tr class="hover:bg-slate-800/40">
+              <td class="py-2.5 px-3 text-sky-300 font-semibold font-mono"><a href="/flappy.html" class="hover:underline">/flappy.html</a></td>
+              <td class="py-2.5 px-3 text-white font-sans font-medium">Cyber Flappy Bird AI</td>
+              <td class="py-2.5 px-3 font-sans"><span class="px-2 py-0.5 rounded bg-sky-500/20 text-sky-300">Game Tự Động</span></td>
+              <td class="py-2.5 px-3 text-slate-400 font-sans">LIDAR Sensor + Parabolic Prediction</td>
+              <td class="py-2.5 px-3"><span class="text-emerald-400 flex items-center gap-1 font-sans">● 200 OK</span></td>
+              <td class="py-2.5 px-3 text-right font-sans"><a href="/flappy.html" class="text-sky-400 hover:underline">Bay →</a></td>
+            </tr>
+            <tr class="hover:bg-slate-800/40">
+              <td class="py-2.5 px-3 text-indigo-300 font-semibold font-mono"><a href="/car.html" class="hover:underline">/car.html</a></td>
+              <td class="py-2.5 px-3 text-white font-sans font-medium">Xe Đua Tự Lái 2D</td>
+              <td class="py-2.5 px-3 font-sans"><span class="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300">Game Tự Động</span></td>
+              <td class="py-2.5 px-3 text-slate-400 font-sans">7-Ray LIDAR Autopilot Controller</td>
+              <td class="py-2.5 px-3"><span class="text-emerald-400 flex items-center gap-1 font-sans">● 200 OK</span></td>
+              <td class="py-2.5 px-3 text-right font-sans"><a href="/car.html" class="text-indigo-400 hover:underline">Lái →</a></td>
+            </tr>
+            <tr class="hover:bg-slate-800/40">
+              <td class="py-2.5 px-3 text-amber-300 font-semibold font-mono"><a href="/pacman.html" class="hover:underline">/pacman.html</a></td>
+              <td class="py-2.5 px-3 text-white font-sans font-medium">Cyber Pac-Man AI</td>
+              <td class="py-2.5 px-3 font-sans"><span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300">Game Tự Động</span></td>
+              <td class="py-2.5 px-3 text-slate-400 font-sans">Multi-Agent Threat Heatmap + BFS</td>
+              <td class="py-2.5 px-3"><span class="text-emerald-400 flex items-center gap-1 font-sans">● 200 OK</span></td>
+              <td class="py-2.5 px-3 text-right font-sans"><a href="/pacman.html" class="text-amber-400 hover:underline">Chơi →</a></td>
+            </tr>
+            <tr class="hover:bg-slate-800/40">
+              <td class="py-2.5 px-3 text-purple-300 font-semibold font-mono"><a href="/2048.html" class="hover:underline">/2048.html</a></td>
+              <td class="py-2.5 px-3 text-white font-sans font-medium">Cyber 2048 AI</td>
+              <td class="py-2.5 px-3 font-sans"><span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300">Game Tự Động</span></td>
+              <td class="py-2.5 px-3 text-slate-400 font-sans">Expectimax + Monotonicity Matrix</td>
+              <td class="py-2.5 px-3"><span class="text-emerald-400 flex items-center gap-1 font-sans">● 200 OK</span></td>
+              <td class="py-2.5 px-3 text-right font-sans"><a href="/2048.html" class="text-purple-400 hover:underline">Ghép →</a></td>
+            </tr>
+            <tr class="hover:bg-slate-800/40">
+              <td class="py-2.5 px-3 text-emerald-300 font-semibold font-mono"><a href="/tetris.html" class="hover:underline">/tetris.html</a></td>
+              <td class="py-2.5 px-3 text-white font-sans font-medium">Cyber Tetris AI</td>
+              <td class="py-2.5 px-3 font-sans"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">Game Tự Động</span></td>
+              <td class="py-2.5 px-3 text-slate-400 font-sans">Pierre Dellacherie Heuristic (0-Hole)</td>
+              <td class="py-2.5 px-3"><span class="text-emerald-400 flex items-center gap-1 font-sans">● 200 OK</span></td>
+              <td class="py-2.5 px-3 text-right font-sans"><a href="/tetris.html" class="text-emerald-400 hover:underline">Xếp →</a></td>
+            </tr>
+            <tr class="hover:bg-slate-800/40">
+              <td class="py-2.5 px-3 text-amber-300 font-semibold font-mono"><a href="/dino.html" class="hover:underline">/dino.html</a></td>
+              <td class="py-2.5 px-3 text-white font-sans font-medium">Cyber Dino Runner AI</td>
+              <td class="py-2.5 px-3 font-sans"><span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300">Game Tự Động</span></td>
+              <td class="py-2.5 px-3 text-slate-400 font-sans">Time-to-Impact (TTI) Dynamic Scaling</td>
+              <td class="py-2.5 px-3"><span class="text-emerald-400 flex items-center gap-1 font-sans">● 200 OK</span></td>
+              <td class="py-2.5 px-3 text-right font-sans"><a href="/dino.html" class="text-amber-400 hover:underline">Nhảy →</a></td>
+            </tr>
+            <tr class="hover:bg-slate-800/40">
+              <td class="py-2.5 px-3 text-cyan-300 font-semibold font-mono"><a href="/lumi.html" class="hover:underline">/lumi.html</a></td>
+              <td class="py-2.5 px-3 text-white font-sans font-medium">Lumi's Valley (3D AI)</td>
+              <td class="py-2.5 px-3 font-sans"><span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300">Mô Phỏng 3D</span></td>
+              <td class="py-2.5 px-3 text-slate-400 font-sans">Three.js WebGL Autonomous Creature</td>
+              <td class="py-2.5 px-3"><span class="text-emerald-400 flex items-center gap-1 font-sans">● 200 OK</span></td>
+              <td class="py-2.5 px-3 text-right font-sans"><a href="/lumi.html" class="text-cyan-400 hover:underline">Khám phá →</a></td>
             </tr>
           </tbody>
         </table>
@@ -341,16 +519,20 @@
     </div>
 
     <!-- Footer -->
-    <footer class="pt-4 pb-8 border-t border-slate-800/60 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-3">
+    <footer class="pt-4 pb-8 border-t border-slate-800/60 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-3 font-sans">
       <div>
         <span>Phát triển & Triển khai trên </span>
         <strong class="text-slate-300">Cloudflare Workers</strong> &bull; Domain: <code class="text-indigo-400 font-mono">jev-test.gohans.org</code>
       </div>
-      <div class="flex items-center gap-4 font-sans">
-        <a href="/classifier.html" class="hover:text-slate-300 transition-colors">Classifier</a>
-        <a href="/snake.html" class="hover:text-slate-300 transition-colors">Snake</a>
-        <a href="/doom.html" class="hover:text-slate-300 transition-colors">Doom</a>
-        <a href="/lumi.html" class="hover:text-slate-300 transition-colors">Lumi 3D</a>
+      <div class="flex items-center gap-3">
+        <a href="/classifier.html" class="hover:text-slate-300">Classifier</a>
+        <a href="/snake.html" class="hover:text-slate-300">Snake</a>
+        <a href="/flappy.html" class="hover:text-slate-300">Flappy</a>
+        <a href="/car.html" class="hover:text-slate-300">Car</a>
+        <a href="/pacman.html" class="hover:text-slate-300">Pac-Man</a>
+        <a href="/2048.html" class="hover:text-slate-300">2048</a>
+        <a href="/tetris.html" class="hover:text-slate-300">Tetris</a>
+        <a href="/dino.html" class="hover:text-slate-300">Dino</a>
       </div>
     </footer>
 

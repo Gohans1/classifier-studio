@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AUTONOMOUS LIDAR CAR - Xe Đua Tự Lái 2D (Raycast Autopilot)</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    body {
+      background-color: #060913;
+      background-image: radial-gradient(circle at 50% 20%, #1e1b4b 0%, #060913 80%);
+    }
+    .neon-border {
+      box-shadow: 0 0 25px rgba(129, 140, 248, 0.2);
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 5px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="text-slate-200 antialiased min-h-screen p-2 md:p-6 flex flex-col justify-center font-sans">
+
+  <div class="max-w-6xl mx-auto w-full space-y-3">
+    
+    <!-- Top Bar -->
+    <header class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-indigo-900/60 bg-indigo-950/20 px-4 py-2.5 rounded-xl border">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-indigo-500 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-indigo-500/30">
+          🏎️
+        </div>
+        <div>
+          <h1 class="text-base md:text-xl font-bold tracking-wider text-indigo-400 uppercase flex items-center gap-2">
+            AUTONOMOUS LIDAR CAR <span class="text-[10px] px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">7-Ray Sensor Autopilot</span>
+          </h1>
+          <p class="text-xs text-slate-400">
+            Xe đua tự lái 100% bằng 7 tia quét LIDAR, tự đánh lái ôm cua và kiểm soát phanh ga như xe tự hành Tesla
+          </p>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="flex items-center gap-2">
+        <a href="/" class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 hover:border-slate-500 text-xs text-slate-300 hover:text-white transition-all flex items-center gap-1">
+          ← Trang Chủ
+        </a>
+        <button id="toggleAudioBtn" onclick="toggleAudio()" class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 hover:border-indigo-500 text-xs text-slate-300 transition-all flex items-center gap-1.5">
+          <span id="audioIcon">🔊</span> <span id="audioText">Âm thanh: BẬT</span>
+        </button>
+        <button id="modeBtn" onclick="toggleAutoPilot()" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-md shadow-indigo-600/30 transition-all flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-indigo-300 animate-pulse"></span>
+          <span id="modeText">AI TỰ ĐỘNG LÁI (ON)</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Game Area -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+      
+      <!-- Canvas Box (7 cols) -->
+      <div class="lg:col-span-7 flex flex-col items-center">
+        <div class="relative rounded-2xl overflow-hidden border border-indigo-500/30 bg-slate-950 shadow-2xl neon-border">
+          <canvas id="gameCanvas" width="560" height="520" class="block w-full max-w-[560px] h-auto"></canvas>
+          
+          <div class="absolute top-3 left-3 flex gap-2">
+            <span class="px-2.5 py-1 rounded-md text-xs font-mono bg-slate-950/80 border border-indigo-500/40 text-indigo-300 shadow">
+              Vòng đua: <strong id="lapVal" class="text-white text-sm">1</strong>
+            </span>
+            <span class="px-2.5 py-1 rounded-md text-xs font-mono bg-slate-950/80 border border-slate-700 text-slate-300 shadow">
+              Tốc độ: <strong id="speedKmh" class="text-emerald-400 text-sm">0 km/h</strong>
+            </span>
+          </div>
+
+          <div class="absolute top-3 right-3 flex gap-1 bg-slate-950/80 p-1 rounded-lg border border-slate-800">
+            <button onclick="setSpeed(1)" class="spd-btn active px-2 py-0.5 text-xs rounded bg-indigo-600 text-white">1x</button>
+            <button onclick="setSpeed(2)" class="spd-btn px-2 py-0.5 text-xs rounded text-slate-400 hover:text-white">2x</button>
+            <button onclick="setSpeed(4)" class="spd-btn px-2 py-0.5 text-xs rounded text-slate-400 hover:text-white">4x</button>
+          </div>
+        </div>
+
+        <p class="text-[11px] text-slate-500 mt-2 text-center">
+          Dùng phím mũi tên <strong>Trái / Phải / Lên / Xuống</strong> để thử cảm giác lái thủ công hoặc để AI lái hoàn toàn.
+        </p>
+      </div>
+
+      <!-- AI Telemetry HUD (5 cols) -->
+      <div class="lg:col-span-5 space-y-3">
+        
+        <!-- Autopilot Dashboard -->
+        <div class="bg-[#0f172a] border border-indigo-900/50 rounded-xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
+              Tesla-style Autopilot Telemetry
+            </span>
+            <span id="aiStatusBadge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+              LIDAR LOCKED
+            </span>
+          </div>
+
+          <!-- Steering Angle Gauge -->
+          <div class="space-y-1">
+            <div class="flex justify-between text-xs">
+              <span class="text-slate-300 font-medium">Góc đánh lái vô-lăng (Steer Angle)</span>
+              <span id="steerVal" class="font-mono text-cyan-400 font-bold">0.0°</span>
+            </div>
+            <div class="relative w-full h-3 bg-slate-800 rounded-full overflow-hidden border border-slate-700">
+              <div class="absolute left-1/2 top-0 bottom-0 w-0.5 bg-slate-500"></div>
+              <div id="steerGauge" class="absolute top-0 bottom-0 bg-gradient-to-r from-cyan-400 to-indigo-500 transition-all duration-75" style="left: 50%; width: 0%;"></div>
+            </div>
+            <div class="flex justify-between text-[10px] text-slate-500 font-mono">
+              <span>-45° (Trái)</span>
+              <span>0° (Thẳng)</span>
+              <span>+45° (Phải)</span>
+            </div>
+          </div>
+
+          <!-- Throttle vs Brake -->
+          <div class="grid grid-cols-2 gap-3 pt-1">
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-emerald-400 text-[11px] font-semibold">GA (THROTTLE)</span>
+                <span id="throttleVal" class="font-mono text-emerald-400 text-xs font-bold">100%</span>
+              </div>
+              <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden border border-slate-700">
+                <div id="throttleBar" class="h-full bg-emerald-500 transition-all duration-75" style="width: 100%"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-rose-400 text-[11px] font-semibold">PHANH (BRAKE)</span>
+                <span id="brakeVal" class="font-mono text-rose-400 text-xs font-bold">0%</span>
+              </div>
+              <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden border border-slate-700">
+                <div id="brakeBar" class="h-full bg-rose-500 transition-all duration-75" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tactical Telemetry Log -->
+          <div class="p-2.5 rounded-lg bg-slate-950/60 border border-slate-800 text-xs space-y-1">
+            <div class="text-[11px] text-slate-400 uppercase font-semibold">Tín hiệu suy luận chiến thuật:</div>
+            <p id="tacticalInsight" class="text-indigo-300 font-mono text-[11px] leading-relaxed">
+              Quét LIDAR: Đường thẳng phía trước an toàn. Đang tăng tốc tối đa.
+            </p>
+          </div>
+        </div>
+
+        <!-- 7 LIDAR Rays Monitor -->
+        <div class="bg-[#0f172a] border border-indigo-900/50 rounded-xl p-4 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-300">
+              7 Cảm Biến Khoảng Cách LIDAR (px)
+            </span>
+            <span class="text-[10px] text-slate-500 font-mono">Tầm xa tối đa: 160px</span>
+          </div>
+
+          <div id="lidarBarsContainer" class="space-y-1 text-[11px] font-mono">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    // --- Audio Engine ---
+    let audioCtx = null;
+    let audioEnabled = true;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playTone(freq, type = 'sine', duration = 0.08, vol = 0.12) {
+      if (!audioEnabled) return;
+      initAudio();
+      if (!audioCtx) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    function toggleAudio() {
+      audioEnabled = !audioEnabled;
+      document.getElementById('audioIcon').textContent = audioEnabled ? '🔊' : '🔇';
+      document.getElementById('audioText').textContent = audioEnabled ? 'Âm thanh: BẬT' : 'Âm thanh: TẮT';
+    }
+
+    // --- Game Engine ---
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let speedMult = 1;
+    let autoPilot = true;
+    let lapCount = 1;
+
+    // Track Geometry: Closed track segments
+    const trackOuter = [
+      { x: 80, y: 70 },
+      { x: 480, y: 70 },
+      { x: 520, y: 130 },
+      { x: 520, y: 390 },
+      { x: 470, y: 460 },
+      { x: 260, y: 460 },
+      { x: 220, y: 380 },
+      { x: 140, y: 380 },
+      { x: 90, y: 460 },
+      { x: 40, y: 390 },
+      { x: 40, y: 130 }
+    ];
+
+    const trackInner = [
+      { x: 140, y: 140 },
+      { x: 430, y: 140 },
+      { x: 450, y: 180 },
+      { x: 450, y: 340 },
+      { x: 410, y: 390 },
+      { x: 300, y: 390 },
+      { x: 270, y: 320 },
+      { x: 100, y: 320 },
+      { x: 110, y: 220 },
+      { x: 110, y: 180 }
+    ];
+
+    // Collect all wall line segments
+    const trackWalls = [];
+    function buildWallSegments(points) {
+      for (let i = 0; i < points.length; i++) {
+        const p1 = points[i];
+        const p2 = points[(i + 1) % points.length];
+        trackWalls.push({ p1, p2 });
+      }
+    }
+    buildWallSegments(trackOuter);
+    buildWallSegments(trackInner);
+
+    // Car State
+    const car = {
+      x: 180,
+      y: 105,
+      angle: 0, // facing right (radians)
+      speed: 0,
+      maxSpeed: 4.8,
+      steer: 0,
+      throttle: 1,
+      brake: 0,
+      width: 24,
+      height: 12
+    };
+
+    // 7 LIDAR Angles relative to car heading
+    const LIDAR_ANGLES = [-65, -40, -18, 0, 18, 40, 65].map(deg => deg * Math.PI / 180);
+    const LIDAR_MAX_DIST = 165;
+    let lidarDistances = new Array(7).fill(LIDAR_MAX_DIST);
+    let lidarEndPoints = [];
+
+    function setSpeed(spd) {
+      speedMult = spd;
+      document.querySelectorAll('.spd-btn').forEach(b => {
+        b.classList.remove('bg-indigo-600', 'text-white');
+        b.classList.add('text-slate-400');
+      });
+      event.target.classList.remove('text-slate-400');
+      event.target.classList.add('bg-indigo-600', 'text-white');
+    }
+
+    function toggleAutoPilot() {
+      autoPilot = !autoPilot;
+      const btn = document.getElementById('modeBtn');
+      const text = document.getElementById('modeText');
+      if (autoPilot) {
+        btn.className = "px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-md shadow-indigo-600/30 transition-all flex items-center gap-1.5";
+        text.textContent = "AI TỰ ĐỘNG LÁI (ON)";
+      } else {
+        btn.className = "px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs border border-slate-700 transition-all flex items-center gap-1.5";
+        text.textContent = "THỦ CÔNG (NGƯỜI LÁI)";
+      }
+    }
+
+    // Raycast Line-Segment intersection
+    function getIntersection(r1, r2, s1, s2) {
+      const dx = r2.x - r1.x;
+      const dy = r2.y - r1.y;
+      const sx = s2.x - s1.x;
+      const sy = s2.y - s1.y;
+
+      const denom = dx * sy - dy * sx;
+      if (denom === 0) return null;
+
+      const t = ((s1.x - r1.x) * sy - (s1.y - r1.y) * sx) / denom;
+      const u = ((s1.x - r1.x) * dy - (s1.y - r1.y) * dx) / denom;
+
+      if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
+        return {
+          x: r1.x + t * dx,
+          y: r1.y + t * dy,
+          dist: t * Math.hypot(dx, dy)
+        };
+      }
+      return null;
+    }
+
+    function updateLIDAR() {
+      lidarEndPoints = [];
+      const origin = { x: car.x, y: car.y };
+
+      LIDAR_ANGLES.forEach((relAngle, idx) => {
+        const rayAngle = car.angle + relAngle;
+        const rayMax = {
+          x: origin.x + Math.cos(rayAngle) * LIDAR_MAX_DIST,
+          y: origin.y + Math.sin(rayAngle) * LIDAR_MAX_DIST
+        };
+
+        let closestDist = LIDAR_MAX_DIST;
+        let closestHit = rayMax;
+
+        // Check against all track walls
+        for (const wall of trackWalls) {
+          const hit = getIntersection(origin, rayMax, wall.p1, wall.p2);
+          if (hit && hit.dist < closestDist) {
+            closestDist = hit.dist;
+            closestHit = hit;
+          }
+        }
+
+        lidarDistances[idx] = closestDist;
+        lidarEndPoints.push(closestHit);
+      });
+    }
+
+    // --- Autonomous AI Autopilot ---
+    function computeAutopilot() {
+      // LIDAR indexes:
+      // 0: -65 deg (far left)
+      // 1: -40 deg (mid left)
+      // 2: -18 deg (near left)
+      // 3: 0 deg (center forward)
+      // 4: +18 deg (near right)
+      // 5: +40 deg (mid right)
+      // 6: +65 deg (far right)
+
+      const leftDist = (lidarDistances[0] * 0.3 + lidarDistances[1] * 0.5 + lidarDistances[2] * 0.8) / 1.6;
+      const rightDist = (lidarDistances[6] * 0.3 + lidarDistances[5] * 0.5 + lidarDistances[4] * 0.8) / 1.6;
+      const centerDist = lidarDistances[3];
+
+      // Difference vector for steering
+      // If right is closer, diff is negative -> steer left (negative)
+      // If left is closer, diff is positive -> steer right (positive)
+      const diff = (leftDist - rightDist) / LIDAR_MAX_DIST;
+
+      // Desired steer angle (-1 to 1)
+      let desiredSteer = diff * 1.8;
+      
+      // If dead center is blocked, steer heavily towards the more open side
+      if (centerDist < 70) {
+        if (leftDist > rightDist) {
+          desiredSteer = -1.2;
+        } else {
+          desiredSteer = 1.2;
+        }
+      }
+
+      desiredSteer = Math.max(-1, Math.min(1, desiredSteer));
+      car.steer = car.steer * 0.6 + desiredSteer * 0.4;
+
+      // Speed control: Brake on tight turns or close center obstacle
+      let desiredThrottle = 1.0;
+      let desiredBrake = 0.0;
+
+      if (centerDist < 60 || Math.abs(car.steer) > 0.6) {
+        desiredThrottle = 0.2;
+        desiredBrake = 0.7;
+        document.getElementById('tacticalInsight').textContent = 
+          `CẢNH BÁO KHÚC CUA: Đang hãm phanh (${Math.round(desiredBrake * 100)}%) và đánh lái ${desiredSteer < 0 ? 'TRÁI' : 'PHẢI'} để giữ thân xe.`;
+      } else if (centerDist < 90) {
+        desiredThrottle = 0.6;
+        desiredBrake = 0.2;
+        document.getElementById('tacticalInsight').textContent = 
+          "Đoạn uốn lượn: Giảm nhẹ ga, duy trì tốc độ ôm cua lý tưởng.";
+      } else {
+        desiredThrottle = 1.0;
+        desiredBrake = 0.0;
+        document.getElementById('tacticalInsight').textContent = 
+          "Đoạn thẳng an toàn: 7 tia LIDAR thông thoáng, nhấn hết ga 100%!";
+      }
+
+      car.throttle = desiredThrottle;
+      car.brake = desiredBrake;
+
+      // Update HUD
+      const steerDeg = (car.steer * 45).toFixed(1);
+      document.getElementById('steerVal').textContent = (steerDeg > 0 ? '+' : '') + steerDeg + '°';
+      
+      const gaugeWidth = Math.abs(car.steer) * 50;
+      const gaugeLeft = car.steer >= 0 ? 50 : 50 - gaugeWidth;
+      const gauge = document.getElementById('steerGauge');
+      gauge.style.left = gaugeLeft + '%';
+      gauge.style.width = gaugeWidth + '%';
+
+      document.getElementById('throttleVal').textContent = Math.round(car.throttle * 100) + '%';
+      document.getElementById('brakeVal').textContent = Math.round(car.brake * 100) + '%';
+      document.getElementById('throttleBar').style.width = Math.round(car.throttle * 100) + '%';
+      document.getElementById('brakeBar').style.width = Math.round(car.brake * 100) + '%';
+    }
+
+    // Key states for manual override
+    const keys = {};
+    window.addEventListener('keydown', e => {
+      keys[e.code] = true;
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyS', 'KeyA', 'KeyD'].includes(e.code)) {
+        if (autoPilot) toggleAutoPilot();
+      }
+    });
+    window.addEventListener('keyup', e => { keys[e.code] = false; });
+
+    function update() {
+      updateLIDAR();
+
+      if (autoPilot) {
+        computeAutopilot();
+      } else {
+        // Manual controls
+        if (keys['ArrowLeft'] || keys['KeyA']) car.steer = -1;
+        else if (keys['ArrowRight'] || keys['KeyD']) car.steer = 1;
+        else car.steer = 0;
+
+        if (keys['ArrowUp'] || keys['KeyW']) {
+          car.throttle = 1;
+          car.brake = 0;
+        } else if (keys['ArrowDown'] || keys['KeyS']) {
+          car.throttle = 0;
+          car.brake = 1;
+        } else {
+          car.throttle = 0;
+          car.brake = 0.1;
+        }
+      }
+
+      // Acceleration & Braking
+      const targetSpeed = car.maxSpeed * car.throttle;
+      if (car.speed < targetSpeed) {
+        car.speed += 0.12;
+      }
+      if (car.brake > 0) {
+        car.speed -= 0.22 * car.brake;
+      }
+      car.speed = Math.max(0.2, Math.min(car.maxSpeed, car.speed));
+
+      // Steering
+      const turnSpeed = 0.055 * (car.speed / car.maxSpeed);
+      car.angle += car.steer * turnSpeed;
+
+      // Position update
+      car.x += Math.cos(car.angle) * car.speed;
+      car.y += Math.sin(car.angle) * car.speed;
+
+      // Collision with wall recovery
+      const minDistance = Math.min(...lidarDistances);
+      if (minDistance < 8) {
+        playTone(220, 'sawtooth', 0.15, 0.2);
+        // Soft rebound
+        car.speed = 0.8;
+      }
+
+      // Lap Detection (Crossing finish line at x: 200, y: 70..140 going right)
+      if (car.x > 320 && car.x < 340 && car.y > 70 && car.y < 140 && Math.cos(car.angle) > 0.5) {
+        if (!car.hasCrossed) {
+          car.hasCrossed = true;
+          lapCount++;
+          document.getElementById('lapVal').textContent = lapCount;
+          playTone(660, 'sine', 0.1, 0.15);
+        }
+      } else if (car.x < 250) {
+        car.hasCrossed = false;
+      }
+
+      // Speedometer
+      const kmh = Math.round(car.speed * 32);
+      document.getElementById('speedKmh').textContent = kmh + ' km/h';
+
+      // Update 7 LIDAR bars
+      renderLidarBars();
+    }
+
+    function renderLidarBars() {
+      const container = document.getElementById('lidarBarsContainer');
+      const labels = ['L65°', 'L40°', 'L18°', 'C 0°', 'R18°', 'R40°', 'R65°'];
+      container.innerHTML = lidarDistances.map((d, i) => {
+        const pct = Math.round((d / LIDAR_MAX_DIST) * 100);
+        let col = 'bg-emerald-500';
+        if (pct < 35) col = 'bg-rose-500';
+        else if (pct < 65) col = 'bg-amber-400';
+
+        return `
+          <div class="flex items-center gap-2">
+            <span class="w-8 text-[10px] text-slate-400">${labels[i]}</span>
+            <div class="flex-1 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+              <div class="h-full ${col}" style="width: ${pct}%"></div>
+            </div>
+            <span class="w-10 text-right text-[10px] ${pct < 35 ? 'text-rose-400 font-bold' : 'text-slate-400'}">${Math.round(d)}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // --- Render ---
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Cyber Grid
+      ctx.strokeStyle = 'rgba(79, 70, 229, 0.1)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < canvas.width; x += 40) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      for (let y = 0; y < canvas.height; y += 40) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+
+      // Draw Track Asphalt
+      ctx.save();
+      ctx.beginPath();
+      trackOuter.forEach((p, idx) => {
+        if (idx === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      });
+      ctx.closePath();
+      ctx.fillStyle = '#090d1a';
+      ctx.fill();
+
+      // Cut inner track
+      ctx.beginPath();
+      trackInner.forEach((p, idx) => {
+        if (idx === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      });
+      ctx.closePath();
+      ctx.fillStyle = '#060913';
+      ctx.fill();
+      ctx.restore();
+
+      // Draw Track Neon Borders
+      ctx.save();
+      ctx.strokeStyle = '#6366f1';
+      ctx.lineWidth = 2.5;
+      ctx.shadowColor = '#6366f1';
+      ctx.shadowBlur = 10;
+
+      // Outer border
+      ctx.beginPath();
+      trackOuter.forEach((p, idx) => {
+        if (idx === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      });
+      ctx.closePath();
+      ctx.stroke();
+
+      // Inner border
+      ctx.strokeStyle = '#a855f7';
+      ctx.shadowColor = '#a855f7';
+      ctx.beginPath();
+      trackInner.forEach((p, idx) => {
+        if (idx === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      });
+      ctx.closePath();
+      ctx.stroke();
+      ctx.restore();
+
+      // Start/Finish Line
+      ctx.save();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 3;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(330, 70);
+      ctx.lineTo(330, 140);
+      ctx.stroke();
+      ctx.restore();
+
+      // Draw LIDAR Rays
+      ctx.save();
+      lidarEndPoints.forEach((hit, idx) => {
+        const d = lidarDistances[idx];
+        const pct = d / LIDAR_MAX_DIST;
+        
+        ctx.beginPath();
+        ctx.moveTo(car.x, car.y);
+        ctx.lineTo(hit.x, hit.y);
+        
+        if (pct < 0.35) {
+          ctx.strokeStyle = 'rgba(244, 63, 94, 0.85)'; // Red danger
+          ctx.lineWidth = 1.8;
+        } else if (pct < 0.65) {
+          ctx.strokeStyle = 'rgba(251, 191, 36, 0.7)'; // Yellow caution
+          ctx.lineWidth = 1.2;
+        } else {
+          ctx.strokeStyle = 'rgba(52, 211, 153, 0.5)'; // Green clear
+          ctx.lineWidth = 1.0;
+        }
+        ctx.stroke();
+
+        // Hit point
+        ctx.beginPath();
+        ctx.arc(hit.x, hit.y, 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = ctx.strokeStyle;
+        ctx.fill();
+      });
+      ctx.restore();
+
+      // Draw Car
+      ctx.save();
+      ctx.translate(car.x, car.y);
+      ctx.rotate(car.angle);
+
+      // Car Glow
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 12;
+
+      // Car Body
+      ctx.fillStyle = '#6366f1';
+      ctx.beginPath();
+      ctx.roundRect(-car.width / 2, -car.height / 2, car.width, car.height, 4);
+      ctx.fill();
+
+      // Windshield
+      ctx.fillStyle = '#060913';
+      ctx.beginPath();
+      ctx.roundRect(-car.width / 6, -car.height / 2.5, car.width / 3, car.height / 1.25, 2);
+      ctx.fill();
+
+      // Headlights
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillRect(car.width / 2 - 3, -car.height / 2 + 1, 3, 3);
+      ctx.fillRect(car.width / 2 - 3, car.height / 2 - 4, 3, 3);
+
+      // Taillights
+      ctx.fillStyle = '#ef4444';
+      ctx.fillRect(-car.width / 2, -car.height / 2 + 1, 2.5, 3);
+      ctx.fillRect(-car.width / 2, car.height / 2 - 4, 2.5, 3);
+
+      ctx.restore();
+    }
+
+    function gameLoop() {
+      for (let s = 0; s < speedMult; s++) {
+        update();
+      }
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    // Start
+    requestAnimationFrame(gameLoop);
+  </script>
+</body>
+</html>

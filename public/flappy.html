@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CYBER FLAPPY AI - Game Tự Chơi 100% (Autonomous LIDAR Bird)</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    body {
+      background-color: #060913;
+      background-image: radial-gradient(circle at 50% 20%, #172554 0%, #060913 80%);
+    }
+    .neon-border {
+      box-shadow: 0 0 25px rgba(56, 189, 248, 0.2);
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 5px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="text-slate-200 antialiased min-h-screen p-2 md:p-6 flex flex-col justify-center font-sans">
+
+  <div class="max-w-6xl mx-auto w-full space-y-3">
+    
+    <!-- Top Bar -->
+    <header class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-sky-900/60 bg-sky-950/20 px-4 py-2.5 rounded-xl border">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-sky-500 flex items-center justify-center text-black font-black text-xl shadow-lg shadow-sky-500/30">
+          🐦
+        </div>
+        <div>
+          <h1 class="text-base md:text-xl font-bold tracking-wider text-sky-400 uppercase flex items-center gap-2">
+            CYBER FLAPPY AI <span class="text-[10px] px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30">LIDAR Trajectory Agent</span>
+          </h1>
+          <p class="text-xs text-slate-400">
+            AI tự đo khoảng cách vật cản bằng tia Lidar, tính toán vận tốc rơi và tự nhảy vượt cọc vô tận
+          </p>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="flex items-center gap-2">
+        <a href="/" class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 hover:border-slate-500 text-xs text-slate-300 hover:text-white transition-all flex items-center gap-1">
+          ← Trang Chủ
+        </a>
+        <button id="toggleAudioBtn" onclick="toggleAudio()" class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 hover:border-sky-500 text-xs text-slate-300 transition-all flex items-center gap-1.5">
+          <span id="audioIcon">🔊</span> <span id="audioText">Âm thanh: BẬT</span>
+        </button>
+        <button id="modeBtn" onclick="toggleAutoPilot()" class="px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs shadow-md shadow-sky-600/30 transition-all flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-sky-300 animate-pulse"></span>
+          <span id="modeText">AI TỰ ĐỘNG CHƠI (ON)</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Game Area -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+      
+      <!-- Canvas Box (7 cols) -->
+      <div class="lg:col-span-7 flex flex-col items-center">
+        <div class="relative rounded-2xl overflow-hidden border border-sky-500/30 bg-slate-950 shadow-2xl neon-border">
+          <canvas id="gameCanvas" width="480" height="560" class="block w-full max-w-[480px] h-auto"></canvas>
+          
+          <div class="absolute top-3 left-3 flex gap-2">
+            <span class="px-2.5 py-1 rounded-md text-xs font-mono bg-slate-950/80 border border-sky-500/40 text-sky-300 shadow">
+              Điểm: <strong id="scoreVal" class="text-white text-sm">0</strong>
+            </span>
+            <span class="px-2.5 py-1 rounded-md text-xs font-mono bg-slate-950/80 border border-slate-700 text-slate-300 shadow">
+              Kỷ lục: <strong id="bestVal" class="text-amber-300 text-sm">0</strong>
+            </span>
+          </div>
+
+          <div class="absolute top-3 right-3 flex gap-1 bg-slate-950/80 p-1 rounded-lg border border-slate-800">
+            <button onclick="setSpeed(1)" class="spd-btn active px-2 py-0.5 text-xs rounded bg-sky-600 text-white">1x</button>
+            <button onclick="setSpeed(2)" class="spd-btn px-2 py-0.5 text-xs rounded text-slate-400 hover:text-white">2x</button>
+            <button onclick="setSpeed(5)" class="spd-btn px-2 py-0.5 text-xs rounded text-slate-400 hover:text-white">5x</button>
+          </div>
+        </div>
+
+        <p class="text-[11px] text-slate-500 mt-2 text-center">
+          Nhấn phím <strong>Space</strong> để can thiệp thủ công (chuyển sang người chơi) hoặc nhấp "AI TỰ ĐỘNG CHƠI" để AI nắm quyền.
+        </p>
+      </div>
+
+      <!-- AI Telemetry HUD (5 cols) -->
+      <div class="lg:col-span-5 space-y-3">
+        
+        <!-- Decision Card -->
+        <div class="bg-[#0f172a] border border-sky-900/50 rounded-xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-sky-400 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>
+              Phân Tích Quyết Định AI
+            </span>
+            <span id="aiStatusBadge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30">
+              TRAJECTORY LOCKED
+            </span>
+          </div>
+
+          <!-- Probability Bars -->
+          <div class="space-y-2">
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-slate-300 font-medium flex items-center gap-1">
+                  <span>🚀</span> ĐẬP CÁNH (JUMP)
+                </span>
+                <span id="jumpPct" class="font-mono text-sky-400 font-bold">0%</span>
+              </div>
+              <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden border border-slate-700">
+                <div id="jumpBar" class="h-full bg-gradient-to-r from-sky-500 to-cyan-400 transition-all duration-75" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-slate-300 font-medium flex items-center gap-1">
+                  <span>⬇️</span> LƯỢN RƠI (GLIDE)
+                </span>
+                <span id="glidePct" class="font-mono text-slate-400 font-bold">100%</span>
+              </div>
+              <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden border border-slate-700">
+                <div id="glideBar" class="h-full bg-slate-600 transition-all duration-75" style="width: 100%"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-2.5 rounded-lg bg-slate-950/60 border border-slate-800 text-xs space-y-1">
+            <div class="text-[11px] text-slate-400 uppercase font-semibold">Tín hiệu suy luận chiến thuật:</div>
+            <p id="tacticalInsight" class="text-sky-300 font-mono text-[11px] leading-relaxed">
+              Quét LIDAR: Đang bám theo quỹ đạo an toàn giữa 2 cọc.
+            </p>
+          </div>
+        </div>
+
+        <!-- Sensor Telemetry -->
+        <div class="bg-[#0f172a] border border-sky-900/50 rounded-xl p-4 space-y-3">
+          <span class="text-xs font-semibold uppercase tracking-wider text-slate-300">
+            Thông Số Cảm Biến Thời Gian Thực
+          </span>
+
+          <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+            <div class="bg-slate-950/60 p-2.5 rounded-lg border border-slate-800">
+              <span class="text-[10px] text-slate-400 block">K/cách cọc trước mặt (dX)</span>
+              <span id="statDistX" class="text-sm font-bold text-sky-400">0 px</span>
+            </div>
+            <div class="bg-slate-950/60 p-2.5 rounded-lg border border-slate-800">
+              <span class="text-[10px] text-slate-400 block">Độ lệch tâm khe hở (dY)</span>
+              <span id="statDistY" class="text-sm font-bold text-cyan-400">0 px</span>
+            </div>
+            <div class="bg-slate-950/60 p-2.5 rounded-lg border border-slate-800">
+              <span class="text-[10px] text-slate-400 block">Vận tốc rơi (Velocity Y)</span>
+              <span id="statVelY" class="text-sm font-bold text-emerald-400">0 px/s</span>
+            </div>
+            <div class="bg-slate-950/60 p-2.5 rounded-lg border border-slate-800">
+              <span class="text-[10px] text-slate-400 block">Tổng số lần vỗ cánh</span>
+              <span id="statFlaps" class="text-sm font-bold text-amber-400">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Algorithm Specs -->
+        <div class="bg-[#0f172a] border border-slate-800 rounded-xl p-3 text-xs text-slate-400 space-y-1">
+          <span class="text-slate-300 font-semibold block text-[11px] uppercase">Thuật Toán Cốt Lõi:</span>
+          <p class="text-[11px] leading-relaxed">
+            Áp dụng <strong>Predictive Parabolic Physics Simulation</strong>. Mỗi frame, AI giả lập 15 frame tương lai nếu Đập cánh vs Để rơi. Lựa chọn hành động giảm thiểu sai số bình phương tới tâm khe hở của cọc gần nhất.
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    // --- Audio Engine ---
+    let audioCtx = null;
+    let audioEnabled = true;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playTone(freq, type = 'sine', duration = 0.08, vol = 0.15) {
+      if (!audioEnabled) return;
+      initAudio();
+      if (!audioCtx) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    function toggleAudio() {
+      audioEnabled = !audioEnabled;
+      document.getElementById('audioIcon').textContent = audioEnabled ? '🔊' : '🔇';
+      document.getElementById('audioText').textContent = audioEnabled ? 'Âm thanh: BẬT' : 'Âm thanh: TẮT';
+    }
+
+    // --- Game Engine ---
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const GRAVITY = 0.38;
+    const JUMP_STRENGTH = -6.8;
+    const PIPE_SPEED = 2.4;
+    const PIPE_SPAWN_DIST = 165;
+    const GAP_SIZE = 125;
+    const PIPE_WIDTH = 55;
+
+    let bird = {
+      x: 80,
+      y: 250,
+      vy: 0,
+      radius: 14,
+      flaps: 0
+    };
+
+    let pipes = [];
+    let score = 0;
+    let bestScore = 0;
+    let speedMult = 1;
+    let autoPilot = true;
+    let frameCount = 0;
+    let particles = [];
+    let lidarTarget = { x: 0, y: 0 };
+    let aiChoice = { jumpProb: 0, glideProb: 1, reason: '' };
+
+    function resetGame() {
+      bird.y = canvas.height / 2;
+      bird.vy = 0;
+      bird.flaps = 0;
+      pipes = [];
+      score = 0;
+      document.getElementById('scoreVal').textContent = score;
+      
+      // Initial pipe
+      pipes.push(createPipe(canvas.width + 50));
+    }
+
+    function createPipe(x) {
+      const minTop = 50;
+      const maxTop = canvas.height - GAP_SIZE - 60;
+      const topHeight = Math.floor(Math.random() * (maxTop - minTop + 1)) + minTop;
+      return {
+        x: x,
+        top: topHeight,
+        bottom: topHeight + GAP_SIZE,
+        passed: false
+      };
+    }
+
+    function toggleAutoPilot() {
+      autoPilot = !autoPilot;
+      const btn = document.getElementById('modeBtn');
+      const text = document.getElementById('modeText');
+      if (autoPilot) {
+        btn.className = "px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs shadow-md shadow-sky-600/30 transition-all flex items-center gap-1.5";
+        text.textContent = "AI TỰ ĐỘNG CHƠI (ON)";
+      } else {
+        btn.className = "px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs border border-slate-700 transition-all flex items-center gap-1.5";
+        text.textContent = "THỦ CÔNG (NGƯỜI CHƠI)";
+      }
+    }
+
+    function setSpeed(spd) {
+      speedMult = spd;
+      document.querySelectorAll('.spd-btn').forEach(b => {
+        b.classList.remove('bg-sky-600', 'text-white');
+        b.classList.add('text-slate-400');
+      });
+      event.target.classList.remove('text-slate-400');
+      event.target.classList.add('bg-sky-600', 'text-white');
+    }
+
+    function jump() {
+      bird.vy = JUMP_STRENGTH;
+      bird.flaps++;
+      playTone(520, 'triangle', 0.08, 0.12);
+      
+      // Flap particle
+      for (let i = 0; i < 4; i++) {
+        particles.push({
+          x: bird.x - 10,
+          y: bird.y + (Math.random() * 8 - 4),
+          vx: -(Math.random() * 2 + 1),
+          vy: Math.random() * 2 - 1,
+          alpha: 1,
+          color: '#38bdf8'
+        });
+      }
+    }
+
+    // --- Autonomous AI Decision Core ---
+    function computeAIDecision() {
+      // Find the next upcoming pipe
+      let nextPipe = null;
+      for (const p of pipes) {
+        if (p.x + PIPE_WIDTH >= bird.x - bird.radius) {
+          nextPipe = p;
+          break;
+        }
+      }
+
+      const targetX = nextPipe ? nextPipe.x + PIPE_WIDTH / 2 : canvas.width / 2;
+      const targetY = nextPipe ? (nextPipe.top + nextPipe.bottom) / 2 : canvas.height / 2;
+      lidarTarget = { x: targetX, y: targetY };
+
+      const distX = targetX - bird.x;
+      const distY = targetY - bird.y;
+
+      // Simulate future frames
+      // Predict where bird will be in 8-12 frames if it doesn't jump vs if it jumps
+      const lookahead = Math.min(Math.max(Math.floor(distX / PIPE_SPEED), 4), 16);
+      
+      // Simulation A: Do nothing (glide)
+      let simY_glide = bird.y;
+      let simVy_glide = bird.vy;
+      for (let f = 0; f < lookahead; f++) {
+        simVy_glide += GRAVITY;
+        simY_glide += simVy_glide;
+      }
+
+      // Simulation B: Jump now
+      let simY_jump = bird.y;
+      let simVy_jump = JUMP_STRENGTH;
+      for (let f = 0; f < lookahead; f++) {
+        simVy_jump += GRAVITY;
+        simY_jump += simVy_jump;
+      }
+
+      // Desired safe target
+      // If nextPipe is close, we bias slightly below the gap center to allow arc clearance
+      const desiredY = targetY + 5;
+
+      const errorGlide = Math.abs(simY_glide - desiredY);
+      const errorJump = Math.abs(simY_jump - desiredY);
+
+      let shouldJump = false;
+      let jumpProb = 0.05;
+
+      // Rule 1: Emergency ground avoidance
+      if (bird.y + bird.vy * 4 > canvas.height - 40) {
+        shouldJump = true;
+        jumpProb = 0.98;
+        aiChoice.reason = "CẢNH BÁO: Quá sát mặt đất! Buộc phải vỗ cánh gấp.";
+      } 
+      // Rule 2: Impending pipe bottom collision
+      else if (nextPipe && distX < 100 && bird.y > nextPipe.bottom - 25) {
+        shouldJump = true;
+        jumpProb = 0.95;
+        aiChoice.reason = "CẢNH BÁO: Tránh va chạm ống dưới. Nhảy để lấy độ cao.";
+      }
+      // Rule 3: Trajectory Optimization
+      else {
+        if (errorJump < errorGlide && bird.y > targetY - 15) {
+          shouldJump = true;
+          jumpProb = Math.min(0.92, 0.5 + (bird.y - targetY) / 100);
+          aiChoice.reason = `Quỹ đạo dự đoán: Nhảy tối ưu hơn lượn rơi (Err Jump: ${Math.round(errorJump)} < Glide: ${Math.round(errorGlide)}).`;
+        } else {
+          shouldJump = false;
+          jumpProb = Math.max(0.04, 0.4 - (targetY - bird.y) / 100);
+          aiChoice.reason = "Quỹ đạo dự đoán: Tiếp tục lượn rơi trơn tru vào tâm khe hở.";
+        }
+      }
+
+      aiChoice.jumpProb = Math.round(jumpProb * 100);
+      aiChoice.glideProb = 100 - aiChoice.jumpProb;
+
+      // Update telemetry
+      document.getElementById('jumpPct').textContent = aiChoice.jumpProb + '%';
+      document.getElementById('glidePct').textContent = aiChoice.glideProb + '%';
+      document.getElementById('jumpBar').style.width = aiChoice.jumpProb + '%';
+      document.getElementById('glideBar').style.width = aiChoice.glideProb + '%';
+      document.getElementById('tacticalInsight').textContent = aiChoice.reason;
+
+      document.getElementById('statDistX').textContent = Math.round(distX) + ' px';
+      document.getElementById('statDistY').textContent = (distY > 0 ? '+' : '') + Math.round(distY) + ' px';
+      document.getElementById('statVelY').textContent = bird.vy.toFixed(1) + ' px/f';
+      document.getElementById('statFlaps').textContent = bird.flaps;
+
+      return shouldJump;
+    }
+
+    // --- Main Game Loop ---
+    function update() {
+      frameCount++;
+
+      // AI Decision
+      if (autoPilot) {
+        const wantsJump = computeAIDecision();
+        if (wantsJump && bird.vy > -1.5) { // Prevent spamming in single frames
+          jump();
+        }
+      }
+
+      // Physics
+      bird.vy += GRAVITY;
+      bird.y += bird.vy;
+
+      // Spawn pipes
+      if (pipes.length === 0 || canvas.width - pipes[pipes.length - 1].x >= PIPE_SPAWN_DIST) {
+        pipes.push(createPipe(canvas.width));
+      }
+
+      // Move pipes & Check collisions
+      for (let i = pipes.length - 1; i >= 0; i--) {
+        const p = pipes[i];
+        p.x -= PIPE_SPEED;
+
+        // Score update
+        if (!p.passed && p.x + PIPE_WIDTH < bird.x) {
+          p.passed = true;
+          score++;
+          if (score > bestScore) bestScore = score;
+          document.getElementById('scoreVal').textContent = score;
+          document.getElementById('bestVal').textContent = bestScore;
+          playTone(880, 'sine', 0.12, 0.15);
+        }
+
+        // Collision Check
+        const inPipeX = bird.x + bird.radius > p.x && bird.x - bird.radius < p.x + PIPE_WIDTH;
+        const hitTop = bird.y - bird.radius < p.top;
+        const hitBottom = bird.y + bird.radius > p.bottom;
+
+        if (inPipeX && (hitTop || hitBottom)) {
+          handleCrash();
+          return;
+        }
+
+        // Remove offscreen pipes
+        if (p.x + PIPE_WIDTH < -20) {
+          pipes.splice(i, 1);
+        }
+      }
+
+      // Floor & Ceiling Collision
+      if (bird.y + bird.radius >= canvas.height || bird.y - bird.radius <= 0) {
+        handleCrash();
+        return;
+      }
+
+      // Update particles
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const pt = particles[i];
+        pt.x += pt.vx;
+        pt.y += pt.vy;
+        pt.alpha -= 0.04;
+        if (pt.alpha <= 0) particles.splice(i, 1);
+      }
+    }
+
+    function handleCrash() {
+      playTone(180, 'sawtooth', 0.25, 0.2);
+      // Auto restart cleanly
+      resetGame();
+    }
+
+    // --- Render ---
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Background Cyber Grid
+      ctx.strokeStyle = 'rgba(30, 58, 138, 0.15)';
+      ctx.lineWidth = 1;
+      const gridSize = 40;
+      for (let x = 0; x < canvas.width; x += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      for (let y = 0; y < canvas.height; y += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+
+      // Draw Pipes
+      pipes.forEach(p => {
+        // Top Pipe
+        ctx.fillStyle = '#0f172a';
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 2;
+        ctx.fillRect(p.x, 0, PIPE_WIDTH, p.top);
+        ctx.strokeRect(p.x, 0, PIPE_WIDTH, p.top);
+
+        // Pipe Lip Top
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(p.x - 3, p.top - 16, PIPE_WIDTH + 6, 16);
+        ctx.strokeRect(p.x - 3, p.top - 16, PIPE_WIDTH + 6, 16);
+
+        // Bottom Pipe
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(p.x, p.bottom, PIPE_WIDTH, canvas.height - p.bottom);
+        ctx.strokeRect(p.x, p.bottom, PIPE_WIDTH, canvas.height - p.bottom);
+
+        // Pipe Lip Bottom
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(p.x - 3, p.bottom, PIPE_WIDTH + 6, 16);
+        ctx.strokeRect(p.x - 3, p.bottom, PIPE_WIDTH + 6, 16);
+
+        // Neon Glow accents
+        ctx.fillStyle = 'rgba(56, 189, 248, 0.3)';
+        ctx.fillRect(p.x + 4, 0, 4, p.top);
+        ctx.fillRect(p.x + 4, p.bottom, 4, canvas.height - p.bottom);
+      });
+
+      // Draw LIDAR Vision Ray
+      if (lidarTarget.x > 0) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.setLineDash([4, 4]);
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.6)';
+        ctx.lineWidth = 1.5;
+        ctx.moveTo(bird.x, bird.y);
+        ctx.lineTo(lidarTarget.x, lidarTarget.y);
+        ctx.stroke();
+
+        // Target Reticle
+        ctx.beginPath();
+        ctx.arc(lidarTarget.x, lidarTarget.y, 6, 0, Math.PI * 2);
+        ctx.strokeStyle = '#38bdf8';
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Draw Particles
+      particles.forEach(pt => {
+        ctx.save();
+        ctx.globalAlpha = pt.alpha;
+        ctx.fillStyle = pt.color;
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+
+      // Draw Cyber Bird
+      ctx.save();
+      ctx.translate(bird.x, bird.y);
+      const angle = Math.min(Math.PI / 4, Math.max(-Math.PI / 4, (bird.vy / 10)));
+      ctx.rotate(angle);
+
+      // Glow halo
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 15;
+
+      // Body
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.arc(0, 0, bird.radius, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Wing
+      ctx.fillStyle = '#0284c7';
+      ctx.beginPath();
+      ctx.ellipse(-3, 2, 7, 4, -0.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Eye
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(6, -4, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath();
+      ctx.arc(7.5, -4, 2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Beak
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath();
+      ctx.moveTo(11, -1);
+      ctx.lineTo(19, 2);
+      ctx.lineTo(11, 5);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function gameLoop() {
+      for (let s = 0; s < speedMult; s++) {
+        update();
+      }
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    // Input listener
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        if (autoPilot) {
+          toggleAutoPilot(); // Switch to manual on user press
+        }
+        jump();
+      }
+    });
+
+    canvas.addEventListener('click', () => {
+      if (autoPilot) toggleAutoPilot();
+      jump();
+    });
+
+    // Start
+    resetGame();
+    requestAnimationFrame(gameLoop);
+  </script>
+</body>
+</html>

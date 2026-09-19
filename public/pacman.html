@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CYBER PAC-MAN AI - Kẻ Săn Ma Tự Động (Threat Heatmap Agent)</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    body {
+      background-color: #060913;
+      background-image: radial-gradient(circle at 50% 20%, #1e1b4b 0%, #060913 80%);
+    }
+    .neon-border {
+      box-shadow: 0 0 25px rgba(251, 191, 36, 0.2);
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 5px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="text-slate-200 antialiased min-h-screen p-2 md:p-6 flex flex-col justify-center font-sans">
+
+  <div class="max-w-6xl mx-auto w-full space-y-3">
+    
+    <!-- Top Bar -->
+    <header class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-amber-900/60 bg-amber-950/20 px-4 py-2.5 rounded-xl border">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-amber-400 flex items-center justify-center text-black font-black text-xl shadow-lg shadow-amber-400/30">
+          ᗧ
+        </div>
+        <div>
+          <h1 class="text-base md:text-xl font-bold tracking-wider text-amber-400 uppercase flex items-center gap-2">
+            CYBER PAC-MAN AI <span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">Multi-Agent Threat Heatmap</span>
+          </h1>
+          <p class="text-xs text-slate-400">
+            Pac-Man tự động đánh giá nguy cơ, luồn lách mê cung né 4 con ma và săn ngược lại ma khi ăn hạt năng lượng
+          </p>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="flex items-center gap-2">
+        <a href="/" class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 hover:border-slate-500 text-xs text-slate-300 hover:text-white transition-all flex items-center gap-1">
+          ← Trang Chủ
+        </a>
+        <button id="toggleAudioBtn" onclick="toggleAudio()" class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 hover:border-amber-500 text-xs text-slate-300 transition-all flex items-center gap-1.5">
+          <span id="audioIcon">🔊</span> <span id="audioText">Âm thanh: BẬT</span>
+        </button>
+        <button id="modeBtn" onclick="toggleAutoPilot()" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs shadow-md shadow-amber-500/30 transition-all flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-black animate-pulse"></span>
+          <span id="modeText">AI TỰ ĐỘNG CHƠI (ON)</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Game Area -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+      
+      <!-- Canvas Box (7 cols) -->
+      <div class="lg:col-span-7 flex flex-col items-center">
+        <div class="relative rounded-2xl overflow-hidden border border-amber-500/30 bg-slate-950 shadow-2xl neon-border">
+          <canvas id="gameCanvas" width="460" height="520" class="block w-full max-w-[460px] h-auto"></canvas>
+          
+          <div class="absolute top-3 left-3 flex gap-2">
+            <span class="px-2.5 py-1 rounded-md text-xs font-mono bg-slate-950/80 border border-amber-500/40 text-amber-300 shadow">
+              Điểm: <strong id="scoreVal" class="text-white text-sm">0</strong>
+            </span>
+            <span class="px-2.5 py-1 rounded-md text-xs font-mono bg-slate-950/80 border border-slate-700 text-slate-300 shadow">
+              Hạt còn lại: <strong id="pelletsVal" class="text-cyan-300 text-sm">0</strong>
+            </span>
+          </div>
+
+          <div class="absolute top-3 right-3 flex gap-1 bg-slate-950/80 p-1 rounded-lg border border-slate-800">
+            <button onclick="setSpeed(1)" class="spd-btn active px-2 py-0.5 text-xs rounded bg-amber-500 text-black font-bold">1x</button>
+            <button onclick="setSpeed(2)" class="spd-btn px-2 py-0.5 text-xs rounded text-slate-400 hover:text-white">2x</button>
+            <button onclick="setSpeed(4)" class="spd-btn px-2 py-0.5 text-xs rounded text-slate-400 hover:text-white">4x</button>
+          </div>
+        </div>
+
+        <p class="text-[11px] text-slate-500 mt-2 text-center">
+          Dùng phím mũi tên <strong>Trái / Phải / Lên / Xuống</strong> để can thiệp chơi thủ công bất cứ lúc nào.
+        </p>
+      </div>
+
+      <!-- AI Telemetry HUD (5 cols) -->
+      <div class="lg:col-span-5 space-y-3">
+        
+        <!-- Decision Card -->
+        <div class="bg-[#0f172a] border border-amber-900/50 rounded-xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+              Phân Tích Quyết Định Pac-Man
+            </span>
+            <span id="aiStateBadge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              SĂN ĐẬU (FORAGE)
+            </span>
+          </div>
+
+          <!-- Probability Bars 4 directions -->
+          <div class="space-y-1.5 text-xs">
+            <div id="probBars">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <div class="p-2.5 rounded-lg bg-slate-950/60 border border-slate-800 text-xs space-y-1">
+            <div class="text-[11px] text-slate-400 uppercase font-semibold">Tín hiệu suy luận chiến thuật:</div>
+            <p id="tacticalInsight" class="text-amber-300 font-mono text-[11px] leading-relaxed">
+              Khu vực an toàn: Bám theo lộ trình BFS đến hạt đậu gần nhất.
+            </p>
+          </div>
+        </div>
+
+        <!-- Ghost Threat Status -->
+        <div class="bg-[#0f172a] border border-amber-900/50 rounded-xl p-4 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-300">
+              Khoảng Cách & Nguy Cơ 4 Con Ma
+            </span>
+            <span id="threatLevel" class="text-[10px] font-mono text-emerald-400 font-bold">THẤP (AN TOÀN)</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+            <div class="bg-slate-950/60 p-2 rounded-lg border border-slate-800 flex items-center justify-between">
+              <span class="text-rose-400 font-semibold">🔴 Blinky</span>
+              <span id="distGhost0" class="text-slate-300">-- ô</span>
+            </div>
+            <div class="bg-slate-950/60 p-2 rounded-lg border border-slate-800 flex items-center justify-between">
+              <span class="text-pink-400 font-semibold">🌸 Pinky</span>
+              <span id="distGhost1" class="text-slate-300">-- ô</span>
+            </div>
+            <div class="bg-slate-950/60 p-2 rounded-lg border border-slate-800 flex items-center justify-between">
+              <span class="text-cyan-400 font-semibold">🔷 Inky</span>
+              <span id="distGhost2" class="text-slate-300">-- ô</span>
+            </div>
+            <div class="bg-slate-950/60 p-2 rounded-lg border border-slate-800 flex items-center justify-between">
+              <span class="text-orange-400 font-semibold">🟠 Clyde</span>
+              <span id="distGhost3" class="text-slate-300">-- ô</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Algorithm Specs -->
+        <div class="bg-[#0f172a] border border-slate-800 rounded-xl p-3 text-xs text-slate-400 space-y-1">
+          <span class="text-slate-300 font-semibold block text-[11px] uppercase">Thuật Toán Cốt Lõi:</span>
+          <p class="text-[11px] leading-relaxed">
+            Áp dụng <strong>Multi-agent Threat Heatmap + BFS Pathfinding</strong>. Khi ma tiếp cận trong bán kính 4 ô, thuật toán kích hoạt chế độ lẩn trốn (Evade). Khi ăn Power Pellet, AI chuyển sang chế độ Săn ma (Hunt) để tối đa điểm số.
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    // --- Audio Engine ---
+    let audioCtx = null;
+    let audioEnabled = true;
+
+    function initAudio() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    function playTone(freq, type = 'sine', duration = 0.06, vol = 0.1) {
+      if (!audioEnabled) return;
+      initAudio();
+      if (!audioCtx) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    function toggleAudio() {
+      audioEnabled = !audioEnabled;
+      document.getElementById('audioIcon').textContent = audioEnabled ? '🔊' : '🔇';
+      document.getElementById('audioText').textContent = audioEnabled ? 'Âm thanh: BẬT' : 'Âm thanh: TẮT';
+    }
+
+    // --- Maze Matrix (21 cols x 23 rows) ---
+    // 1: Wall, 0: Empty/Eaten, 2: Dot, 3: Power Pellet, 4: Ghost House
+    const MAZE_TEMPLATE = [
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,3,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,3,1],
+      [1,2,1,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,1,2,1],
+      [1,2,1,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,1,2,1],
+      [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+      [1,2,1,1,1,2,1,2,1,1,1,1,1,2,1,2,1,1,1,2,1],
+      [1,2,2,2,2,2,1,2,2,2,1,2,2,2,1,2,2,2,2,2,1],
+      [1,1,1,1,1,2,1,1,1,0,1,0,1,1,1,2,1,1,1,1,1],
+      [0,0,0,0,1,2,1,0,0,0,0,0,0,0,1,2,1,0,0,0,0],
+      [1,1,1,1,1,2,1,0,1,1,4,1,1,0,1,2,1,1,1,1,1],
+      [0,0,0,0,0,2,0,0,1,4,4,4,1,0,0,2,0,0,0,0,0],
+      [1,1,1,1,1,2,1,0,1,1,1,1,1,0,1,2,1,1,1,1,1],
+      [0,0,0,0,1,2,1,0,0,0,0,0,0,0,1,2,1,0,0,0,0],
+      [1,1,1,1,1,2,1,0,1,1,1,1,1,0,1,2,1,1,1,1,1],
+      [1,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,1],
+      [1,2,1,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,1,2,1],
+      [1,3,2,2,1,2,2,2,2,2,0,2,2,2,2,2,1,2,2,3,1],
+      [1,1,1,2,1,2,1,2,1,1,1,1,1,2,1,2,1,2,1,1,1],
+      [1,2,2,2,2,2,1,2,2,2,1,2,2,2,1,2,2,2,2,2,1],
+      [1,2,1,1,1,1,1,1,1,2,1,2,1,1,1,1,1,1,1,2,1],
+      [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    ];
+
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const ROWS = MAZE_TEMPLATE.length;
+    const COLS = MAZE_TEMPLATE[0].length;
+    const TILE_SIZE = 21;
+
+    let grid = [];
+    let score = 0;
+    let totalPellets = 0;
+    let speedMult = 1;
+    let autoPilot = true;
+    let powerModeTimer = 0;
+
+    let pacman = {
+      x: 10,
+      y: 16,
+      dirX: 0,
+      dirY: 0,
+      mouth: 0.2,
+      mouthDir: 0.05
+    };
+
+    const ghosts = [
+      { x: 9, y: 10, dirX: 0, dirY: -1, color: '#f43f5e', name: 'Blinky', home: {x: 9, y: 10} },
+      { x: 10, y: 10, dirX: 0, dirY: -1, color: '#f472b6', name: 'Pinky', home: {x: 10, y: 10} },
+      { x: 11, y: 10, dirX: 0, dirY: -1, color: '#38bdf8', name: 'Inky', home: {x: 11, y: 10} },
+      { x: 10, y: 9, dirX: 1, dirY: 0, color: '#fb923c', name: 'Clyde', home: {x: 10, y: 9} }
+    ];
+
+    function initMaze() {
+      grid = JSON.parse(JSON.stringify(MAZE_TEMPLATE));
+      totalPellets = 0;
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          if (grid[r][c] === 2 || grid[r][c] === 3) totalPellets++;
+        }
+      }
+      document.getElementById('pelletsVal').textContent = totalPellets;
+    }
+
+    function toggleAutoPilot() {
+      autoPilot = !autoPilot;
+      const btn = document.getElementById('modeBtn');
+      const text = document.getElementById('modeText');
+      if (autoPilot) {
+        btn.className = "px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs shadow-md shadow-amber-500/30 transition-all flex items-center gap-1.5";
+        text.textContent = "AI TỰ ĐỘNG CHƠI (ON)";
+      } else {
+        btn.className = "px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs border border-slate-700 transition-all flex items-center gap-1.5";
+        text.textContent = "THỦ CÔNG (NGƯỜI CHƠI)";
+      }
+    }
+
+    function setSpeed(spd) {
+      speedMult = spd;
+      document.querySelectorAll('.spd-btn').forEach(b => {
+        b.classList.remove('bg-amber-500', 'text-black', 'font-bold');
+        b.classList.add('text-slate-400');
+      });
+      event.target.classList.remove('text-slate-400');
+      event.target.classList.add('bg-amber-500', 'text-black', 'font-bold');
+    }
+
+    // BFS Shortest Path finding
+    function findShortestPath(startX, startY, targetFilter) {
+      const queue = [{ x: startX, y: startY, path: [] }];
+      const visited = new Set();
+      visited.add(`${startX},${startY}`);
+
+      const dirs = [
+        { x: 0, y: -1, name: 'LÊN' },
+        { x: 0, y: 1, name: 'XUỐNG' },
+        { x: -1, y: 0, name: 'TRÁI' },
+        { x: 1, y: 0, name: 'PHẢI' }
+      ];
+
+      while (queue.length > 0) {
+        const curr = queue.shift();
+        if (targetFilter(curr.x, curr.y)) {
+          return curr.path;
+        }
+
+        for (const d of dirs) {
+          let nx = curr.x + d.x;
+          let ny = curr.y + d.y;
+
+          // Wrap around horizontal tunnel
+          if (nx < 0) nx = COLS - 1;
+          if (nx >= COLS) nx = 0;
+
+          if (ny >= 0 && ny < ROWS && grid[ny][nx] !== 1 && grid[ny][nx] !== 4) {
+            const key = `${nx},${ny}`;
+            if (!visited.has(key)) {
+              visited.add(key);
+              queue.push({
+                x: nx,
+                y: ny,
+                path: curr.path.length === 0 ? [{ x: d.x, y: d.y, name: d.name }] : curr.path
+              });
+            }
+          }
+        }
+      }
+      return null;
+    }
+
+    // --- Autonomous AI Decision Core ---
+    function computeAIDecision() {
+      // 1. Calculate ghost distances
+      let minGhostDist = 999;
+      ghosts.forEach((g, i) => {
+        const d = Math.abs(g.x - pacman.x) + Math.abs(g.y - pacman.y);
+        if (d < minGhostDist) minGhostDist = d;
+        document.getElementById(`distGhost${i}`).textContent = d + ' ô';
+      });
+
+      // Update threat level indicator
+      const threatEl = document.getElementById('threatLevel');
+      if (powerModeTimer > 0) {
+        threatEl.textContent = `SĂN MA (${Math.ceil(powerModeTimer / 60)}s)`;
+        threatEl.className = 'text-[10px] font-mono text-cyan-400 font-bold animate-pulse';
+      } else if (minGhostDist <= 3) {
+        threatEl.textContent = 'BÁO ĐỘNG ĐỎ (NGUY CẤP)';
+        threatEl.className = 'text-[10px] font-mono text-rose-400 font-bold animate-pulse';
+      } else if (minGhostDist <= 5) {
+        threatEl.textContent = 'CẢNH BÁO (CÓ MA GẦN)';
+        threatEl.className = 'text-[10px] font-mono text-amber-400 font-bold';
+      } else {
+        threatEl.textContent = 'THẤP (AN TOÀN)';
+        threatEl.className = 'text-[10px] font-mono text-emerald-400 font-bold';
+      }
+
+      const dirs = [
+        { x: 0, y: -1, name: 'LÊN' },
+        { x: 0, y: 1, name: 'XUỐNG' },
+        { x: -1, y: 0, name: 'TRÁI' },
+        { x: 1, y: 0, name: 'PHẢI' }
+      ];
+
+      // Valid legal moves
+      const validMoves = dirs.filter(d => {
+        let nx = pacman.x + d.x;
+        let ny = pacman.y + d.y;
+        if (nx < 0) nx = COLS - 1;
+        if (nx >= COLS) nx = 0;
+        return ny >= 0 && ny < ROWS && grid[ny][nx] !== 1 && grid[ny][nx] !== 4;
+      });
+
+      if (validMoves.length === 0) return;
+
+      let chosenMove = validMoves[0];
+      let stateName = 'SĂN ĐẬU (FORAGE)';
+      let insight = '';
+
+      // MODE A: HUNT (When ghosts are blue)
+      if (powerModeTimer > 0) {
+        stateName = 'SĂN MA (HUNT)';
+        document.getElementById('aiStateBadge').className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30';
+        
+        // Find path to closest ghost
+        const pathToGhost = findShortestPath(pacman.x, pacman.y, (x, y) => {
+          return ghosts.some(g => g.x === x && g.y === y);
+        });
+
+        if (pathToGhost && pathToGhost.length > 0) {
+          chosenMove = pathToGhost[0];
+          insight = "Ăn được Hạt Năng Lượng! AI đang chủ động truy đuổi và ăn ma để lấy điểm thưởng!";
+        }
+      } 
+      // MODE B: EVADE (Danger when ghost <= 3 tiles)
+      else if (minGhostDist <= 3) {
+        stateName = 'NÉ TRÁNH (EVADE)';
+        document.getElementById('aiStateBadge').className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30';
+
+        // Pick the move that maximizes minimum distance to ghosts
+        let bestScore = -999;
+        for (const m of validMoves) {
+          const nx = pacman.x + m.x;
+          const ny = pacman.y + m.y;
+          let minD = 999;
+          for (const g of ghosts) {
+            const d = Math.abs(g.x - nx) + Math.abs(g.y - ny);
+            if (d < minD) minD = d;
+          }
+          if (minD > bestScore) {
+            bestScore = minD;
+            chosenMove = m;
+          }
+        }
+        insight = `NGUY CẤP: Ma áp sát (${minGhostDist} ô). AI đổi hướng ${chosenMove.name} để thoát thân an toàn!`;
+      } 
+      // MODE C: FORAGE (Eat dots & Power Pellets)
+      else {
+        stateName = 'SĂN ĐẬU (FORAGE)';
+        document.getElementById('aiStateBadge').className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+
+        // Target nearest dot or power pellet
+        const pathToPellet = findShortestPath(pacman.x, pacman.y, (x, y) => {
+          return grid[y][x] === 2 || grid[y][x] === 3;
+        });
+
+        if (pathToPellet && pathToPellet.length > 0) {
+          chosenMove = pathToPellet[0];
+          insight = `Lộ trình BFS: Đang đi hướng ${chosenMove.name} tới vị trí hạt đậu gần nhất.`;
+        }
+      }
+
+      document.getElementById('aiStateBadge').textContent = stateName;
+      document.getElementById('tacticalInsight').textContent = insight;
+
+      // Update probability bars UI
+      renderProbBars(chosenMove);
+
+      pacman.dirX = chosenMove.x;
+      pacman.dirY = chosenMove.y;
+    }
+
+    function renderProbBars(chosen) {
+      const container = document.getElementById('probBars');
+      const dirs = [
+        { name: 'LÊN', x: 0, y: -1 },
+        { name: 'XUỐNG', x: 0, y: 1 },
+        { name: 'TRÁI', x: -1, y: 0 },
+        { name: 'PHẢI', x: 1, y: 0 }
+      ];
+
+      container.innerHTML = dirs.map(d => {
+        const isChosen = d.x === chosen.x && d.y === chosen.y;
+        const pct = isChosen ? 88 : 4;
+        let barColor = isChosen ? 'bg-amber-400' : 'bg-slate-700';
+
+        return `
+          <div class="space-y-0.5">
+            <div class="flex justify-between text-[11px]">
+              <span class="${isChosen ? 'text-amber-300 font-bold' : 'text-slate-400'}">${isChosen ? '✓ ' : ''}${d.name}</span>
+              <span class="font-mono ${isChosen ? 'text-amber-300 font-bold' : 'text-slate-500'}">${pct}%</span>
+            </div>
+            <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+              <div class="h-full ${barColor}" style="width: ${pct}%"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // --- Update & Loop ---
+    let frameTick = 0;
+    function update() {
+      frameTick++;
+
+      if (powerModeTimer > 0) powerModeTimer--;
+
+      // AI decision each 8 frames (grid steps)
+      if (frameTick % 8 === 0) {
+        if (autoPilot) {
+          computeAIDecision();
+        }
+
+        // Move Pac-Man
+        let nx = pacman.x + pacman.dirX;
+        let ny = pacman.y + pacman.dirY;
+
+        // Wrap horizontal
+        if (nx < 0) nx = COLS - 1;
+        if (nx >= COLS) nx = 0;
+
+        if (ny >= 0 && ny < ROWS && grid[ny][nx] !== 1 && grid[ny][nx] !== 4) {
+          pacman.x = nx;
+          pacman.y = ny;
+
+          // Eat dot
+          if (grid[ny][nx] === 2) {
+            grid[ny][nx] = 0;
+            score += 10;
+            totalPellets--;
+            document.getElementById('scoreVal').textContent = score;
+            document.getElementById('pelletsVal').textContent = totalPellets;
+            playTone(480, 'sine', 0.04, 0.08);
+          } else if (grid[ny][nx] === 3) {
+            grid[ny][nx] = 0;
+            score += 50;
+            totalPellets--;
+            powerModeTimer = 360; // 6 seconds power
+            document.getElementById('scoreVal').textContent = score;
+            document.getElementById('pelletsVal').textContent = totalPellets;
+            playTone(720, 'triangle', 0.15, 0.2);
+          }
+
+          if (totalPellets <= 0) {
+            initMaze(); // Reset board if cleared
+          }
+        }
+
+        // Move Ghosts
+        ghosts.forEach(g => {
+          const ghostDirs = [
+            { x: 0, y: -1 }, { x: 0, y: 1 }, { x: -1, y: 0 }, { x: 1, y: 0 }
+          ].filter(d => {
+            let gx = g.x + d.x;
+            let gy = g.y + d.y;
+            if (gx < 0) gx = COLS - 1;
+            if (gx >= COLS) gx = 0;
+            return gy >= 0 && gy < ROWS && grid[gy][gx] !== 1;
+          });
+
+          if (ghostDirs.length > 0) {
+            // Pick a move towards pacman (or away if frightened)
+            const target = powerModeTimer > 0 
+              ? { x: COLS - pacman.x, y: ROWS - pacman.y } 
+              : { x: pacman.x, y: pacman.y };
+
+            ghostDirs.sort((a, b) => {
+              const da = Math.hypot(g.x + a.x - target.x, g.y + a.y - target.y);
+              const db = Math.hypot(g.x + b.x - target.x, g.y + b.y - target.y);
+              return da - db;
+            });
+
+            // 70% best move, 30% random for organic gameplay
+            const move = Math.random() < 0.7 ? ghostDirs[0] : ghostDirs[Math.floor(Math.random() * ghostDirs.length)];
+            g.x += move.x;
+            g.y += move.y;
+            if (g.x < 0) g.x = COLS - 1;
+            if (g.x >= COLS) g.x = 0;
+          }
+
+          // Check Pacman-Ghost Collision
+          if (g.x === pacman.x && g.y === pacman.y) {
+            if (powerModeTimer > 0) {
+              // Eat ghost
+              score += 200;
+              document.getElementById('scoreVal').textContent = score;
+              g.x = g.home.x;
+              g.y = g.home.y;
+              playTone(950, 'sawtooth', 0.15, 0.2);
+            } else {
+              // Ghost eats pacman -> soft reset
+              playTone(150, 'sawtooth', 0.25, 0.2);
+              pacman.x = 10;
+              pacman.y = 16;
+              pacman.dirX = 0;
+              pacman.dirY = 0;
+            }
+          }
+        });
+      }
+
+      // Animate mouth
+      pacman.mouth += pacman.mouthDir;
+      if (pacman.mouth > 0.4 || pacman.mouth < 0.05) pacman.mouthDir = -pacman.mouthDir;
+    }
+
+    // --- Render ---
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const offsetX = (canvas.width - COLS * TILE_SIZE) / 2;
+      const offsetY = (canvas.height - ROWS * TILE_SIZE) / 2;
+
+      // Draw Maze Walls & Pellets
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const x = offsetX + c * TILE_SIZE;
+          const y = offsetY + r * TILE_SIZE;
+          const cell = grid[r][c];
+
+          if (cell === 1) {
+            ctx.fillStyle = '#1e1b4b';
+            ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+            ctx.strokeStyle = '#6366f1';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(x + 1, y + 1, TILE_SIZE - 2, TILE_SIZE - 2);
+          } else if (cell === 4) {
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+          } else if (cell === 2) {
+            ctx.fillStyle = '#fde68a';
+            ctx.beginPath();
+            ctx.arc(x + TILE_SIZE / 2, y + TILE_SIZE / 2, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+          } else if (cell === 3) {
+            ctx.fillStyle = '#38bdf8';
+            ctx.beginPath();
+            ctx.arc(x + TILE_SIZE / 2, y + TILE_SIZE / 2, 6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowColor = '#38bdf8';
+            ctx.shadowBlur = 8;
+          }
+          ctx.shadowBlur = 0;
+        }
+      }
+
+      // Draw Pac-Man
+      const px = offsetX + pacman.x * TILE_SIZE + TILE_SIZE / 2;
+      const py = offsetY + pacman.y * TILE_SIZE + TILE_SIZE / 2;
+
+      ctx.save();
+      ctx.translate(px, py);
+      let angle = 0;
+      if (pacman.dirX === 1) angle = 0;
+      else if (pacman.dirX === -1) angle = Math.PI;
+      else if (pacman.dirY === 1) angle = Math.PI / 2;
+      else if (pacman.dirY === -1) angle = -Math.PI / 2;
+      ctx.rotate(angle);
+
+      ctx.fillStyle = '#facc15';
+      ctx.shadowColor = '#facc15';
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.arc(0, 0, TILE_SIZE / 2 - 1, pacman.mouth * Math.PI, (2 - pacman.mouth) * Math.PI);
+      ctx.lineTo(0, 0);
+      ctx.fill();
+      ctx.restore();
+
+      // Draw Ghosts
+      ghosts.forEach(g => {
+        const gx = offsetX + g.x * TILE_SIZE + TILE_SIZE / 2;
+        const gy = offsetY + g.y * TILE_SIZE + TILE_SIZE / 2;
+
+        ctx.save();
+        ctx.translate(gx, gy);
+
+        const isFrightened = powerModeTimer > 0;
+        ctx.fillStyle = isFrightened ? '#38bdf8' : g.color;
+        ctx.shadowColor = ctx.fillStyle;
+        ctx.shadowBlur = 8;
+
+        // Ghost Body
+        ctx.beginPath();
+        ctx.arc(0, -2, TILE_SIZE / 2 - 2, Math.PI, 0, false);
+        ctx.lineTo(TILE_SIZE / 2 - 2, TILE_SIZE / 2 - 2);
+        ctx.lineTo(0, TILE_SIZE / 2 - 5);
+        ctx.lineTo(-TILE_SIZE / 2 + 2, TILE_SIZE / 2 - 2);
+        ctx.closePath();
+        ctx.fill();
+
+        // Eyes
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(-3, -3, 2.5, 0, Math.PI * 2);
+        ctx.arc(3, -3, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = isFrightened ? '#f43f5e' : '#0f172a';
+        ctx.beginPath();
+        ctx.arc(-3, -3, 1.2, 0, Math.PI * 2);
+        ctx.arc(3, -3, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+      });
+    }
+
+    function gameLoop() {
+      for (let s = 0; s < speedMult; s++) {
+        update();
+      }
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    // Manual controls
+    window.addEventListener('keydown', e => {
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
+        if (autoPilot) toggleAutoPilot();
+        if (e.code === 'ArrowUp') { pacman.dirX = 0; pacman.dirY = -1; }
+        if (e.code === 'ArrowDown') { pacman.dirX = 0; pacman.dirY = 1; }
+        if (e.code === 'ArrowLeft') { pacman.dirX = -1; pacman.dirY = 0; }
+        if (e.code === 'ArrowRight') { pacman.dirX = 1; pacman.dirY = 0; }
+      }
+    });
+
+    initMaze();
+    requestAnimationFrame(gameLoop);
+  </script>
+</body>
+</html>

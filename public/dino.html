@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CYBER DINO AI - Khủng Long Nhảy Vượt Vật Cản (TTI Physics Agent)</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    body {
+      background-color: #060913;
+      background-image: radial-gradient(circle at 50% 20%, #1e293b 0%, #060913 80%);
+    }
+    .neon-border {
+      box-shadow: 0 0 25px rgba(245, 158, 11, 0.2);
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 5px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="text-slate-200 antialiased min-h-screen p-2 md:p-6 flex flex-col justify-center font-sans">
+
+  <div class="max-w-6xl mx-auto w-full space-y-3">
+    
+    <!-- Top Bar -->
+    <header class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-amber-900/60 bg-amber-950/20 px-4 py-2.5 rounded-xl border">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-amber-500 flex items-center justify-center text-black font-black text-xl shadow-lg shadow-amber-500/30">
+          🦖
+        </div>
+        <div>
+          <h1 class="text-base md:text-xl font-bold tracking-wider text-amber-400 uppercase flex items-center gap-2">
+            CYBER DINO AI <span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">Time-to-Impact Physics Agent</span>
+          </h1>
+          <p class="text-xs text-slate-400">
+            Khủng long tự đo thời gian va chạm (TTI), tự động nhảy qua xương rồng và cúi người né chim bay ở tốc độ siêu thanh
+          </p>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="flex items-center gap-2">
+        <a href="/" class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 hover:border-slate-500 text-xs text-slate-300 hover:text-white transition-all flex items-center gap-1">
+          ← Trang Chủ
+        </a>
+        <button id="toggleAudioBtn" onclick="toggleAudio()" class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 hover:border-amber-500 text-xs text-slate-300 transition-all flex items-center gap-1.5">
+          <span id="audioIcon">🔊</span> <span id="audioText">Âm thanh: BẬT</span>
+        </button>
+        <button id="modeBtn" onclick="toggleAutoPilot()" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs shadow-md shadow-amber-500/30 transition-all flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-black animate-pulse"></span>
+          <span id="modeText">AI TỰ ĐỘNG CHƠI (ON)</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Game Area -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+      
+      <!-- Canvas Box (7 cols) -->
+      <div class="lg:col-span-7 flex flex-col items-center">
+        <div class="relative rounded-2xl overflow-hidden border border-amber-500/30 bg-slate-950 shadow-2xl neon-border w-full">
+          <canvas id="gameCanvas" width="600" height="260" class="block w-full max-w-[600px] h-auto"></canvas>
+          
+          <div class="absolute top-3 left-3 flex gap-2">
+            <span class="px-2.5 py-1 rounded-md text-xs font-mono bg-slate-950/80 border border-amber-500/40 text-amber-300 shadow">
+              Điểm: <strong id="scoreVal" class="text-white text-sm">0</strong>
+            </span>
+            <span class="px-2.5 py-1 rounded-md text-xs font-mono bg-slate-950/80 border border-slate-700 text-slate-300 shadow">
+              Kỷ lục: <strong id="bestVal" class="text-emerald-400 text-sm">0</strong>
+            </span>
+          </div>
+
+          <div class="absolute top-3 right-3 flex gap-1 bg-slate-950/80 p-1 rounded-lg border border-slate-800">
+            <button onclick="setSpeed(1)" class="spd-btn active px-2 py-0.5 text-xs rounded bg-amber-500 text-black font-bold">1x</button>
+            <button onclick="setSpeed(2)" class="spd-btn px-2 py-0.5 text-xs rounded text-slate-400 hover:text-white">2x</button>
+            <button onclick="setSpeed(4)" class="spd-btn px-2 py-0.5 text-xs rounded text-slate-400 hover:text-white">4x</button>
+          </div>
+        </div>
+
+        <p class="text-[11px] text-slate-500 mt-2 text-center">
+          Nhấn <strong>Space / Lên</strong> để nhảy hoặc <strong>Xuống</strong> để cúi người (chuyển sang chơi thủ công).
+        </p>
+      </div>
+
+      <!-- AI Telemetry HUD (5 cols) -->
+      <div class="lg:col-span-5 space-y-3">
+        
+        <!-- Decision Card -->
+        <div class="bg-[#0f172a] border border-amber-900/50 rounded-xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+              Phân Tích Quyết Định Hành Động
+            </span>
+            <span id="aiActionBadge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+              CHẠY ĐƯỜNG DÀI (RUN)
+            </span>
+          </div>
+
+          <!-- Probability Action Bars -->
+          <div class="space-y-2 text-xs font-mono">
+            <div>
+              <div class="flex justify-between text-[11px] mb-0.5">
+                <span class="text-slate-300">Xác suất NHẢY (JUMP)</span>
+                <span id="jumpProb" class="text-amber-400 font-bold">0%</span>
+              </div>
+              <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                <div id="jumpBar" class="h-full bg-amber-400 transition-all duration-75" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between text-[11px] mb-0.5">
+                <span class="text-slate-300">Xác suất CÚI NGƯỜI (DUCK)</span>
+                <span id="duckProb" class="text-cyan-400 font-bold">0%</span>
+              </div>
+              <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                <div id="duckBar" class="h-full bg-cyan-400 transition-all duration-75" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-2.5 rounded-lg bg-slate-950/60 border border-slate-800 text-xs space-y-1">
+            <div class="text-[11px] text-slate-400 uppercase font-semibold">Tín hiệu suy luận chiến thuật:</div>
+            <p id="tacticalInsight" class="text-amber-300 font-mono text-[11px] leading-relaxed">
+              Mặt đường an toàn: Chưa phát hiện vật cản trong tầm ngắm.
+            </p>
+          </div>
+        </div>
+
+        <!-- Sensor Telemetry -->
+        <div class="bg-[#0f172a] border border-amber-900/50 rounded-xl p-4 space-y-2.5">
+          <span class="text-xs font-semibold uppercase tracking-wider text-slate-300">
+            Vật Lý & Cảm Biến Thời Gian Thực
+          </span>
+
+          <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+            <div class="bg-slate-950/60 p-2.5 rounded-lg border border-slate-800">
+              <span class="text-[10px] text-slate-400 block">Thời gian va chạm (TTI)</span>
+              <span id="statTTI" class="text-sm font-bold text-amber-400">-- ms</span>
+            </div>
+            <div class="bg-slate-950/60 p-2.5 rounded-lg border border-slate-800">
+              <span class="text-[10px] text-slate-400 block">Khoảng cách vật cản (dX)</span>
+              <span id="statDist" class="text-sm font-bold text-cyan-400">-- px</span>
+            </div>
+            <div class="bg-slate-950/60 p-2.5 rounded-lg border border-slate-800">
+              <span class="text-[10px] text-slate-400 block">Tốc độ chạy hiện tại</span>
+              <span id="statSpeed" class="text-sm font-bold text-emerald-400">6.0 px/f</span>
+            </div>
+            <div class="bg-slate-950/60 p-2.5 rounded-lg border border-slate-800">
+              <span class="text-[10px] text-slate-400 block">Loại vật cản sắp tới</span>
+              <span id="statObstacleType" class="text-sm font-bold text-purple-400">Không có</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Algorithm Specs -->
+        <div class="bg-[#0f172a] border border-slate-800 rounded-xl p-3 text-xs text-slate-400 space-y-1">
+          <span class="text-slate-300 font-semibold block text-[11px] uppercase">Thuật Toán Cốt Lõi:</span>
+          <p class="text-[11px] leading-relaxed">
+            Áp dụng <strong>Time-To-Impact (TTI) Dynamic Scaling</strong>. Công thức kích hoạt: \( \text{TTI} = \frac{\text{Distance}}{\text{Speed}} \). Khi TTI chạm ngưỡng giới hạn nhảy của hàm trọng lực Parabol, AI tự động kích hoạt đòn nhảy hoàn hảo từng mili-giây.
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    // --- Audio Engine ---
+    let audioCtx = null;
+    let audioEnabled = true;
+
+    function initAudio() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    function playTone(freq, type = 'sine', duration = 0.08, vol = 0.12) {
+      if (!audioEnabled) return;
+      initAudio();
+      if (!audioCtx) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    function toggleAudio() {
+      audioEnabled = !audioEnabled;
+      document.getElementById('audioIcon').textContent = audioEnabled ? '🔊' : '🔇';
+      document.getElementById('audioText').textContent = audioEnabled ? 'Âm thanh: BẬT' : 'Âm thanh: TẮT';
+    }
+
+    // --- Dino Game Engine ---
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const GROUND_Y = 210;
+    const GRAVITY = 0.65;
+    const JUMP_FORCE = -11.5;
+
+    let speedMult = 1;
+    let autoPilot = true;
+    let score = 0;
+    let bestScore = 0;
+    let gameSpeed = 6.0;
+
+    let dino = {
+      x: 60,
+      y: GROUND_Y,
+      vy: 0,
+      width: 32,
+      height: 42,
+      isGrounded: true,
+      isDucking: false,
+      legFrame: 0
+    };
+
+    let obstacles = [];
+    let clouds = [];
+    let nextObstacleTimer = 80;
+
+    function resetGame() {
+      score = 0;
+      gameSpeed = 6.0;
+      obstacles = [];
+      dino.y = GROUND_Y;
+      dino.vy = 0;
+      dino.isGrounded = true;
+      dino.isDucking = false;
+      document.getElementById('scoreVal').textContent = score;
+
+      // Spawn initial cloud
+      clouds = [
+        { x: 150, y: 50, speed: 0.8 },
+        { x: 380, y: 35, speed: 0.5 },
+        { x: 520, y: 65, speed: 0.7 }
+      ];
+    }
+
+    function toggleAutoPilot() {
+      autoPilot = !autoPilot;
+      const btn = document.getElementById('modeBtn');
+      const text = document.getElementById('modeText');
+      if (autoPilot) {
+        btn.className = "px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs shadow-md shadow-amber-500/30 transition-all flex items-center gap-1.5";
+        text.textContent = "AI TỰ ĐỘNG CHƠI (ON)";
+      } else {
+        btn.className = "px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs border border-slate-700 transition-all flex items-center gap-1.5";
+        text.textContent = "THỦ CÔNG (NGƯỜI CHƠI)";
+      }
+    }
+
+    function setSpeed(spd) {
+      speedMult = spd;
+      document.querySelectorAll('.spd-btn').forEach(b => {
+        b.classList.remove('bg-amber-500', 'text-black', 'font-bold');
+        b.classList.add('text-slate-400');
+      });
+      event.target.classList.remove('text-slate-400');
+      event.target.classList.add('bg-amber-500', 'text-black', 'font-bold');
+    }
+
+    function jump() {
+      if (dino.isGrounded) {
+        dino.vy = JUMP_FORCE;
+        dino.isGrounded = false;
+        dino.isDucking = false;
+        playTone(600, 'square', 0.08, 0.1);
+      }
+    }
+
+    function spawnObstacle() {
+      const isBird = score > 150 && Math.random() < 0.35;
+      if (isBird) {
+        // Flying Pterodactyl at head height
+        obstacles.push({
+          x: canvas.width + 20,
+          y: GROUND_Y - 28,
+          width: 32,
+          height: 22,
+          type: 'bird'
+        });
+      } else {
+        // Cactus (single or double)
+        const isDouble = Math.random() < 0.4;
+        obstacles.push({
+          x: canvas.width + 20,
+          y: GROUND_Y,
+          width: isDouble ? 34 : 18,
+          height: isDouble ? 36 : 38,
+          type: 'cactus'
+        });
+      }
+    }
+
+    // --- Autonomous AI Decision Core ---
+    function computeAIDecision() {
+      // Find nearest upcoming obstacle
+      let nearest = null;
+      let minDist = Infinity;
+
+      for (const obs of obstacles) {
+        if (obs.x + obs.width > dino.x) {
+          const d = obs.x - (dino.x + dino.width);
+          if (d < minDist) {
+            minDist = d;
+            nearest = obs;
+          }
+        }
+      }
+
+      if (!nearest) {
+        document.getElementById('statTTI').textContent = "-- ms";
+        document.getElementById('statDist').textContent = "-- px";
+        document.getElementById('statObstacleType').textContent = "Không có";
+        document.getElementById('aiActionBadge').textContent = "CHẠY ĐƯỜNG DÀI (RUN)";
+        document.getElementById('jumpProb').textContent = "0%";
+        document.getElementById('duckProb').textContent = "0%";
+        document.getElementById('jumpBar').style.width = "0%";
+        document.getElementById('duckBar').style.width = "0%";
+        document.getElementById('tacticalInsight').textContent = "Tầm nhìn trống trải: Tiếp tục tích lũy tốc độ.";
+        dino.isDucking = false;
+        return;
+      }
+
+      const ttiFrames = minDist / gameSpeed;
+      const ttiMs = Math.round(ttiFrames * 16.6);
+
+      document.getElementById('statTTI').textContent = `${ttiMs} ms`;
+      document.getElementById('statDist').textContent = `${Math.round(minDist)} px`;
+      document.getElementById('statObstacleType').textContent = nearest.type === 'bird' ? '🐦 Chim Bay' : '🌵 Xương Rồng';
+      document.getElementById('statSpeed').textContent = `${gameSpeed.toFixed(1)} px/f`;
+
+      // Trigger threshold scales with speed
+      const jumpThreshold = gameSpeed * 12.5;
+
+      if (nearest.type === 'bird' && nearest.y < GROUND_Y - 15) {
+        // Pterodactyl flying at mid height: DUCK!
+        if (minDist < jumpThreshold + 20 && minDist > -20) {
+          dino.isDucking = true;
+          document.getElementById('duckProb').textContent = "96%";
+          document.getElementById('duckBar').style.width = "96%";
+          document.getElementById('aiActionBadge').textContent = "CÚI NGƯỜI (DUCK)";
+          document.getElementById('tacticalInsight').textContent = `PHÁT HIỆN CHIM BAY: TTI = ${ttiMs}ms. Cúi người trượt dưới bụng chim!`;
+          return;
+        }
+      }
+
+      // Cactus: JUMP!
+      if (minDist < jumpThreshold && minDist > 0) {
+        dino.isDucking = false;
+        document.getElementById('jumpProb').textContent = "98%";
+        document.getElementById('jumpBar').style.width = "98%";
+        document.getElementById('aiActionBadge').textContent = "NHẢY CAO (JUMP)";
+        document.getElementById('tacticalInsight').textContent = `PHÁT HIỆN XƯƠNG RỒNG: TTI = ${ttiMs}ms. Bật nhảy parabol hoàn hảo!`;
+        jump();
+      } else {
+        dino.isDucking = false;
+        document.getElementById('jumpProb').textContent = "5%";
+        document.getElementById('duckProb').textContent = "5%";
+        document.getElementById('jumpBar').style.width = "5%";
+        document.getElementById('duckBar').style.width = "5%";
+        document.getElementById('aiActionBadge').textContent = "TIẾP CẬN (RUN)";
+        document.getElementById('tacticalInsight').textContent = `Vật cản phía trước cách ${Math.round(minDist)}px. Chuẩn bị điểm nhảy.`;
+      }
+    }
+
+    // --- Main Loop ---
+    let frameTick = 0;
+    function update() {
+      frameTick++;
+
+      // AI Logic
+      if (autoPilot) {
+        computeAIDecision();
+      }
+
+      // Dino Physics
+      if (!dino.isGrounded) {
+        dino.vy += GRAVITY;
+        dino.y += dino.vy;
+        if (dino.y >= GROUND_Y) {
+          dino.y = GROUND_Y;
+          dino.vy = 0;
+          dino.isGrounded = true;
+        }
+      }
+
+      // Leg running animation
+      if (frameTick % 6 === 0) {
+        dino.legFrame = (dino.legFrame + 1) % 2;
+      }
+
+      // Speed progression
+      gameSpeed += 0.001;
+      score += 0.2;
+      const displayScore = Math.floor(score);
+      document.getElementById('scoreVal').textContent = displayScore;
+      if (displayScore > bestScore) {
+        bestScore = displayScore;
+        document.getElementById('bestVal').textContent = bestScore;
+      }
+
+      // Clouds
+      clouds.forEach(c => {
+        c.x -= c.speed;
+        if (c.x < -60) c.x = canvas.width + 30;
+      });
+
+      // Spawn Obstacles
+      nextObstacleTimer--;
+      if (nextObstacleTimer <= 0) {
+        spawnObstacle();
+        const minGap = Math.max(50, 110 - Math.floor(gameSpeed * 3));
+        const maxGap = Math.max(90, 160 - Math.floor(gameSpeed * 3));
+        nextObstacleTimer = Math.floor(Math.random() * (maxGap - minGap + 1)) + minGap;
+      }
+
+      // Move & Collide Obstacles
+      for (let i = obstacles.length - 1; i >= 0; i--) {
+        const obs = obstacles[i];
+        obs.x -= gameSpeed;
+
+        // Collision Check
+        const dinoTop = dino.y - (dino.isDucking ? 24 : dino.height);
+        const dinoBottom = dino.y;
+        const dinoLeft = dino.x + 4;
+        const dinoRight = dino.x + (dino.isDucking ? 44 : dino.width) - 4;
+
+        const obsTop = obs.y - obs.height;
+        const obsBottom = obs.y;
+        const obsLeft = obs.x + 3;
+        const obsRight = obs.x + obs.width - 3;
+
+        const collideX = dinoRight > obsLeft && dinoLeft < obsRight;
+        const collideY = dinoBottom > obsTop && dinoTop < obsBottom;
+
+        if (collideX && collideY) {
+          playTone(180, 'sawtooth', 0.2, 0.2);
+          resetGame();
+          return;
+        }
+
+        if (obs.x + obs.width < -30) {
+          obstacles.splice(i, 1);
+        }
+      }
+    }
+
+    // --- Render ---
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Cyber Stars & Moon
+      ctx.fillStyle = '#fef08a';
+      ctx.beginPath();
+      ctx.arc(canvas.width - 45, 35, 14, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#060913';
+      ctx.beginPath();
+      ctx.arc(canvas.width - 50, 32, 12, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Clouds
+      ctx.fillStyle = 'rgba(148, 163, 184, 0.25)';
+      clouds.forEach(c => {
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, 14, 0, Math.PI * 2);
+        ctx.arc(c.x + 12, c.y - 6, 12, 0, Math.PI * 2);
+        ctx.arc(c.x + 24, c.y, 14, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Neon Ground Line
+      ctx.strokeStyle = '#f59e0b';
+      ctx.shadowColor = '#f59e0b';
+      ctx.shadowBlur = 8;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, GROUND_Y);
+      ctx.lineTo(canvas.width, GROUND_Y);
+      ctx.stroke();
+
+      // Ground bumps
+      ctx.fillStyle = '#b45309';
+      for (let x = 10; x < canvas.width; x += 45) {
+        ctx.fillRect((x - (frameTick * (gameSpeed * 0.4)) % 45), GROUND_Y + 3, 3, 2);
+      }
+      ctx.shadowBlur = 0;
+
+      // Draw Obstacles
+      obstacles.forEach(obs => {
+        if (obs.type === 'cactus') {
+          ctx.fillStyle = '#10b981';
+          ctx.shadowColor = '#10b981';
+          ctx.shadowBlur = 8;
+          // Main stem
+          ctx.fillRect(obs.x + 6, obs.y - obs.height, obs.width - 12, obs.height);
+          // Arms
+          ctx.fillRect(obs.x, obs.y - obs.height + 10, 6, 14);
+          ctx.fillRect(obs.x + obs.width - 6, obs.y - obs.height + 6, 6, 14);
+        } else {
+          // Bird
+          ctx.fillStyle = '#f43f5e';
+          ctx.shadowColor = '#f43f5e';
+          ctx.shadowBlur = 8;
+          ctx.beginPath();
+          ctx.ellipse(obs.x + 14, obs.y - 10, 14, 8, 0, 0, Math.PI * 2);
+          ctx.fill();
+          // Wings
+          const wingUp = (frameTick % 12) < 6;
+          ctx.fillRect(obs.x + 8, obs.y - (wingUp ? 22 : 10), 8, 12);
+        }
+        ctx.shadowBlur = 0;
+      });
+
+      // Draw Dino
+      ctx.save();
+      ctx.fillStyle = '#f59e0b';
+      ctx.shadowColor = '#f59e0b';
+      ctx.shadowBlur = 10;
+
+      if (dino.isDucking) {
+        // Ducking form
+        const dx = dino.x;
+        const dy = dino.y - 24;
+        ctx.beginPath();
+        ctx.roundRect(dx, dy, 44, 20, 4);
+        ctx.fill();
+        // Eye
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(dx + 34, dy + 4, 3, 3);
+        // Legs
+        ctx.fillStyle = '#d97706';
+        ctx.fillRect(dx + 10, dy + 20, 5, 4);
+        ctx.fillRect(dx + 26, dy + 20, 5, 4);
+      } else {
+        // Standing / Running form
+        const dx = dino.x;
+        const dy = dino.y - dino.height;
+        // Body
+        ctx.beginPath();
+        ctx.roundRect(dx, dy + 10, 24, 24, 4);
+        ctx.fill();
+        // Head
+        ctx.fillRect(dx + 12, dy, 18, 16);
+        // Eye
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(dx + 22, dy + 4, 3, 3);
+        // Tail
+        ctx.fillStyle = '#f59e0b';
+        ctx.fillRect(dx - 6, dy + 16, 6, 8);
+        // Legs
+        ctx.fillStyle = '#d97706';
+        if (dino.isGrounded) {
+          if (dino.legFrame === 0) {
+            ctx.fillRect(dx + 6, dy + 34, 4, 8);
+            ctx.fillRect(dx + 16, dy + 34, 4, 5);
+          } else {
+            ctx.fillRect(dx + 6, dy + 34, 4, 5);
+            ctx.fillRect(dx + 16, dy + 34, 4, 8);
+          }
+        } else {
+          ctx.fillRect(dx + 8, dy + 34, 4, 6);
+          ctx.fillRect(dx + 14, dy + 34, 4, 6);
+        }
+      }
+
+      ctx.restore();
+    }
+
+    function gameLoop() {
+      for (let s = 0; s < speedMult; s++) {
+        update();
+      }
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    // Manual controls
+    window.addEventListener('keydown', e => {
+      if (['Space', 'ArrowUp', 'KeyW'].includes(e.code)) {
+        e.preventDefault();
+        if (autoPilot) toggleAutoPilot();
+        jump();
+      } else if (['ArrowDown', 'KeyS'].includes(e.code)) {
+        if (autoPilot) toggleAutoPilot();
+        dino.isDucking = true;
+      }
+    });
+
+    window.addEventListener('keyup', e => {
+      if (['ArrowDown', 'KeyS'].includes(e.code)) {
+        dino.isDucking = false;
+      }
+    });
+
+    resetGame();
+    requestAnimationFrame(gameLoop);
+  </script>
+</body>
+</html>

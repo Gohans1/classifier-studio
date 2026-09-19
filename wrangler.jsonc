@@ -6,6 +6,12 @@
   "assets": {
     "directory": "./public"
   },
+  "routes": [
+    {
+      "pattern": "jev-test.gohans.org",
+      "custom_domain": true
+    }
+  ],
   "observability": {
     "enabled": true
   }

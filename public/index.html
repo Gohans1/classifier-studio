@@ -69,7 +69,7 @@
         </a>
         <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
           <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          10 Ứng Dụng Online
+          11 Ứng Dụng Online
         </div>
       </div>
     </header>
@@ -83,20 +83,20 @@
         Cổng Trải Nghiệm <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-cyan-400 to-emerald-400">AI & Game Tự Chơi</span>
       </h2>
       <p class="text-slate-400 text-sm sm:text-base leading-relaxed">
-        Tổng hợp toàn bộ 10 công cụ AI phân loại xác suất (TypeSafe Jev), các tựa game tự động chơi 100% bằng thuật toán và thế giới mô phỏng 3D. Bấm vào bất kỳ ứng dụng nào để trải nghiệm ngay.
+        Tổng hợp toàn bộ 11 công cụ AI phân loại xác suất (TypeSafe Jev, Laya Open-Source), các tựa game tự động chơi 100% bằng thuật toán và thế giới mô phỏng 3D. Bấm vào bất kỳ ứng dụng nào để trải nghiệm ngay.
       </p>
     </div>
 
     <!-- Filter Buttons -->
     <div class="flex flex-wrap items-center justify-center gap-2 pt-2">
       <button onclick="filterCategory('all', event)" class="filter-btn active px-4 py-1.5 rounded-lg text-xs font-medium transition-all bg-indigo-600 text-white shadow-sm">
-        Tất cả (10)
+        Tất cả (11)
       </button>
       <button onclick="filterCategory('game', event)" class="filter-btn px-4 py-1.5 rounded-lg text-xs font-medium transition-all bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700">
         🎮 Game Tự Động (7)
       </button>
       <button onclick="filterCategory('tool', event)" class="filter-btn px-4 py-1.5 rounded-lg text-xs font-medium transition-all bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700">
-        ⚡ Công Cụ AI (1)
+        ⚡ Công Cụ AI (2)
       </button>
       <button onclick="filterCategory('3d', event)" class="filter-btn px-4 py-1.5 rounded-lg text-xs font-medium transition-all bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700">
         🔮 3D Simulation (2)
@@ -131,6 +131,35 @@
           <span class="text-[10px] text-slate-500 font-mono">/classifier.html</span>
           <a href="/classifier.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-all">
             Mở Studio <span>→</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Card: Laya AI Decision Studio (Open-Source Jev) -->
+      <div class="app-card tool bg-[#131b2e] border border-cyan-500/30 rounded-2xl p-5 flex flex-col justify-between card-hover relative overflow-hidden group">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-10 h-10 rounded-xl bg-cyan-600/20 border border-cyan-500/30 flex items-center justify-center text-xl text-cyan-400">🧠</div>
+              <div>
+                <h3 class="text-base font-bold text-white group-hover:text-cyan-300 transition-colors">Laya AI Studio</h3>
+                <p class="text-[11px] text-slate-400 font-mono">/laya.html</p>
+              </div>
+            </div>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">Open Jev</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Mô hình System 1 Non-Autoregressive của <strong>Nandakishor</strong> (ModernBERT + RLCD). Trả lời cùng lúc Choice, Score, Noul trong 1 lượt chạy (~30ms), 0 token sinh thừa.
+          </p>
+          <div class="flex flex-wrap gap-1 pt-1">
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">Laya Engine</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300">Choice/Score/Noul</span>
+          </div>
+        </div>
+        <div class="pt-4 mt-3 border-t border-slate-800/80 flex items-center justify-between">
+          <span class="text-[10px] text-slate-500 font-mono">/laya.html</span>
+          <a href="/laya.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-cyan-600 hover:bg-cyan-500 text-white transition-all">
+            Mở Laya <span>→</span>
           </a>
         </div>
       </div>
@@ -442,6 +471,14 @@
               <td class="py-2.5 px-3 text-right font-sans"><a href="/classifier.html" class="text-indigo-400 hover:underline">Mở →</a></td>
             </tr>
             <tr class="hover:bg-slate-800/40">
+              <td class="py-2.5 px-3 text-cyan-300 font-semibold font-mono"><a href="/laya.html" class="hover:underline">/laya.html</a></td>
+              <td class="py-2.5 px-3 text-white font-sans font-medium">Laya AI Studio (Open Jev)</td>
+              <td class="py-2.5 px-3 font-sans"><span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300">Công Cụ AI</span></td>
+              <td class="py-2.5 px-3 text-slate-400 font-sans">ModernBERT + RLCD Non-Autoregressive</td>
+              <td class="py-2.5 px-3"><span class="text-emerald-400 flex items-center gap-1 font-sans">● 200 OK</span></td>
+              <td class="py-2.5 px-3 text-right font-sans"><a href="/laya.html" class="text-cyan-400 hover:underline">Mở →</a></td>
+            </tr>
+            <tr class="hover:bg-slate-800/40">
               <td class="py-2.5 px-3 text-emerald-300 font-semibold font-mono"><a href="/snake.html" class="hover:underline">/snake.html</a></td>
               <td class="py-2.5 px-3 text-white font-sans font-medium">Rắn Săn Mồi Tự Động</td>
               <td class="py-2.5 px-3 font-sans"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">Game Tự Động</span></td>
@@ -526,6 +563,7 @@
       </div>
       <div class="flex items-center gap-3">
         <a href="/classifier.html" class="hover:text-slate-300">Classifier</a>
+        <a href="/laya.html" class="hover:text-slate-300">Laya AI</a>
         <a href="/snake.html" class="hover:text-slate-300">Snake</a>
         <a href="/flappy.html" class="hover:text-slate-300">Flappy</a>
         <a href="/car.html" class="hover:text-slate-300">Car</a>

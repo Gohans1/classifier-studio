@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Classifier.dev Studio - Đối Đầu TypeSafe Jev vs Convai Laya</title>
+  <title>Classifier.dev Studio - TypeSafe Jev Realtime Classifier</title>
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
   <style>
     .custom-scroll::-webkit-scrollbar {
@@ -18,114 +18,92 @@
       background: rgba(150, 150, 150, 0.3);
       border-radius: 4px;
     }
-    .model-card-active {
-      box-shadow: 0 0 20px -5px rgba(99, 102, 241, 0.25);
+    .card-glow {
+      box-shadow: 0 0 25px -5px rgba(99, 102, 241, 0.2);
     }
   </style>
 </head>
 <body class="bg-[#0b0f19] text-[#f1f5f9] antialiased min-h-screen p-3 sm:p-5 md:p-8 font-sans custom-scroll selection:bg-indigo-500/30 selection:text-indigo-300">
-  <div class="max-w-7xl mx-auto space-y-5">
+  
+  <!-- Ambient Background Glow -->
+  <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+    <div class="absolute -top-40 -left-40 w-96 h-96 bg-indigo-600/15 rounded-full blur-3xl"></div>
+    <div class="absolute top-1/2 -right-40 w-96 h-96 bg-cyan-600/10 rounded-full blur-3xl"></div>
+  </div>
+
+  <div class="relative z-10 max-w-7xl mx-auto space-y-5">
 
     <!-- Top Header -->
     <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-cyan-500 to-emerald-400 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-indigo-500/20">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-indigo-500/20">
           ⚡
         </div>
         <div>
           <div class="flex items-center gap-2">
             <h1 class="text-xl font-bold tracking-tight text-white">
-              Classifier.dev <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-cyan-400 to-emerald-400">Studio & Arena</span>
+              Classifier.dev <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-cyan-400 to-emerald-400">Studio</span>
             </h1>
             <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-              v2.0 Dual Engine
+              TypeSafe Jev Fast
             </span>
           </div>
           <p class="text-xs text-slate-400">
-            Trải nghiệm & đối chiếu song song: <strong>TypeSafe Jev (Cloud Fast)</strong> vs <strong>Convai Laya (Open-Source RLCD)</strong>
+            Phân loại văn bản thời gian thực bằng model <strong>TypeSafe AI Jev (Fast Zero-Shot)</strong>. Xuất xác suất toán học 100%.
           </p>
         </div>
       </div>
       
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
         <a href="/" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs text-slate-300 hover:text-white transition-all flex items-center gap-1">
           ← Trang Chủ
         </a>
-        <a href="/laya.html" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs text-slate-300 hover:text-white transition-all flex items-center gap-1">
-          Laya Studio ↗
-        </a>
+        <button onclick="copyShareableLink()" id="btnShareLink" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition-all shadow-sm flex items-center gap-1.5" title="Tạo link chứa sẵn bộ Nhãn và Recommend hiện tại để gửi người khác">
+          <span>🔗</span> Sao chép Link chia sẻ
+        </button>
+        <button onclick="openConfigModal()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-medium text-slate-300 hover:text-white transition-all flex items-center gap-1.5" title="Xuất hoặc Nhập cấu hình JSON">
+          <span>📋</span> JSON
+        </button>
         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
           <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          2 Models Live
+          Jev Online
         </span>
       </div>
     </header>
 
-    <!-- Model Mode Selection Bar -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-[#131b2e] border border-slate-800 rounded-xl p-3 shadow-sm">
-      <div class="flex items-center gap-2 flex-wrap">
-        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Chế độ phân loại:</span>
-        <div class="inline-flex p-1 bg-[#0b0f19] rounded-lg border border-slate-800 text-xs font-medium">
-          <button id="btnModeDual" onclick="setEngineMode('dual')" class="px-3 py-1.5 rounded-md transition-all bg-indigo-600 text-white shadow-sm flex items-center gap-1.5">
-            <span>⚔️</span> So Sánh Song Song (Jev vs Laya)
-          </button>
-          <button id="btnModeJev" onclick="setEngineMode('jev')" class="px-3 py-1.5 rounded-md transition-all text-slate-400 hover:text-white flex items-center gap-1.5">
-            <span>⚡</span> Chỉ TypeSafe Jev
-          </button>
-          <button id="btnModeLaya" onclick="setEngineMode('laya')" class="px-3 py-1.5 rounded-md transition-all text-slate-400 hover:text-white flex items-center gap-1.5">
-            <span>🧠</span> Chỉ Convai Laya
-          </button>
-        </div>
-      </div>
-
-      <div class="flex items-center gap-3 text-xs font-mono text-slate-400">
+    <!-- Top Action / Info Banner -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#131b2e] border border-slate-800 rounded-xl p-3 shadow-sm text-xs">
+      <div class="flex items-center gap-2 text-slate-400 font-mono">
         <span class="inline-flex items-center gap-1 text-indigo-300">
-          <span class="w-2 h-2 rounded-full bg-indigo-500"></span> TypeSafe Jev ($0.042/MTok)
+          <span class="w-2 h-2 rounded-full bg-indigo-500"></span> TypeSafe Jev (Cloud Fast)
         </span>
-        <span class="text-slate-600">&bull;</span>
-        <span class="inline-flex items-center gap-1 text-cyan-300">
-          <span class="w-2 h-2 rounded-full bg-cyan-400"></span> Convai Laya (Open $0.00)
-        </span>
+        <span>&bull;</span>
+        <span>~30ms</span>
+        <span>&bull;</span>
+        <span>Zero-shot NLP</span>
+        <span>&bull;</span>
+        <span>$0.042/MTok</span>
       </div>
-    </div>
 
-    <!-- Live Comparison Scorecard Banner (Visible in Dual Mode) -->
-    <div id="dualScorecard" class="bg-gradient-to-r from-indigo-950/40 via-slate-900 to-cyan-950/40 border border-slate-800 rounded-xl p-3.5 text-xs text-slate-300 transition-all">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-        <div class="flex items-center gap-2">
-          <span class="text-base" id="scorecardIcon">⚔️</span>
-          <div>
-            <span class="font-bold text-white uppercase text-[11px] tracking-wider block">Bảng So Kè Thời Gian Thực:</span>
-            <span id="scorecardConsensus" class="text-slate-300">
-              Nhập nội dung bên dưới và bấm "Phân Loại" để xem hai mô hình đọ sức đồng thời.
-            </span>
-          </div>
-        </div>
-        <div class="flex items-center gap-3 font-mono text-[11px] self-start sm:self-auto">
-          <div class="px-2.5 py-1 rounded bg-slate-900/90 border border-slate-700/80">
-            Jev: <span id="scJevMs" class="text-indigo-400 font-bold">-- ms</span>
-          </div>
-          <div class="px-2.5 py-1 rounded bg-slate-900/90 border border-slate-700/80">
-            Laya: <span id="scLayaMs" class="text-cyan-400 font-bold">-- ms</span>
-          </div>
-          <div id="scSpeedWinner" class="px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold hidden">
-            --
-          </div>
-        </div>
+      <div class="flex items-center gap-2">
+        <span class="text-slate-500 text-[11px]">Chia sẻ cấu hình cho người khác test:</span>
+        <button onclick="copyShareableLink()" class="text-indigo-400 hover:text-indigo-300 font-semibold underline text-[11px] transition-colors">
+          Lấy Link Chia Sẻ ↗
+        </button>
       </div>
     </div>
 
     <!-- Main Workspace Layout -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
       
-      <!-- Left Column: Input & Labels (5 cols) -->
+      <!-- Left Column: Input, Recommend Samples & Labels (5 cols) -->
       <div class="lg:col-span-5 space-y-4">
         
         <!-- Text Input Card -->
         <div class="bg-[#131b2e] border border-slate-800 rounded-xl p-4 space-y-3">
           <div class="flex items-center justify-between">
             <span class="text-xs font-semibold text-white uppercase tracking-wider">
-              Văn bản đầu vào (State)
+              Văn bản đầu vào (Text State)
             </span>
             <label class="flex items-center gap-1.5 cursor-pointer text-xs text-slate-400 select-none">
               <input type="checkbox" id="realtimeToggle" checked class="rounded accent-indigo-600">
@@ -139,72 +117,12 @@
               placeholder="Nhập nội dung bất kỳ bằng tiếng Việt hoặc tiếng Anh..."></textarea>
             
             <div id="typingIndicator" class="hidden absolute bottom-2.5 right-2.5 text-[10px] text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20 animate-pulse">
-              Đang phân tích song song...
-            </div>
-          </div>
-
-          <!-- Quick Samples (16 English Posts) -->
-          <div class="space-y-2">
-            <div class="flex items-center justify-between">
-              <span class="text-[11px] font-semibold text-slate-300">
-                🚀 Recommended English Posts (Click any to test):
-              </span>
-              <span class="text-[10px] text-indigo-400 font-mono">16 Samples</span>
-            </div>
-            <div class="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto custom-scroll p-2 bg-[#0b0f19] rounded-lg border border-slate-800">
-              <button onclick="setSample(1)" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-indigo-600 hover:text-white border border-slate-700 text-[11px] text-slate-300 transition-all flex items-center gap-1">
-                🪙 Crypto Surge ($BTC)
-              </button>
-              <button onclick="setSample(2)" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-indigo-600 hover:text-white border border-slate-700 text-[11px] text-slate-300 transition-all flex items-center gap-1">
-                🤖 AI Agent Launch
-              </button>
-              <button onclick="setSample(3)" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-indigo-600 hover:text-white border border-slate-700 text-[11px] text-slate-300 transition-all flex items-center gap-1">
-                🚨 Phishing Scam
-              </button>
-              <button onclick="setSample(4)" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-indigo-600 hover:text-white border border-slate-700 text-[11px] text-slate-300 transition-all flex items-center gap-1">
-                💻 C++ Memory Bug
-              </button>
-              <button onclick="setSample(5)" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-indigo-600 hover:text-white border border-slate-700 text-[11px] text-slate-300 transition-all flex items-center gap-1">
-                🎮 GTA 6 Leak
-              </button>
-              <button onclick="setSample(6)" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-indigo-600 hover:text-white border border-slate-700 text-[11px] text-slate-300 transition-all flex items-center gap-1">
-                😡 Airline Rant
-              </button>
-              <button onclick="setSample(7)" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-indigo-600 hover:text-white border border-slate-700 text-[11px] text-slate-300 transition-all flex items-center gap-1">
-                📈 Fed Interest Rates
-              </button>
-              <button onclick="setSample(8)" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-indigo-600 hover:text-white border border-slate-700 text-[11px] text-slate-300 transition-all flex items-center gap-1">
-                🛡️ Zero-Day Exploit
-              </button>
-              <button onclick="setSample(9)" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-indigo-600 hover:text-white border border-slate-700 text-[11px] text-slate-300 transition-all flex items-center gap-1">
-                🍔 Texas BBQ Brisket
-              </button>
-              <button onclick="setSample(10)" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-indigo-600 hover:text-white border border-slate-700 text-[11px] text-slate-300 transition-all flex items-center gap-1">
-                🚀 NASA Webb Telescope
-              </button>
-              <button onclick="setSample(11)" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-indigo-600 hover:text-white border border-slate-700 text-[11px] text-slate-300 transition-all flex items-center gap-1">
-                💼 $420k Engineer Job
-              </button>
-              <button onclick="setSample(12)" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-indigo-600 hover:text-white border border-slate-700 text-[11px] text-slate-300 transition-all flex items-center gap-1">
-                ⚽ Champions League
-              </button>
-              <button onclick="setSample(13)" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-indigo-600 hover:text-white border border-slate-700 text-[11px] text-slate-300 transition-all flex items-center gap-1">
-                🎬 Nolan IMAX Movie
-              </button>
-              <button onclick="setSample(14)" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-indigo-600 hover:text-white border border-slate-700 text-[11px] text-slate-300 transition-all flex items-center gap-1">
-                🧘 Cardio & Health
-              </button>
-              <button onclick="setSample(15)" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-indigo-600 hover:text-white border border-slate-700 text-[11px] text-slate-300 transition-all flex items-center gap-1">
-                🗳️ Privacy Law
-              </button>
-              <button onclick="setSample(16)" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-indigo-600 hover:text-white border border-slate-700 text-[11px] text-slate-300 transition-all flex items-center gap-1">
-                😂 99 Bugs Meme
-              </button>
+              Đang phân tích Jev...
             </div>
           </div>
 
           <div class="flex items-center justify-between gap-2 pt-1">
-            <button id="classifyBtn" onclick="runDualClassification(true)" class="flex-1 py-2 px-4 bg-gradient-to-r from-indigo-600 via-indigo-500 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white rounded-lg text-xs font-bold transition-all shadow-md shadow-indigo-600/20 flex items-center justify-center gap-1.5">
+            <button id="classifyBtn" onclick="runClassification(true)" class="flex-1 py-2 px-4 bg-gradient-to-r from-indigo-600 via-indigo-500 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white rounded-lg text-xs font-bold transition-all shadow-md shadow-indigo-600/20 flex items-center justify-center gap-1.5">
               <span id="btnIcon">⚡</span>
               <span id="btnText">Phân loại ngay</span>
             </button>
@@ -214,11 +132,61 @@
           </div>
         </div>
 
-        <!-- Labels Card -->
+        <!-- Recommend Samples Management Card -->
         <div class="bg-[#131b2e] border border-slate-800 rounded-xl p-4 space-y-3">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <span class="text-xs font-semibold text-white uppercase tracking-wider">Danh sách Nhãn</span>
+              <span class="text-xs font-semibold text-white uppercase tracking-wider">
+                🚀 Mẫu Recommend
+              </span>
+              <span id="recommendCount" class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-mono">0</span>
+            </div>
+            <div class="flex items-center gap-2 text-[11px]">
+              <button onclick="toggleAddRecommendForm()" id="btnAddRecommendToggle" class="text-indigo-400 hover:text-indigo-300 font-medium transition-colors flex items-center gap-1">
+                <span>+</span> Thêm Recommend
+              </button>
+              <span class="text-slate-700">|</span>
+              <button onclick="resetDefaultRecommends()" class="text-slate-400 hover:text-rose-400 transition-colors" title="Khôi phục mẫu mặc định">
+                Khôi phục
+              </button>
+            </div>
+          </div>
+
+          <!-- Inline Add Recommend Form (Collapsible) -->
+          <div id="addRecommendForm" class="hidden p-3 bg-[#0b0f19] border border-indigo-500/30 rounded-lg space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold text-indigo-300">Tạo mẫu Recommend mới</span>
+              <button onclick="toggleAddRecommendForm()" class="text-slate-500 hover:text-slate-300 text-xs">✕</button>
+            </div>
+            <input type="text" id="newRecTitle" placeholder="Tiêu đề / Icon (VD: 🪙 Crypto Surge, 🍔 Đồ Ăn, Phàn nàn...)" 
+              class="w-full bg-[#131b2e] border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+            <textarea id="newRecText" rows="2" placeholder="Nội dung văn bản mẫu để test..."
+              class="w-full bg-[#131b2e] border border-slate-800 rounded-lg p-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 custom-scroll"></textarea>
+            <div class="flex justify-end gap-2">
+              <button onclick="toggleAddRecommendForm()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs transition-colors">
+                Hủy
+              </button>
+              <button onclick="saveNewRecommend()" class="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-xs font-semibold shadow-sm transition-colors">
+                + Lưu Mẫu
+              </button>
+            </div>
+          </div>
+
+          <!-- Recommend Chips List -->
+          <div id="recommendChips" class="flex flex-wrap gap-1.5 max-h-56 overflow-y-auto custom-scroll p-2 bg-[#0b0f19] rounded-lg border border-slate-800 min-h-[48px]">
+            <!-- Injected by JS -->
+          </div>
+
+          <p class="text-[10px] text-slate-500 leading-normal">
+            💡 <em>Mẹo:</em> Bấm vào bất kỳ mẫu nào để nạp và phân loại ngay. Bấm dấu ✕ trên mỗi chip để xóa mẫu không cần thiết.
+          </p>
+        </div>
+
+        <!-- Labels Management Card -->
+        <div class="bg-[#131b2e] border border-slate-800 rounded-xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold text-white uppercase tracking-wider">🏷️ Danh sách Nhãn</span>
               <span id="labelCount" class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-mono">0</span>
             </div>
             <div class="flex items-center gap-2 text-[11px]">
@@ -226,20 +194,24 @@
                 + other
               </button>
               <span class="text-slate-700">|</span>
+              <button onclick="clearAllLabels()" class="text-slate-400 hover:text-rose-400 transition-colors" title="Xóa toàn bộ nhãn">
+                Xóa hết
+              </button>
+              <span class="text-slate-700">|</span>
               <button onclick="resetDefaultLabels()" class="text-slate-400 hover:text-rose-400 transition-colors" title="Khôi phục danh sách nhãn ban đầu">
-                Khôi phục gốc
+                Khôi phục
               </button>
             </div>
           </div>
 
           <!-- Label Chips Container -->
-          <div id="labelChips" class="flex flex-wrap gap-1.5 p-2.5 bg-[#0b0f19] rounded-lg border border-slate-800 min-h-[44px]">
+          <div id="labelChips" class="flex flex-wrap gap-1.5 p-2.5 bg-[#0b0f19] rounded-lg border border-slate-800 min-h-[44px] max-h-48 overflow-y-auto custom-scroll">
             <!-- Injected by JS -->
           </div>
 
           <!-- Add Label Input -->
           <div class="flex gap-2">
-            <input type="text" id="newLabelInput" placeholder="Thêm nhãn mới (Enter)..." 
+            <input type="text" id="newLabelInput" placeholder="Nhập nhãn mới (nhấn Enter để thêm)..." 
               class="flex-1 bg-[#0b0f19] border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
               onkeydown="if(event.key === 'Enter'){ addCustomLabel(); }">
             <button onclick="addCustomLabel()" class="px-3 py-1.5 bg-slate-800 hover:bg-indigo-600 text-slate-200 hover:text-white rounded-lg text-xs font-medium border border-slate-700 hover:border-indigo-500 transition-all">
@@ -248,105 +220,75 @@
           </div>
 
           <p class="text-[10px] text-slate-500 leading-normal">
-            💡 <em>Mẹo:</em> TypeSafe Jev hỗ trợ tới 255 nhãn; Laya hỗ trợ tốt nhất $\le$ 16 nhãn cùng lúc. Cả 2 đều tính toán phân phối xác suất toán học 100%.
+            💡 <em>Mẹo:</em> TypeSafe Jev hỗ trợ tới 255 nhãn zero-shot cùng lúc, tính toán phân phối xác suất toán học 100%. Tự thêm nhãn riêng để kiểm thử theo ý m.
           </p>
         </div>
 
       </div>
 
-      <!-- Right Area: Results Columns (7 cols) -->
+      <!-- Right Column: Single TypeSafe Jev Results (7 cols) -->
       <div class="lg:col-span-7 space-y-4">
 
-        <!-- Dual Arena View (Default: 2 Columns Side-by-Side) -->
-        <div id="dualViewGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-          <!-- Left Model: TypeSafe Jev -->
-          <div id="jevColumn" class="bg-[#131b2e] border border-indigo-500/30 rounded-xl p-4 space-y-3.5 relative overflow-hidden transition-all">
-            <div class="flex items-center justify-between pb-2 border-b border-slate-800/80">
-              <div class="flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
-                <span class="text-xs font-bold text-white uppercase tracking-wider">TypeSafe Jev</span>
+        <!-- TypeSafe Jev Studio Card -->
+        <div id="jevCard" class="bg-[#131b2e] border border-indigo-500/30 rounded-xl p-5 space-y-5 relative overflow-hidden transition-all card-glow">
+          
+          <!-- Header of Results -->
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div class="flex items-center gap-2.5">
+              <span class="w-3 h-3 rounded-full bg-indigo-500 animate-pulse"></span>
+              <div>
+                <h2 class="text-sm font-bold text-white uppercase tracking-wider">Kết Quả Phân Loại TypeSafe Jev</h2>
+                <p class="text-[11px] text-slate-400 font-mono">Parallel Exact Probability Sampler</p>
               </div>
-              <span id="jevLatencyBadge" class="text-[10px] font-mono text-indigo-300 bg-indigo-500/15 px-2 py-0.5 rounded border border-indigo-500/30">
+            </div>
+            <div class="flex items-center gap-2 font-mono">
+              <span id="jevLatencyBadge" class="text-xs font-bold text-indigo-300 bg-indigo-500/15 px-2.5 py-1 rounded-lg border border-indigo-500/30">
                 Chờ lệnh
               </span>
-            </div>
-
-            <!-- Primary Decision Box -->
-            <div class="bg-[#0b0f19] p-3 rounded-lg border border-slate-800/80 space-y-1">
-              <span class="text-[10px] text-slate-400 uppercase font-mono block">Nhãn Chiến Thắng (Top 1)</span>
-              <div class="flex items-baseline justify-between gap-2">
-                <div id="jevWinnerLabel" class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-300 truncate max-w-[180px]">
-                  --
-                </div>
-                <div id="jevWinnerConfidence" class="px-2 py-0.5 rounded text-xs font-mono font-bold bg-slate-800 text-slate-400 border border-slate-700">
-                  --%
-                </div>
-              </div>
-            </div>
-
-            <!-- Probability Bars -->
-            <div class="space-y-2">
-              <div class="flex items-center justify-between text-[11px]">
-                <span class="text-slate-400 font-semibold">Phân bổ xác suất:</span>
-                <span class="text-[10px] text-slate-500 font-mono">Parallel Sampler</span>
-              </div>
-              <div id="jevBarsContainer" class="space-y-2 max-h-64 overflow-y-auto custom-scroll pr-1">
-                <div class="text-[11px] text-slate-500 py-6 text-center italic">
-                  Chờ dữ liệu từ Jev...
-                </div>
-              </div>
-            </div>
-
-            <!-- Jev Footer Telemetry -->
-            <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[10px] text-slate-500 font-mono">
-              <span>tokens_out: 0</span>
-              <span class="text-indigo-400">Zero-Shot Pretrained</span>
             </div>
           </div>
 
-          <!-- Right Model: Convai Laya -->
-          <div id="layaColumn" class="bg-[#131b2e] border border-cyan-500/30 rounded-xl p-4 space-y-3.5 relative overflow-hidden transition-all">
-            <div class="flex items-center justify-between pb-2 border-b border-slate-800/80">
-              <div class="flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
-                <span class="text-xs font-bold text-white uppercase tracking-wider">Convai Laya</span>
-              </div>
-              <span id="layaLatencyBadge" class="text-[10px] font-mono text-cyan-300 bg-cyan-500/15 px-2 py-0.5 rounded border border-cyan-500/30">
-                Chờ lệnh
-              </span>
+          <!-- Top 1 Primary Decision Hero Banner -->
+          <div class="bg-[#0b0f19] p-4 rounded-xl border border-slate-800/80 space-y-2">
+            <div class="flex items-center justify-between text-[11px] text-slate-400 uppercase font-mono">
+              <span>🏆 Nhãn Chiến Thắng (Top 1 Winner)</span>
+              <span>Độ Tin Cậy (Confidence)</span>
             </div>
-
-            <!-- Primary Decision Box -->
-            <div class="bg-[#0b0f19] p-3 rounded-lg border border-slate-800/80 space-y-1">
-              <span class="text-[10px] text-slate-400 uppercase font-mono block">Nhãn Chiến Thắng (Top 1)</span>
-              <div class="flex items-baseline justify-between gap-2">
-                <div id="layaWinnerLabel" class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-300 truncate max-w-[180px]">
-                  --
-                </div>
-                <div id="layaWinnerConfidence" class="px-2 py-0.5 rounded text-xs font-mono font-bold bg-slate-800 text-slate-400 border border-slate-700">
-                  --%
-                </div>
+            <div class="flex items-baseline justify-between gap-3">
+              <div id="jevWinnerLabel" class="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-cyan-400 to-emerald-300 truncate max-w-[320px] sm:max-w-md">
+                --
+              </div>
+              <div id="jevWinnerConfidence" class="px-3 py-1 rounded-lg text-sm sm:text-base font-mono font-black bg-slate-800 text-slate-400 border border-slate-700">
+                --%
               </div>
             </div>
+          </div>
 
-            <!-- Probability Bars -->
-            <div class="space-y-2">
-              <div class="flex items-center justify-between text-[11px]">
-                <span class="text-slate-400 font-semibold">Phân bổ xác suất:</span>
-                <span class="text-[10px] text-slate-500 font-mono">ModernBERT + RLCD</span>
-              </div>
-              <div id="layaBarsContainer" class="space-y-2 max-h-64 overflow-y-auto custom-scroll pr-1">
-                <div class="text-[11px] text-slate-500 py-6 text-center italic">
-                  Chờ dữ liệu từ Laya...
-                </div>
+          <!-- Probability Distribution Bars -->
+          <div class="space-y-3">
+            <div class="flex items-center justify-between text-xs pb-1 border-b border-slate-800/60">
+              <span class="text-slate-300 font-semibold">Phân bổ xác suất toán học (Tất cả nhãn):</span>
+              <span class="text-[10px] text-slate-500 font-mono">Tổng xác suất = 100%</span>
+            </div>
+            
+            <div id="jevBarsContainer" class="space-y-2.5 max-h-96 overflow-y-auto custom-scroll pr-2">
+              <div class="text-xs text-slate-500 py-12 text-center italic">
+                Nhập nội dung hoặc chọn mẫu recommend để bắt đầu phân loại...
               </div>
             </div>
+          </div>
 
-            <!-- Laya Footer Telemetry -->
-            <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[10px] text-slate-500 font-mono">
-              <span id="layaActProb">act_prob: --</span>
-              <span class="text-cyan-400">Apache 2.0 (Open)</span>
+          <!-- Telemetry Footer -->
+          <div class="pt-3 border-t border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-500 font-mono">
+            <div class="flex items-center gap-3">
+              <span>tokens_out: <strong class="text-slate-300">0</strong></span>
+              <span>&bull;</span>
+              <span>latency: <span id="telemetryLatency" class="text-indigo-400 font-bold">-- ms</span></span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-indigo-400 font-semibold">TypeSafe Jev Engine</span>
+              <span>&bull;</span>
+              <span class="text-slate-400">Zero-Shot Pretrained</span>
             </div>
           </div>
 
@@ -358,8 +300,51 @@
 
   </div>
 
+  <!-- Config Import/Export Modal -->
+  <div id="configModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-[#131b2e] border border-slate-800 rounded-2xl max-w-lg w-full p-5 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+          <span>📋</span> Quản Lý Cấu Hình (JSON)
+        </h3>
+        <button onclick="closeConfigModal()" class="text-slate-400 hover:text-white text-base">✕</button>
+      </div>
+
+      <p class="text-xs text-slate-400 leading-relaxed">
+        Sao chép dữ liệu JSON bên dưới để lưu lại, hoặc dán dữ liệu JSON mới vào rồi bấm <strong>Nạp Cấu Hình</strong>:
+      </p>
+
+      <textarea id="configJsonText" rows="10" 
+        class="w-full bg-[#0b0f19] border border-slate-800 rounded-lg p-3 text-xs font-mono text-indigo-300 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 custom-scroll"></textarea>
+
+      <div class="flex items-center justify-between gap-2 pt-2 border-t border-slate-800">
+        <button onclick="copyConfigJson()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg text-xs font-medium border border-slate-700 transition-colors">
+          Sao Chép JSON
+        </button>
+        <div class="flex items-center gap-2">
+          <button onclick="closeConfigModal()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs transition-colors">
+            Đóng
+          </button>
+          <button onclick="importConfigJson()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors">
+            Nạp Cấu Hình
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toastNotification" class="fixed bottom-5 right-5 z-50 transform translate-y-12 opacity-0 transition-all duration-300 pointer-events-none">
+    <div id="toastContent" class="px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-semibold shadow-xl border border-indigo-400/30 flex items-center gap-2">
+      <span>✓</span>
+      <span id="toastMsg">Thông báo</span>
+    </div>
+  </div>
+
   <script>
-    const STORAGE_KEY = 'classifier_studio_labels_en_v5';
+    const STORAGE_KEY_LABELS = 'classifier_studio_labels_v6';
+    const STORAGE_KEY_RECOMMENDS = 'classifier_studio_recommends_v1';
+
     const DEFAULT_LABELS = [
       "artificial intelligence",
       "software engineering",
@@ -395,40 +380,55 @@
       "other"
     ];
 
-    const SAMPLES = {
-      1: "Bitcoin breaks past $105,000 as institutional spot ETF inflows shatter all historical volume records on Wall Street!",
-      2: "Anthropic unveiled Claude 3.7 Sonnet featuring hybrid reasoning, sub-agent orchestration, and native computer use tools.",
-      3: "URGENT AIRDROP: Connect your Web3 MetaMask wallet right now to claim 5,000 free governance tokens before the claim window closes!",
-      4: "Encountered a fatal Segmentation Fault (SIGSEGV) in C++ memory pointer allocation inside the multithreaded worker loop.",
-      5: "Rockstar Games just leaked the official GTA VI gameplay trailer showcasing dynamic weather physics and 4K raytracing in Vice City.",
-      6: "Worst customer service ever! The airline delayed our international flight for 9 hours without offering hotel vouchers or water bottles.",
-      7: "Federal Reserve chair signals imminent interest rate cuts as monthly inflation drops below the 2.0% target.",
-      8: "Critical zero-day remote code execution vulnerability discovered in widespread open-source logging library. Patch immediately!",
-      9: "Smoked Texas beef brisket slow-cooked for 14 hours over post oak wood with homemade barbecue glaze and creamy mac & cheese.",
-      10: "NASA's James Webb Space Telescope detects potential biosignature gases in the atmosphere of habitable-zone exoplanet K2-18b.",
-      11: "We are hiring a Principal Distributed Systems Engineer in San Francisco / Remote. $280k-$420k base + generous equity package.",
-      12: "Real Madrid pulls off an unbelievable 94th-minute comeback victory in the UEFA Champions League semifinal thriller!",
-      13: "Christopher Nolan announces his next sci-fi IMAX epic starring Matt Damon and Zendaya, scheduled for worldwide release in July 2026.",
-      14: "Daily 20-minute resistance training and zone-2 cardio significantly lowers resting heart rate and reduces systemic inflammation.",
-      15: "Parliament passes landmark digital privacy legislation restricting commercial harvesting of biometric and location data.",
-      16: "My code has 99 compiler bugs. I fix one bug, now my code has 127 bugs and the linker is threatening to delete my hard drive."
-    };
+    const DEFAULT_RECOMMENDS = [
+      { id: "s1", title: "🪙 Crypto Surge ($BTC)", text: "Bitcoin breaks past $105,000 as institutional spot ETF inflows shatter all historical volume records on Wall Street!" },
+      { id: "s2", title: "🤖 AI Agent Launch", text: "Anthropic unveiled Claude 3.7 Sonnet featuring hybrid reasoning, sub-agent orchestration, and native computer use tools." },
+      { id: "s3", title: "🚨 Phishing Scam", text: "URGENT AIRDROP: Connect your Web3 MetaMask wallet right now to claim 5,000 free governance tokens before the claim window closes!" },
+      { id: "s4", title: "💻 C++ Memory Bug", text: "Encountered a fatal Segmentation Fault (SIGSEGV) in C++ memory pointer allocation inside the multithreaded worker loop." },
+      { id: "s5", title: "🎮 GTA 6 Leak", text: "Rockstar Games just leaked the official GTA VI gameplay trailer showcasing dynamic weather physics and 4K raytracing in Vice City." },
+      { id: "s6", title: "😡 Airline Rant", text: "Worst customer service ever! The airline delayed our international flight for 9 hours without offering hotel vouchers or water bottles." },
+      { id: "s7", title: "📈 Fed Interest Rates", text: "Federal Reserve chair signals imminent interest rate cuts as monthly inflation drops below the 2.0% target." },
+      { id: "s8", title: "🛡️ Zero-Day Exploit", text: "Critical zero-day remote code execution vulnerability discovered in widespread open-source logging library. Patch immediately!" },
+      { id: "s9", title: "🍔 Texas BBQ Brisket", text: "Smoked Texas beef brisket slow-cooked for 14 hours over post oak wood with homemade barbecue glaze and creamy mac & cheese." },
+      { id: "s10", title: "🚀 NASA Webb Telescope", text: "NASA's James Webb Space Telescope detects potential biosignature gases in the atmosphere of habitable-zone exoplanet K2-18b." },
+      { id: "s11", title: "💼 $420k Engineer Job", text: "We are hiring a Principal Distributed Systems Engineer in San Francisco / Remote. $280k-$420k base + generous equity package." },
+      { id: "s12", title: "⚽ Champions League", text: "Real Madrid pulls off an unbelievable 94th-minute comeback victory in the UEFA Champions League semifinal thriller!" },
+      { id: "s13", title: "🎬 Nolan IMAX Movie", text: "Christopher Nolan announces his next sci-fi IMAX epic starring Matt Damon and Zendaya, scheduled for worldwide release in July 2026." },
+      { id: "s14", title: "🧘 Cardio & Health", text: "Daily 20-minute resistance training and zone-2 cardio significantly lowers resting heart rate and reduces systemic inflammation." },
+      { id: "s15", title: "🗳️ Privacy Law", text: "Parliament passes landmark digital privacy legislation restricting commercial harvesting of biometric and location data." },
+      { id: "s16", title: "😂 99 Bugs Meme", text: "My code has 99 compiler bugs. I fix one bug, now my code has 127 bugs and the linker is threatening to delete my hard drive." }
+    ];
 
     const state = {
       labels: [],
-      engineMode: 'dual', // 'dual', 'jev', 'laya'
+      recommends: [],
       typingTimeout: null,
       isClassifying: false,
       lastText: "",
       jevData: null,
-      layaData: null,
-      jevMs: null,
-      layaMs: null
+      jevMs: null
     };
 
+    // ==================== TOAST NOTIFICATION ====================
+    function showToast(msg, isError = false) {
+      const el = document.getElementById('toastNotification');
+      const content = document.getElementById('toastContent');
+      const text = document.getElementById('toastMsg');
+      text.textContent = msg;
+      content.className = isError 
+        ? "px-4 py-2.5 rounded-xl bg-rose-600 text-white text-xs font-semibold shadow-xl border border-rose-400/30 flex items-center gap-2"
+        : "px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-semibold shadow-xl border border-indigo-400/30 flex items-center gap-2";
+
+      el.classList.remove('translate-y-12', 'opacity-0');
+      setTimeout(() => {
+        el.classList.add('translate-y-12', 'opacity-0');
+      }, 3000);
+    }
+
+    // ==================== STORAGE & URL SHARING ====================
     function loadSavedLabels() {
       try {
-        const saved = localStorage.getItem(STORAGE_KEY);
+        const saved = localStorage.getItem(STORAGE_KEY_LABELS);
         if (saved) {
           const parsed = JSON.parse(saved);
           if (Array.isArray(parsed) && parsed.length >= 2) {
@@ -436,72 +436,245 @@
           }
         }
       } catch (e) {
-        console.warn("Error reading localStorage:", e);
+        console.warn("Lỗi đọc labels từ localStorage:", e);
       }
       return [...DEFAULT_LABELS];
     }
 
     function saveLabels() {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state.labels));
+        localStorage.setItem(STORAGE_KEY_LABELS, JSON.stringify(state.labels));
       } catch (e) {
-        console.error("Error saving labels:", e);
+        console.error("Lỗi lưu labels:", e);
       }
     }
 
-    function setEngineMode(mode) {
-      state.engineMode = mode;
+    function loadSavedRecommends() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY_RECOMMENDS);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed;
+          }
+        }
+      } catch (e) {
+        console.warn("Lỗi đọc recommends từ localStorage:", e);
+      }
+      return [...DEFAULT_RECOMMENDS];
+    }
+
+    function saveRecommends() {
+      try {
+        localStorage.setItem(STORAGE_KEY_RECOMMENDS, JSON.stringify(state.recommends));
+      } catch (e) {
+        console.error("Lỗi lưu recommends:", e);
+      }
+    }
+
+    function loadConfigFromUrl() {
+      try {
+        const hash = window.location.hash;
+        const params = new URLSearchParams(window.location.search);
+        let encoded = null;
+        if (hash && hash.startsWith('#config=')) {
+          encoded = hash.substring(8);
+        } else if (params.get('config')) {
+          encoded = params.get('config');
+        }
+        if (encoded) {
+          const decoded = decodeURIComponent(atob(encoded));
+          const parsed = JSON.parse(decoded);
+          let loaded = false;
+          if (parsed.labels && Array.isArray(parsed.labels) && parsed.labels.length >= 2) {
+            state.labels = parsed.labels;
+            saveLabels();
+            loaded = true;
+          }
+          if (parsed.recommends && Array.isArray(parsed.recommends) && parsed.recommends.length > 0) {
+            state.recommends = parsed.recommends;
+            saveRecommends();
+            loaded = true;
+          }
+          if (loaded) {
+            showToast("Đã nạp thành công bộ Nhãn & Recommend từ liên kết chia sẻ!");
+            return true;
+          }
+        }
+      } catch (e) {
+        console.warn("Không đọc được cấu hình từ URL hash:", e);
+      }
+      return false;
+    }
+
+    function copyShareableLink() {
+      const payload = {
+        labels: state.labels,
+        recommends: state.recommends
+      };
+      const jsonStr = JSON.stringify(payload);
+      const encoded = btoa(encodeURIComponent(jsonStr));
+      const shareUrl = `${window.location.origin}${window.location.pathname}#config=${encoded}`;
       
-      const btnDual = document.getElementById('btnModeDual');
-      const btnJev = document.getElementById('btnModeJev');
-      const btnLaya = document.getElementById('btnModeLaya');
-      const jevCol = document.getElementById('jevColumn');
-      const layaCol = document.getElementById('layaColumn');
-      const grid = document.getElementById('dualViewGrid');
-      const scorecard = document.getElementById('dualScorecard');
-
-      [btnDual, btnJev, btnLaya].forEach(b => {
-        b.className = "px-3 py-1.5 rounded-md transition-all text-slate-400 hover:text-white flex items-center gap-1.5";
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        showToast("Đã sao chép link chia sẻ vào bộ nhớ tạm! Gửi link này cho người khác để test.");
+      }).catch(err => {
+        prompt("Sao chép link này để chia sẻ:", shareUrl);
       });
+    }
 
-      if (mode === 'dual') {
-        btnDual.className = "px-3 py-1.5 rounded-md transition-all bg-indigo-600 text-white shadow-sm flex items-center gap-1.5";
-        grid.className = "grid grid-cols-1 md:grid-cols-2 gap-4";
-        jevCol.classList.remove('hidden');
-        layaCol.classList.remove('hidden');
-        scorecard.classList.remove('hidden');
-      } else if (mode === 'jev') {
-        btnJev.className = "px-3 py-1.5 rounded-md transition-all bg-indigo-600 text-white shadow-sm flex items-center gap-1.5";
-        grid.className = "grid grid-cols-1 gap-4";
-        jevCol.classList.remove('hidden');
-        layaCol.classList.add('hidden');
-        scorecard.classList.add('hidden');
-      } else if (mode === 'laya') {
-        btnLaya.className = "px-3 py-1.5 rounded-md transition-all bg-cyan-600 text-white shadow-sm flex items-center gap-1.5";
-        grid.className = "grid grid-cols-1 gap-4";
-        jevCol.classList.add('hidden');
-        layaCol.classList.remove('hidden');
-        scorecard.classList.add('hidden');
+    // ==================== CONFIG MODAL ====================
+    function openConfigModal() {
+      const modal = document.getElementById('configModal');
+      const textarea = document.getElementById('configJsonText');
+      const config = {
+        labels: state.labels,
+        recommends: state.recommends
+      };
+      textarea.value = JSON.stringify(config, null, 2);
+      modal.classList.remove('hidden');
+    }
+
+    function closeConfigModal() {
+      document.getElementById('configModal').classList.add('hidden');
+    }
+
+    function copyConfigJson() {
+      const text = document.getElementById('configJsonText').value;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast("Đã sao chép JSON cấu hình!");
+      });
+    }
+
+    function importConfigJson() {
+      try {
+        const text = document.getElementById('configJsonText').value.trim();
+        const parsed = JSON.parse(text);
+        if (!parsed || typeof parsed !== 'object') throw new Error("JSON không hợp lệ");
+
+        if (Array.isArray(parsed.labels) && parsed.labels.length >= 2) {
+          state.labels = parsed.labels;
+          saveLabels();
+          renderLabels();
+        }
+        if (Array.isArray(parsed.recommends) && parsed.recommends.length > 0) {
+          state.recommends = parsed.recommends;
+          saveRecommends();
+          renderRecommends();
+        }
+
+        closeConfigModal();
+        showToast("Đã nạp cấu hình mới thành công!");
+        runClassification();
+      } catch (e) {
+        alert("Lỗi phân tích cú pháp JSON: " + e.message);
+      }
+    }
+
+    // ==================== RECOMMEND SAMPLES ====================
+    function renderRecommends() {
+      const container = document.getElementById('recommendChips');
+      const countEl = document.getElementById('recommendCount');
+      countEl.textContent = state.recommends.length;
+
+      if (state.recommends.length === 0) {
+        container.innerHTML = `<span class="text-xs text-slate-500 italic p-1">Chưa có mẫu nào. Bấm "+ Thêm Recommend" để tạo!</span>`;
+        return;
       }
 
-      runDualClassification();
+      container.innerHTML = state.recommends.map((rec, idx) => `
+        <div class="group inline-flex items-center rounded-lg bg-slate-800/90 hover:bg-indigo-600 border border-slate-700 hover:border-indigo-500 transition-all text-slate-300 hover:text-white shadow-sm overflow-hidden">
+          <button onclick="applyRecommend(${idx})" class="px-2.5 py-1 text-[11px] font-medium flex items-center gap-1 truncate max-w-[200px]" title="${rec.title}">
+            ${rec.title}
+          </button>
+          <button onclick="deleteRecommend(${idx}, event)" class="px-1.5 py-1 text-slate-400 hover:text-rose-400 hover:bg-slate-900/60 border-l border-slate-700/80 text-[10px] transition-colors" title="Xóa mẫu này">
+            ✕
+          </button>
+        </div>
+      `).join('');
     }
 
-    function setSample(idx) {
-      document.getElementById('inputText').value = SAMPLES[idx];
-      runDualClassification(true);
+    function applyRecommend(idx) {
+      const rec = state.recommends[idx];
+      if (!rec) return;
+      document.getElementById('inputText').value = rec.text;
+      showToast(`Đã nạp: ${rec.title}`);
+      runClassification(true);
     }
 
+    function toggleAddRecommendForm() {
+      const form = document.getElementById('addRecommendForm');
+      form.classList.toggle('hidden');
+      if (!form.classList.contains('hidden')) {
+        document.getElementById('newRecTitle').focus();
+      }
+    }
+
+    function saveNewRecommend() {
+      const titleInput = document.getElementById('newRecTitle');
+      const textInput = document.getElementById('newRecText');
+      const title = titleInput.value.trim();
+      const text = textInput.value.trim();
+
+      if (!title || !text) {
+        alert("Vui lòng nhập đầy đủ tiêu đề và nội dung mẫu!");
+        return;
+      }
+
+      const newRec = {
+        id: "rec_" + Date.now(),
+        title: title,
+        text: text
+      };
+
+      state.recommends.unshift(newRec);
+      saveRecommends();
+      renderRecommends();
+
+      titleInput.value = "";
+      textInput.value = "";
+      toggleAddRecommendForm();
+      showToast(`Đã thêm mẫu "${title}"!`);
+
+      // Tự động chọn mẫu vừa thêm
+      document.getElementById('inputText').value = text;
+      runClassification(true);
+    }
+
+    function deleteRecommend(idx, event) {
+      event.stopPropagation();
+      const rec = state.recommends[idx];
+      state.recommends.splice(idx, 1);
+      saveRecommends();
+      renderRecommends();
+      showToast(`Đã xóa mẫu "${rec ? rec.title : ''}"`);
+    }
+
+    function resetDefaultRecommends() {
+      if (confirm("Khôi phục danh sách mẫu recommend về mặc định ban đầu?")) {
+        state.recommends = [...DEFAULT_RECOMMENDS];
+        saveRecommends();
+        renderRecommends();
+        showToast("Đã khôi phục danh sách mẫu recommend mặc định!");
+      }
+    }
+
+    // ==================== LABELS MANAGEMENT ====================
     function renderLabels() {
       const container = document.getElementById('labelChips');
       const countBadge = document.getElementById('labelCount');
       countBadge.textContent = state.labels.length;
 
+      if (state.labels.length === 0) {
+        container.innerHTML = `<span class="text-xs text-rose-400 italic p-1">Chưa có nhãn nào! Vui lòng thêm tối thiểu 2 nhãn.</span>`;
+        return;
+      }
+
       container.innerHTML = state.labels.map((lbl, idx) => `
         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs bg-[#131b2e] border border-slate-800 text-slate-200">
           <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
           <span>${lbl}</span>
-          <button onclick="removeLabel(${idx})" class="text-slate-500 hover:text-rose-400 transition-colors ml-0.5" title="Xóa nhãn">✕</button>
+          <button onclick="removeLabel(${idx})" class="text-slate-500 hover:text-rose-400 transition-colors ml-0.5" title="Xóa nhãn này">✕</button>
         </span>
       `).join('');
     }
@@ -516,19 +689,23 @@
         saveLabels();
         renderLabels();
         input.value = "";
-        runDualClassification();
+        showToast(`Đã thêm nhãn "${val}"`);
+        runClassification();
+      } else {
+        showToast(`Nhãn "${val}" đã tồn tại!`, true);
       }
     }
 
     function removeLabel(index) {
       if (state.labels.length <= 2) {
-        alert("Cần tối thiểu 2 nhãn để phân loại!");
+        alert("Cần tối thiểu 2 nhãn để mô hình tính toán phân phối xác suất!");
         return;
       }
-      state.labels.splice(index, 1);
+      const removed = state.labels.splice(index, 1);
       saveLabels();
       renderLabels();
-      runDualClassification();
+      showToast(`Đã xóa nhãn "${removed[0]}"`);
+      runClassification();
     }
 
     function addEscapeHatch() {
@@ -537,19 +714,31 @@
         state.labels.push("other");
         saveLabels();
         renderLabels();
-        runDualClassification();
+        showToast('Đã thêm nhãn "other"');
+        runClassification();
+      }
+    }
+
+    function clearAllLabels() {
+      if (confirm("Bạn có chắc chắn muốn xóa hết tất cả các nhãn hiện tại?")) {
+        state.labels = [];
+        saveLabels();
+        renderLabels();
+        resetDisplay();
       }
     }
 
     function resetDefaultLabels() {
-      if (confirm("Khôi phục danh sách nhãn về mặc định?")) {
+      if (confirm("Khôi phục danh sách nhãn về mặc định ban đầu?")) {
         state.labels = [...DEFAULT_LABELS];
         saveLabels();
         renderLabels();
-        runDualClassification();
+        showToast("Đã khôi phục danh sách nhãn mặc định!");
+        runClassification();
       }
     }
 
+    // ==================== CLASSIFICATION LOGIC ====================
     function clearInput() {
       document.getElementById('inputText').value = "";
       state.lastText = "";
@@ -560,28 +749,14 @@
       document.getElementById('jevWinnerLabel').textContent = "--";
       document.getElementById('jevWinnerConfidence').textContent = "--%";
       document.getElementById('jevLatencyBadge').textContent = "Chờ lệnh";
+      document.getElementById('telemetryLatency').textContent = "-- ms";
       document.getElementById('jevBarsContainer').innerHTML = `
-        <div class="text-[11px] text-slate-500 py-6 text-center italic">
-          Chờ dữ liệu từ Jev...
+        <div class="text-xs text-slate-500 py-12 text-center italic">
+          Nhập nội dung hoặc chọn mẫu recommend để bắt đầu phân loại...
         </div>
       `;
-
-      document.getElementById('layaWinnerLabel').textContent = "--";
-      document.getElementById('layaWinnerConfidence').textContent = "--%";
-      document.getElementById('layaLatencyBadge').textContent = "Chờ lệnh";
-      document.getElementById('layaBarsContainer').innerHTML = `
-        <div class="text-[11px] text-slate-500 py-6 text-center italic">
-          Chờ dữ liệu từ Laya...
-        </div>
-      `;
-
-      document.getElementById('scJevMs').textContent = "-- ms";
-      document.getElementById('scLayaMs').textContent = "-- ms";
-      document.getElementById('scSpeedWinner').classList.add('hidden');
-      document.getElementById('scorecardConsensus').textContent = "Nhập nội dung bên dưới để xem hai mô hình đọ sức đồng thời.";
     }
 
-    // Call TypeSafe Jev API
     async function callJev(text, labels) {
       const start = performance.now();
       const res = await fetch("https://classifier.dev", {
@@ -604,60 +779,14 @@
       return { data, ms: elapsed };
     }
 
-    // Call Convai Laya Gradio Playground API
-    async function callLaya(text, labels) {
-      const start = performance.now();
-      // Support up to 24 labels for English vocabulary
-      const activeLabels = labels.slice(0, 24);
-      const criteria = {};
-      activeLabels.forEach(l => { criteria[l] = l; });
-
-      const questions_text = JSON.stringify({
-        category: {
-          type: "choice",
-          instructions: "Chọn 1 nhãn phù hợp nhất",
-          criteria: criteria
-        }
-      });
-
-      const initRes = await fetch("https://convaiinnovations-laya-demo.hf.space/gradio_api/call/run_playground", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data: [text, questions_text] })
-      });
-
-      if (!initRes.ok) throw new Error("Không thể kết nối đến Laya Hugging Face Space");
-      const { event_id } = await initRes.json();
-
-      const eventRes = await fetch("https://convaiinnovations-laya-demo.hf.space/gradio_api/call/run_playground/" + event_id);
-      const sseText = await eventRes.text();
-      const elapsed = Math.round(performance.now() - start);
-
-      const lines = sseText.split('\n');
-      let dataJson = null;
-      for (const line of lines) {
-        if (line.startsWith('data:')) {
-          try {
-            const parsed = JSON.parse(line.substring(5).trim());
-            if (Array.isArray(parsed) && parsed.length >= 2) {
-              dataJson = typeof parsed[1] === 'string' ? JSON.parse(parsed[1]) : parsed[1];
-            }
-          } catch (e) {}
-        }
-      }
-
-      if (!dataJson) throw new Error("Dữ liệu Laya trả về không đúng định dạng");
-      return { data: dataJson, ms: elapsed };
-    }
-
-    async function runDualClassification(manual = false) {
+    async function runClassification(manual = false) {
       const text = document.getElementById('inputText').value.trim();
       if (!text) {
         resetDisplay();
         return;
       }
       if (state.labels.length < 2) {
-        alert("Cần tối thiểu 2 nhãn!");
+        showToast("Cần tối thiểu 2 nhãn để phân loại!", true);
         return;
       }
 
@@ -667,65 +796,34 @@
       const btnIcon = document.getElementById('btnIcon');
       const btnText = document.getElementById('btnText');
       btnIcon.textContent = "⏳";
-      btnText.textContent = "Đang xử lý...";
+      btnText.textContent = "Đang phân loại...";
 
       const indicator = document.getElementById('typingIndicator');
       indicator.classList.remove('hidden');
 
       state.jevData = null;
-      state.layaData = null;
       state.jevMs = null;
-      state.layaMs = null;
 
-      const shouldCallJev = state.engineMode === 'dual' || state.engineMode === 'jev';
-      const shouldCallLaya = state.engineMode === 'dual' || state.engineMode === 'laya';
-
-      const promises = [];
-
-      if (shouldCallJev) {
-        promises.push(
-          callJev(text, state.labels)
-            .then(res => {
-              state.jevData = res.data;
-              state.jevMs = res.ms;
-              renderJevResults(res.data, res.ms);
-            })
-            .catch(err => {
-              console.error("Jev error:", err);
-              renderJevError(err.message);
-            })
-        );
-      }
-
-      if (shouldCallLaya) {
-        promises.push(
-          callLaya(text, state.labels)
-            .then(res => {
-              state.layaData = res.data;
-              state.layaMs = res.ms;
-              renderLayaResults(res.data, res.ms);
-            })
-            .catch(err => {
-              console.error("Laya error:", err);
-              renderLayaError(err.message);
-            })
-        );
-      }
-
-      await Promise.allSettled(promises);
-
-      indicator.classList.add('hidden');
-      btnIcon.textContent = "⚡";
-      btnText.textContent = "Phân loại ngay";
-      state.isClassifying = false;
-
-      if (state.engineMode === 'dual') {
-        updateDualScorecard();
+      try {
+        const res = await callJev(text, state.labels);
+        state.jevData = res.data;
+        state.jevMs = res.ms;
+        renderJevResults(res.data, res.ms);
+      } catch (err) {
+        console.error("Lỗi gọi TypeSafe Jev:", err);
+        renderJevError(err.message);
+      } finally {
+        indicator.classList.add('hidden');
+        btnIcon.textContent = "⚡";
+        btnText.textContent = "Phân loại ngay";
+        state.isClassifying = false;
       }
     }
 
     function renderJevResults(data, elapsed) {
       document.getElementById('jevLatencyBadge').textContent = `${elapsed} ms`;
+      document.getElementById('telemetryLatency').textContent = `${elapsed} ms`;
+
       const item = (data.results && data.results[0]) ? data.results[0] : data;
       const chosenLabel = item.label || "--";
       const scores = item.scores || {};
@@ -740,72 +838,29 @@
       document.getElementById('jevWinnerLabel').textContent = chosenLabel;
       const confEl = document.getElementById('jevWinnerConfidence');
       confEl.textContent = winnerPct.toFixed(1) + "%";
-      confEl.className = "px-2 py-0.5 rounded text-xs font-mono font-bold " + 
+      confEl.className = "px-3 py-1 rounded-lg text-sm sm:text-base font-mono font-black " + 
         (winnerPct >= 70 ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30" : "bg-slate-800 text-slate-300 border border-slate-700");
 
       const allLabels = Array.from(new Set([...state.labels, ...Object.keys(scores)]));
       const sorted = allLabels.sort((a, b) => (scores[b] || 0) - (scores[a] || 0));
 
       const container = document.getElementById('jevBarsContainer');
-      container.innerHTML = sorted.map(lbl => {
+      container.innerHTML = sorted.map((lbl, idx) => {
         const score = (typeof scores[lbl] === 'number') ? scores[lbl] : 0;
         const pct = (score * 100).toFixed(1);
         const isWinner = lbl === chosenLabel;
-        const barColor = isWinner ? "bg-gradient-to-r from-indigo-500 to-cyan-400" : "bg-slate-700";
+        const barColor = isWinner ? "bg-gradient-to-r from-indigo-500 via-cyan-400 to-emerald-400" : "bg-slate-700";
 
         return `
-          <div class="space-y-1">
-            <div class="flex items-center justify-between text-[11px]">
-              <span class="${isWinner ? 'text-indigo-300 font-bold' : 'text-slate-400'}">${isWinner ? '✓ ' : ''}${lbl}</span>
-              <span class="font-mono ${isWinner ? 'text-indigo-300 font-bold' : 'text-slate-500'}">${pct}%</span>
+          <div class="space-y-1 p-2 rounded-lg ${isWinner ? 'bg-indigo-950/30 border border-indigo-500/20' : 'hover:bg-slate-800/40'} transition-all">
+            <div class="flex items-center justify-between text-xs">
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-mono text-slate-500 w-4">${idx + 1}.</span>
+                <span class="${isWinner ? 'text-indigo-300 font-bold text-sm' : 'text-slate-300 font-medium'}">${isWinner ? '🏆 ' : ''}${lbl}</span>
+              </div>
+              <span class="font-mono ${isWinner ? 'text-indigo-300 font-bold text-sm' : 'text-slate-400 font-semibold'}">${pct}%</span>
             </div>
-            <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
-              <div class="h-full rounded-full transition-all duration-300 ${barColor}" style="width: ${pct}%;"></div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function renderLayaResults(data, elapsed) {
-      document.getElementById('layaLatencyBadge').textContent = `${elapsed} ms`;
-      const answers = data.answers || {};
-      const cat = answers.category || {};
-      const chosenLabel = cat.choice || "--";
-      const probs = cat.probabilities || {};
-
-      let winnerPct = (probs[chosenLabel] || 0) * 100;
-      if (winnerPct === 0 && cat.confidence) {
-        winnerPct = cat.confidence * 100;
-      }
-
-      document.getElementById('layaWinnerLabel').textContent = chosenLabel;
-      const confEl = document.getElementById('layaWinnerConfidence');
-      confEl.textContent = winnerPct.toFixed(1) + "%";
-      confEl.className = "px-2 py-0.5 rounded text-xs font-mono font-bold " + 
-        (winnerPct >= 70 ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30" : "bg-slate-800 text-slate-300 border border-slate-700");
-
-      if (cat.rl_agent && cat.rl_agent.act_probability !== undefined) {
-        document.getElementById('layaActProb').textContent = `act_prob: ${(cat.rl_agent.act_probability * 100).toFixed(0)}%`;
-      }
-
-      const allLabels = Array.from(new Set([...state.labels, ...Object.keys(probs)]));
-      const sorted = allLabels.sort((a, b) => (probs[b] || 0) - (probs[a] || 0));
-
-      const container = document.getElementById('layaBarsContainer');
-      container.innerHTML = sorted.map(lbl => {
-        const score = (typeof probs[lbl] === 'number') ? probs[lbl] : 0;
-        const pct = (score * 100).toFixed(1);
-        const isWinner = lbl === chosenLabel;
-        const barColor = isWinner ? "bg-gradient-to-r from-cyan-400 to-emerald-400" : "bg-slate-700";
-
-        return `
-          <div class="space-y-1">
-            <div class="flex items-center justify-between text-[11px]">
-              <span class="${isWinner ? 'text-cyan-300 font-bold' : 'text-slate-400'}">${isWinner ? '✓ ' : ''}${lbl}</span>
-              <span class="font-mono ${isWinner ? 'text-cyan-300 font-bold' : 'text-slate-500'}">${pct}%</span>
-            </div>
-            <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+            <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
               <div class="h-full rounded-full transition-all duration-300 ${barColor}" style="width: ${pct}%;"></div>
             </div>
           </div>
@@ -814,67 +869,34 @@
     }
 
     function renderJevError(msg) {
-      document.getElementById('jevWinnerLabel').textContent = "Lỗi";
+      document.getElementById('jevWinnerLabel').textContent = "Lỗi kết nối";
       document.getElementById('jevWinnerConfidence').textContent = "--";
+      document.getElementById('telemetryLatency').textContent = "Error";
       document.getElementById('jevBarsContainer').innerHTML = `
-        <div class="p-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-lg text-xs">
-          Lỗi Jev: ${msg}
+        <div class="p-4 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-xl text-xs space-y-1">
+          <div class="font-bold flex items-center gap-1.5">
+            <span>⚠️</span> Không thể gọi API classifier.dev
+          </div>
+          <p class="text-slate-400">${msg}</p>
         </div>
       `;
     }
 
-    function renderLayaError(msg) {
-      document.getElementById('layaWinnerLabel').textContent = "Lỗi";
-      document.getElementById('layaWinnerConfidence').textContent = "--";
-      document.getElementById('layaBarsContainer').innerHTML = `
-        <div class="p-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-lg text-xs">
-          Lỗi Laya: ${msg}
-        </div>
-      `;
-    }
-
-    function updateDualScorecard() {
-      if (state.jevMs !== null) {
-        document.getElementById('scJevMs').textContent = `${state.jevMs} ms`;
-      }
-      if (state.layaMs !== null) {
-        document.getElementById('scLayaMs').textContent = `${state.layaMs} ms`;
-      }
-
-      const jevWinner = document.getElementById('jevWinnerLabel').textContent.trim();
-      const layaWinner = document.getElementById('layaWinnerLabel').textContent.trim();
-      const consensusEl = document.getElementById('scorecardConsensus');
-      const iconEl = document.getElementById('scorecardIcon');
-      const speedBadge = document.getElementById('scSpeedWinner');
-
-      if (jevWinner !== '--' && layaWinner !== '--' && jevWinner !== 'Lỗi' && layaWinner !== 'Lỗi') {
-        if (jevWinner.toLowerCase() === layaWinner.toLowerCase()) {
-          iconEl.textContent = "🤝";
-          consensusEl.innerHTML = `<strong class="text-emerald-400">ĐỒNG THUẬN TUYỆT ĐỐI (100%):</strong> Cả TypeSafe Jev và Convai Laya đều nhất trí chọn nhãn <code class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">"${jevWinner}"</code>!`;
-        } else {
-          iconEl.textContent = "⚡";
-          consensusEl.innerHTML = `<strong class="text-amber-400">BẤT ĐỒNG QUAN ĐIỂM:</strong> Jev chọn <code class="px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-bold">"${jevWinner}"</code>, trong khi Laya chọn <code class="px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-bold">"${layaWinner}"</code>.`;
-        }
-
-        if (state.jevMs && state.layaMs) {
-          speedBadge.classList.remove('hidden');
-          if (state.layaMs < state.jevMs) {
-            const diff = state.jevMs - state.layaMs;
-            speedBadge.textContent = `⚡ Laya nhanh hơn ${diff}ms`;
-            speedBadge.className = "px-2.5 py-1 rounded bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 font-bold font-mono";
-          } else {
-            const diff = state.layaMs - state.jevMs;
-            speedBadge.textContent = `⚡ Jev nhanh hơn ${diff}ms`;
-            speedBadge.className = "px-2.5 py-1 rounded bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 font-bold font-mono";
-          }
-        }
-      }
-    }
-
+    // ==================== INITIALIZATION ====================
     function init() {
-      state.labels = loadSavedLabels();
-      renderLabels();
+      // 1. Check URL for shared config first
+      const hasUrlConfig = loadConfigFromUrl();
 
+      // 2. If no URL config, load from localStorage
+      if (!hasUrlConfig) {
+        state.labels = loadSavedLabels();
+        state.recommends = loadSavedRecommends();
+      }
+
+      renderLabels();
+      renderRecommends();
+
+      // Setup realtime debounce
       const inputEl = document.getElementById('inputText');
       inputEl.addEventListener('input', (e) => {
         const isRealtime = document.getElementById('realtimeToggle').checked;
@@ -887,13 +909,15 @@
         clearTimeout(state.typingTimeout);
 
         state.typingTimeout = setTimeout(() => {
-          runDualClassification();
+          runClassification();
         }, 350);
       });
 
-      // Load sample 1 initially
-      document.getElementById('inputText').value = SAMPLES[1];
-      runDualClassification(true);
+      // Load initial recommend sample if input is empty
+      if (!inputEl.value.trim() && state.recommends.length > 0) {
+        inputEl.value = state.recommends[0].text;
+      }
+      runClassification(true);
     }
 
     window.addEventListener('DOMContentLoaded', init);

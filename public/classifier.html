@@ -3,400 +3,728 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Classifier.dev Studio - TypeSafe Jev Realtime Classifier</title>
-  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <title>Classifier Studio — TypeSafe Jev Real-Time Text Classification</title>
+  
+  <!-- Geist & Geist Mono Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..600&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet" referrerpolicy="no-referrer">
+  
+  <!-- Vercel Brand Guidelines Foundation Stylesheet -->
+  <link href="assets/vercel-brand.css" rel="stylesheet">
+
   <style>
-    .custom-scroll::-webkit-scrollbar {
-      width: 6px;
+    /* Custom page-specific layout & micro-tuning conforming to VBG tokens */
+    :where(.vbg-report) {
+      font-family: var(--vbg-font-sans);
+    }
+
+    .vbg-workspace-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--vbg-space-8);
+      align-items: start;
+    }
+
+    @media (min-width: 992px) {
+      .vbg-workspace-grid {
+        grid-template-columns: 5fr 7fr;
+      }
+    }
+
+    .vbg-panel {
+      border: 1px solid var(--vbg-border-subtle);
+      border-radius: var(--vbg-radius);
+      background: var(--vbg-surface-primary);
+      padding: var(--vbg-space-5);
+      display: flex;
+      flex-direction: column;
+      gap: var(--vbg-space-4);
+    }
+
+    .vbg-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--vbg-space-3);
+    }
+
+    .vbg-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--vbg-space-1);
+      padding: 3px 8px;
+      font-size: var(--vbg-type-compact);
+      border-radius: var(--vbg-radius-small);
+      border: 1px solid var(--vbg-border-subtle);
+      background: var(--vbg-surface-secondary);
+      color: var(--vbg-text-primary);
+      transition: all 0.15s ease;
+    }
+
+    .vbg-chip:hover {
+      border-color: var(--vbg-border-default);
+    }
+
+    .vbg-chip-btn {
+      background: transparent;
+      border: none;
+      padding: 0;
+      color: var(--vbg-text-secondary);
+      cursor: pointer;
+      font-size: 11px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 2px;
+      line-height: 1;
+    }
+
+    .vbg-chip-btn:hover {
+      color: var(--vbg-color-error);
+    }
+
+    .vbg-rec-item {
+      display: inline-flex;
+      align-items: stretch;
+      border-radius: var(--vbg-radius-small);
+      border: 1px solid var(--vbg-border-subtle);
+      background: var(--vbg-surface-secondary);
+      transition: all 0.15s ease;
+      overflow: hidden;
+    }
+
+    .vbg-rec-item:hover {
+      border-color: var(--vbg-border-strong);
+    }
+
+    .vbg-rec-btn {
+      background: transparent;
+      border: none;
+      padding: 5px 10px;
+      font-size: 12px;
+      font-family: var(--vbg-font-sans);
+      color: var(--vbg-text-primary);
+      cursor: pointer;
+      text-align: left;
+      white-space: nowrap;
+      max-width: 220px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .vbg-rec-del {
+      background: transparent;
+      border: none;
+      border-left: 1px solid var(--vbg-border-subtle);
+      padding: 0 7px;
+      color: var(--vbg-text-secondary);
+      cursor: pointer;
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .vbg-rec-del:hover {
+      background: var(--vbg-border-subtle);
+      color: var(--vbg-color-error);
+    }
+
+    .vbg-progress-track {
+      width: 100%;
       height: 6px;
+      background: var(--vbg-gray-200);
+      border-radius: 9999px;
+      overflow: hidden;
     }
-    .custom-scroll::-webkit-scrollbar-track {
-      background: rgba(0, 0, 0, 0.05);
-      border-radius: 4px;
+
+    .vbg-progress-fill {
+      height: 100%;
+      background: var(--vbg-gray-1000);
+      border-radius: 9999px;
+      transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .custom-scroll::-webkit-scrollbar-thumb {
-      background: rgba(150, 150, 150, 0.3);
-      border-radius: 4px;
+
+    .vbg-progress-fill-winner {
+      background: light-dark(#000000, #ffffff);
     }
-    .card-glow {
-      box-shadow: 0 0 25px -5px rgba(99, 102, 241, 0.2);
+
+    .vbg-winner-display {
+      border: 1px solid var(--vbg-border-subtle);
+      border-radius: var(--vbg-radius);
+      background: var(--vbg-surface-secondary);
+      padding: var(--vbg-space-4) var(--vbg-space-5);
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: var(--vbg-space-4);
+    }
+
+    .vbg-winner-label {
+      font-size: clamp(1.5rem, 3vw, 2.25rem);
+      font-weight: var(--vbg-weight-semibold);
+      letter-spacing: -0.03em;
+      color: var(--vbg-text-primary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .vbg-winner-pct {
+      font-family: var(--vbg-font-mono);
+      font-size: var(--vbg-type-title);
+      font-weight: var(--vbg-weight-semibold);
+      font-variant-numeric: tabular-nums;
+      color: var(--vbg-text-primary);
+      white-space: nowrap;
+    }
+
+    .vbg-score-row {
+      display: flex;
+      flex-direction: column;
+      gap: var(--vbg-space-1);
+      padding: var(--vbg-space-2) var(--vbg-space-3);
+      border-radius: var(--vbg-radius-small);
+      transition: background 0.15s ease;
+    }
+
+    .vbg-score-row:hover {
+      background: var(--vbg-surface-secondary);
+    }
+
+    .vbg-score-row[data-winner="true"] {
+      background: var(--vbg-gray-alpha-100);
+      border: 1px solid var(--vbg-border-subtle);
+    }
+
+    /* Modal Backdrop conforming to VBG */
+    .vbg-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--vbg-space-4);
+    }
+
+    .vbg-modal-content {
+      background: var(--vbg-surface-primary);
+      border: 1px solid var(--vbg-border-default);
+      border-radius: var(--vbg-radius);
+      width: 100%;
+      max-width: 520px;
+      padding: var(--vbg-space-6);
+      display: flex;
+      flex-direction: column;
+      gap: var(--vbg-space-4);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Toast notification */
+    .vbg-toast {
+      position: fixed;
+      bottom: var(--vbg-space-6);
+      right: var(--vbg-space-6);
+      z-index: 110;
+      background: var(--vbg-gray-1000);
+      color: var(--vbg-background-100);
+      border: 1px solid var(--vbg-border-strong);
+      border-radius: var(--vbg-radius-small);
+      padding: var(--vbg-space-2) var(--vbg-space-4);
+      font-size: var(--vbg-type-compact);
+      font-weight: var(--vbg-weight-medium);
+      display: flex;
+      align-items: center;
+      gap: var(--vbg-space-2);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+      transform: translateY(20px);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .vbg-toast.show {
+      transform: translateY(0);
+      opacity: 1;
     }
   </style>
 </head>
-<body class="bg-[#0b0f19] text-[#f1f5f9] antialiased min-h-screen p-3 sm:p-5 md:p-8 font-sans custom-scroll selection:bg-indigo-500/30 selection:text-indigo-300">
-  
-  <!-- Ambient Background Glow -->
-  <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
-    <div class="absolute -top-40 -left-40 w-96 h-96 bg-indigo-600/15 rounded-full blur-3xl"></div>
-    <div class="absolute top-1/2 -right-40 w-96 h-96 bg-cyan-600/10 rounded-full blur-3xl"></div>
-  </div>
+<body class="vbg-report" data-theme="dark">
+  <div class="vbg-shell">
+    <a class="vbg-skip-link" href="#main">Chuyển thẳng đến nội dung</a>
 
-  <div class="relative z-10 max-w-7xl mx-auto space-y-5">
-
-    <!-- Top Header -->
-    <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-indigo-500/20">
-          ⚡
-        </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <h1 class="text-xl font-bold tracking-tight text-white">
-              Classifier.dev <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-cyan-400 to-emerald-400">Studio</span>
-            </h1>
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-              TypeSafe Jev Fast
-            </span>
-          </div>
-          <p class="text-xs text-slate-400">
-            Phân loại văn bản thời gian thực bằng model <strong>TypeSafe AI Jev (Fast Zero-Shot)</strong>. Xuất xác suất toán học 100%.
-          </p>
+    <!-- Vercel Official Authorship Header -->
+    <header class="vbg-header">
+      <div class="vbg-masthead">
+        <span class="vbg-identity">
+          <span class="vbg-wordmark" role="img" aria-label="Vercel"></span>
+        </span>
+        <div class="vbg-document-meta">
+          <span class="vbg-meta">TypeSafe Jev Fast Engine</span>
+          <span class="vbg-meta">Zero-Shot Classifier</span>
         </div>
       </div>
-      
-      <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-        <a href="/" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs text-slate-300 hover:text-white transition-all flex items-center gap-1">
-          ← Trang Chủ
-        </a>
-        <button onclick="copyShareableLink()" id="btnShareLink" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition-all shadow-sm flex items-center gap-1.5" title="Tạo link chứa sẵn bộ Nhãn và Recommend hiện tại để gửi người khác">
-          <span>🔗</span> Sao chép Link chia sẻ
-        </button>
-        <button onclick="openConfigModal()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-medium text-slate-300 hover:text-white transition-all flex items-center gap-1.5" title="Xuất hoặc Nhập cấu hình JSON">
-          <span>📋</span> JSON
-        </button>
-        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          Jev Online
-        </span>
+
+      <div style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: var(--vbg-space-2); margin-block-start: var(--vbg-space-6);">
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--vbg-space-4);">
+          <h1 class="vbg-title" style="margin: 0;">Classifier Studio</h1>
+          
+          <div style="display: flex; align-items: center; gap: var(--vbg-space-2); flex-wrap: wrap;">
+            <a href="/" class="vbg-button" data-variant="secondary" style="text-decoration: none;">
+              Trang Chủ
+            </a>
+            <button onclick="copyShareableLink()" id="btnShareLink" class="vbg-button" data-variant="secondary">
+              Sao chép Link chia sẻ
+            </button>
+            <button onclick="openConfigModal()" class="vbg-button" data-variant="tertiary">
+              Cấu hình JSON
+            </button>
+          </div>
+        </div>
+
+        <p class="vbg-lede" style="margin: 0; color: var(--vbg-text-secondary); max-width: 68ch;">
+          Phân loại văn bản thời gian thực bằng mô hình zero-shot TypeSafe Jev. Tính toán phân phối xác suất toán học chính xác 100% qua sampler song song.
+        </p>
       </div>
     </header>
 
-    <!-- Top Action / Info Banner -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#131b2e] border border-slate-800 rounded-xl p-3 shadow-sm text-xs">
-      <div class="flex items-center gap-2 text-slate-400 font-mono">
-        <span class="inline-flex items-center gap-1 text-indigo-300">
-          <span class="w-2 h-2 rounded-full bg-indigo-500"></span> TypeSafe Jev (Cloud Fast)
-        </span>
-        <span>&bull;</span>
-        <span>~30ms</span>
-        <span>&bull;</span>
-        <span>Zero-shot NLP</span>
-        <span>&bull;</span>
-        <span>$0.042/MTok</span>
-      </div>
+    <!-- Main Classifier Workspace -->
+    <main id="main">
+      <div class="vbg-workspace-grid">
 
-      <div class="flex items-center gap-2">
-        <span class="text-slate-500 text-[11px]">Chia sẻ cấu hình cho người khác test:</span>
-        <button onclick="copyShareableLink()" class="text-indigo-400 hover:text-indigo-300 font-semibold underline text-[11px] transition-colors">
-          Lấy Link Chia Sẻ ↗
-        </button>
-      </div>
-    </div>
+        <!-- Left Column: Inputs, Recommends & Labels -->
+        <div style="display: flex; flex-direction: column; gap: var(--vbg-space-6);">
 
-    <!-- Main Workspace Layout -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-      
-      <!-- Left Column: Input, Recommend Samples & Labels (5 cols) -->
-      <div class="lg:col-span-5 space-y-4">
-        
-        <!-- Text Input Card -->
-        <div class="bg-[#131b2e] border border-slate-800 rounded-xl p-4 space-y-3">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-semibold text-white uppercase tracking-wider">
-              Văn bản đầu vào (Text State)
+          <!-- Panel 1: Input Text -->
+          <div class="vbg-panel">
+            <div class="vbg-panel-header">
+              <label class="vbg-label" for="inputText" style="font-weight: var(--vbg-weight-semibold); color: var(--vbg-text-primary);">
+                Văn bản đầu vào
+              </label>
+              
+              <label style="display: flex; align-items: center; gap: 6px; font-size: var(--vbg-type-metadata); color: var(--vbg-text-secondary); cursor: pointer; user-select: none;">
+                <input type="checkbox" id="realtimeToggle" checked style="accent-color: var(--vbg-gray-1000);">
+                <span>Thời gian thực (350ms)</span>
+              </label>
+            </div>
+
+            <div style="position: relative;">
+              <textarea id="inputText" rows="4" class="vbg-field"
+                style="width: 100%; box-sizing: border-box; resize: vertical; padding: var(--vbg-space-3); font-family: var(--vbg-font-sans); font-size: var(--vbg-type-compact); border: 1px solid var(--vbg-border-default); border-radius: var(--vbg-radius-small); background: var(--vbg-background-200); color: var(--vbg-text-primary); outline: none;"
+                placeholder="Nhập nội dung bất kỳ bằng tiếng Việt hoặc tiếng Anh..."></textarea>
+
+              <div id="typingIndicator" style="display: none; position: absolute; bottom: 10px; right: 10px; font-size: 11px; font-family: var(--vbg-font-mono); color: var(--vbg-text-secondary); background: var(--vbg-surface-primary); padding: 2px 8px; border-radius: 4px; border: 1px solid var(--vbg-border-subtle);">
+                Đang xử lý...
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: var(--vbg-space-2);">
+              <button id="classifyBtn" onclick="runClassification(true)" class="vbg-button" data-variant="primary" style="flex: 1;">
+                <span id="btnText">Phân loại ngay</span>
+              </button>
+              <button onclick="clearInput()" class="vbg-button" data-variant="secondary" title="Xóa văn bản">
+                Xóa
+              </button>
+            </div>
+          </div>
+
+          <!-- Panel 2: Recommend Samples -->
+          <div class="vbg-panel">
+            <div class="vbg-panel-header">
+              <div style="display: flex; align-items: center; gap: var(--vbg-space-2);">
+                <span class="vbg-label" style="font-weight: var(--vbg-weight-semibold); color: var(--vbg-text-primary);">
+                  Mẫu Thử Nghiệm (Recommend)
+                </span>
+                <span id="recommendCount" class="vbg-mono" style="font-size: 11px; color: var(--vbg-text-secondary);">
+                  (0)
+                </span>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: var(--vbg-space-2); font-size: var(--vbg-type-metadata);">
+                <button onclick="toggleAddRecommendForm()" style="background: transparent; border: none; color: var(--vbg-text-primary); cursor: pointer; font-size: 12px; font-weight: var(--vbg-weight-medium); padding: 0;">
+                  + Thêm Mẫu
+                </button>
+                <span style="color: var(--vbg-border-strong);">&bull;</span>
+                <button onclick="resetDefaultRecommends()" style="background: transparent; border: none; color: var(--vbg-text-secondary); cursor: pointer; font-size: 12px; padding: 0;" title="Khôi phục mẫu mặc định">
+                  Khôi phục
+                </button>
+              </div>
+            </div>
+
+            <!-- Inline Add Form -->
+            <div id="addRecommendForm" style="display: none; flex-direction: column; gap: var(--vbg-space-3); padding: var(--vbg-space-3); border: 1px solid var(--vbg-border-default); border-radius: var(--vbg-radius-small); background: var(--vbg-surface-secondary);">
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-size: 12px; font-weight: var(--vbg-weight-semibold); color: var(--vbg-text-primary);">Tạo Mẫu Mới</span>
+                <button onclick="toggleAddRecommendForm()" style="background: none; border: none; color: var(--vbg-text-secondary); cursor: pointer;">✕</button>
+              </div>
+
+              <input type="text" id="newRecTitle" placeholder="Tiêu đề gợi nhớ (VD: Crypto Surge, Hàng giao chậm...)"
+                style="width: 100%; box-sizing: border-box; padding: 6px 10px; font-size: 12px; font-family: var(--vbg-font-sans); border: 1px solid var(--vbg-border-default); border-radius: var(--vbg-radius-small); background: var(--vbg-surface-primary); color: var(--vbg-text-primary); outline: none;">
+
+              <textarea id="newRecText" rows="2" placeholder="Nội dung văn bản để kiểm thử..."
+                style="width: 100%; box-sizing: border-box; padding: 6px 10px; font-size: 12px; font-family: var(--vbg-font-sans); border: 1px solid var(--vbg-border-default); border-radius: var(--vbg-radius-small); background: var(--vbg-surface-primary); color: var(--vbg-text-primary); outline: none;"></textarea>
+
+              <div style="display: flex; justify-content: flex-end; gap: var(--vbg-space-2);">
+                <button onclick="toggleAddRecommendForm()" class="vbg-button" data-variant="tertiary" style="padding: 4px 10px; font-size: 12px;">Hủy</button>
+                <button onclick="saveNewRecommend()" class="vbg-button" data-variant="primary" style="padding: 4px 12px; font-size: 12px;">Lưu Mẫu</button>
+              </div>
+            </div>
+
+            <!-- Chips Container -->
+            <div id="recommendChips" style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 180px; overflow-y: auto; padding: 2px 0;">
+              <!-- Injected by JS -->
+            </div>
+
+            <span class="vbg-caption" style="color: var(--vbg-text-secondary); font-size: 11px;">
+              Bấm vào mẫu để nạp và phân loại ngay. Nhấn ✕ để xóa mẫu.
             </span>
-            <label class="flex items-center gap-1.5 cursor-pointer text-xs text-slate-400 select-none">
-              <input type="checkbox" id="realtimeToggle" checked class="rounded accent-indigo-600">
-              <span>Realtime (350ms)</span>
-            </label>
           </div>
 
-          <div class="relative">
-            <textarea id="inputText" rows="4" 
-              class="w-full bg-[#0b0f19] border border-slate-800 rounded-lg p-3 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 custom-scroll transition-all"
-              placeholder="Nhập nội dung bất kỳ bằng tiếng Việt hoặc tiếng Anh..."></textarea>
+          <!-- Panel 3: Labels Management -->
+          <div class="vbg-panel">
+            <div class="vbg-panel-header">
+              <div style="display: flex; align-items: center; gap: var(--vbg-space-2);">
+                <span class="vbg-label" style="font-weight: var(--vbg-weight-semibold); color: var(--vbg-text-primary);">
+                  Danh Sách Nhãn
+                </span>
+                <span id="labelCount" class="vbg-mono" style="font-size: 11px; color: var(--vbg-text-secondary);">
+                  (0)
+                </span>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: var(--vbg-space-2); font-size: var(--vbg-type-metadata);">
+                <button onclick="addEscapeHatch()" style="background: transparent; border: none; color: var(--vbg-text-primary); cursor: pointer; font-size: 12px; padding: 0;">
+                  + other
+                </button>
+                <span style="color: var(--vbg-border-strong);">&bull;</span>
+                <button onclick="clearAllLabels()" style="background: transparent; border: none; color: var(--vbg-text-secondary); cursor: pointer; font-size: 12px; padding: 0;">
+                  Xóa hết
+                </button>
+                <span style="color: var(--vbg-border-strong);">&bull;</span>
+                <button onclick="resetDefaultLabels()" style="background: transparent; border: none; color: var(--vbg-text-secondary); cursor: pointer; font-size: 12px; padding: 0;">
+                  Khôi phục
+                </button>
+              </div>
+            </div>
+
+            <!-- Labels Chips -->
+            <div id="labelChips" style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 160px; overflow-y: auto; padding: 2px 0;">
+              <!-- Injected by JS -->
+            </div>
+
+            <!-- Add Label Input -->
+            <div style="display: flex; gap: var(--vbg-space-2);">
+              <input type="text" id="newLabelInput" placeholder="Nhập nhãn mới (Enter để thêm)..."
+                style="flex: 1; padding: 6px 10px; font-size: 12px; font-family: var(--vbg-font-sans); border: 1px solid var(--vbg-border-default); border-radius: var(--vbg-radius-small); background: var(--vbg-surface-secondary); color: var(--vbg-text-primary); outline: none;"
+                onkeydown="if(event.key === 'Enter'){ addCustomLabel(); }">
+              <button onclick="addCustomLabel()" class="vbg-button" data-variant="secondary" style="padding: 6px 12px; font-size: 12px;">
+                + Thêm
+              </button>
+            </div>
+
+            <span class="vbg-caption" style="color: var(--vbg-text-secondary); font-size: 11px;">
+              Mô hình TypeSafe Jev hỗ trợ đồng thời tới 255 nhãn zero-shot với tổng phân phối 100%.
+            </span>
+          </div>
+
+        </div>
+
+        <!-- Right Column: Results & Probability Evidence -->
+        <div style="display: flex; flex-direction: column; gap: var(--vbg-space-6);">
+
+          <!-- Evidence Card: Winner & Scores -->
+          <div class="vbg-panel" style="padding: var(--vbg-space-6);">
             
-            <div id="typingIndicator" class="hidden absolute bottom-2.5 right-2.5 text-[10px] text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20 animate-pulse">
-              Đang phân tích Jev...
-            </div>
-          </div>
-
-          <div class="flex items-center justify-between gap-2 pt-1">
-            <button id="classifyBtn" onclick="runClassification(true)" class="flex-1 py-2 px-4 bg-gradient-to-r from-indigo-600 via-indigo-500 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white rounded-lg text-xs font-bold transition-all shadow-md shadow-indigo-600/20 flex items-center justify-center gap-1.5">
-              <span id="btnIcon">⚡</span>
-              <span id="btnText">Phân loại ngay</span>
-            </button>
-            <button onclick="clearInput()" class="py-2 px-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 hover:text-white rounded-lg text-xs transition-all" title="Xóa nội dung">
-              ✕
-            </button>
-          </div>
-        </div>
-
-        <!-- Recommend Samples Management Card -->
-        <div class="bg-[#131b2e] border border-slate-800 rounded-xl p-4 space-y-3">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <span class="text-xs font-semibold text-white uppercase tracking-wider">
-                🚀 Mẫu Recommend
-              </span>
-              <span id="recommendCount" class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-mono">0</span>
-            </div>
-            <div class="flex items-center gap-2 text-[11px]">
-              <button onclick="toggleAddRecommendForm()" id="btnAddRecommendToggle" class="text-indigo-400 hover:text-indigo-300 font-medium transition-colors flex items-center gap-1">
-                <span>+</span> Thêm Recommend
-              </button>
-              <span class="text-slate-700">|</span>
-              <button onclick="resetDefaultRecommends()" class="text-slate-400 hover:text-rose-400 transition-colors" title="Khôi phục mẫu mặc định">
-                Khôi phục
-              </button>
-            </div>
-          </div>
-
-          <!-- Inline Add Recommend Form (Collapsible) -->
-          <div id="addRecommendForm" class="hidden p-3 bg-[#0b0f19] border border-indigo-500/30 rounded-lg space-y-2.5">
-            <div class="flex items-center justify-between">
-              <span class="text-[11px] font-bold text-indigo-300">Tạo mẫu Recommend mới</span>
-              <button onclick="toggleAddRecommendForm()" class="text-slate-500 hover:text-slate-300 text-xs">✕</button>
-            </div>
-            <input type="text" id="newRecTitle" placeholder="Tiêu đề / Icon (VD: 🪙 Crypto Surge, 🍔 Đồ Ăn, Phàn nàn...)" 
-              class="w-full bg-[#131b2e] border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-            <textarea id="newRecText" rows="2" placeholder="Nội dung văn bản mẫu để test..."
-              class="w-full bg-[#131b2e] border border-slate-800 rounded-lg p-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 custom-scroll"></textarea>
-            <div class="flex justify-end gap-2">
-              <button onclick="toggleAddRecommendForm()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs transition-colors">
-                Hủy
-              </button>
-              <button onclick="saveNewRecommend()" class="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-xs font-semibold shadow-sm transition-colors">
-                + Lưu Mẫu
-              </button>
-            </div>
-          </div>
-
-          <!-- Recommend Chips List -->
-          <div id="recommendChips" class="flex flex-wrap gap-1.5 max-h-56 overflow-y-auto custom-scroll p-2 bg-[#0b0f19] rounded-lg border border-slate-800 min-h-[48px]">
-            <!-- Injected by JS -->
-          </div>
-
-          <p class="text-[10px] text-slate-500 leading-normal">
-            💡 <em>Mẹo:</em> Bấm vào bất kỳ mẫu nào để nạp và phân loại ngay. Bấm dấu ✕ trên mỗi chip để xóa mẫu không cần thiết.
-          </p>
-        </div>
-
-        <!-- Labels Management Card -->
-        <div class="bg-[#131b2e] border border-slate-800 rounded-xl p-4 space-y-3">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <span class="text-xs font-semibold text-white uppercase tracking-wider">🏷️ Danh sách Nhãn</span>
-              <span id="labelCount" class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-mono">0</span>
-            </div>
-            <div class="flex items-center gap-2 text-[11px]">
-              <button onclick="addEscapeHatch()" class="text-indigo-400 hover:text-indigo-300 transition-colors">
-                + other
-              </button>
-              <span class="text-slate-700">|</span>
-              <button onclick="clearAllLabels()" class="text-slate-400 hover:text-rose-400 transition-colors" title="Xóa toàn bộ nhãn">
-                Xóa hết
-              </button>
-              <span class="text-slate-700">|</span>
-              <button onclick="resetDefaultLabels()" class="text-slate-400 hover:text-rose-400 transition-colors" title="Khôi phục danh sách nhãn ban đầu">
-                Khôi phục
-              </button>
-            </div>
-          </div>
-
-          <!-- Label Chips Container -->
-          <div id="labelChips" class="flex flex-wrap gap-1.5 p-2.5 bg-[#0b0f19] rounded-lg border border-slate-800 min-h-[44px] max-h-48 overflow-y-auto custom-scroll">
-            <!-- Injected by JS -->
-          </div>
-
-          <!-- Add Label Input -->
-          <div class="flex gap-2">
-            <input type="text" id="newLabelInput" placeholder="Nhập nhãn mới (nhấn Enter để thêm)..." 
-              class="flex-1 bg-[#0b0f19] border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-              onkeydown="if(event.key === 'Enter'){ addCustomLabel(); }">
-            <button onclick="addCustomLabel()" class="px-3 py-1.5 bg-slate-800 hover:bg-indigo-600 text-slate-200 hover:text-white rounded-lg text-xs font-medium border border-slate-700 hover:border-indigo-500 transition-all">
-              + Thêm
-            </button>
-          </div>
-
-          <p class="text-[10px] text-slate-500 leading-normal">
-            💡 <em>Mẹo:</em> TypeSafe Jev hỗ trợ tới 255 nhãn zero-shot cùng lúc, tính toán phân phối xác suất toán học 100%. Tự thêm nhãn riêng để kiểm thử theo ý m.
-          </p>
-        </div>
-
-      </div>
-
-      <!-- Right Column: Single TypeSafe Jev Results (7 cols) -->
-      <div class="lg:col-span-7 space-y-4">
-
-        <!-- TypeSafe Jev Studio Card -->
-        <div id="jevCard" class="bg-[#131b2e] border border-indigo-500/30 rounded-xl p-5 space-y-5 relative overflow-hidden transition-all card-glow">
-          
-          <!-- Header of Results -->
-          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-            <div class="flex items-center gap-2.5">
-              <span class="w-3 h-3 rounded-full bg-indigo-500 animate-pulse"></span>
+            <div style="display: flex; align-items: center; justify-content: space-between; pb-2; border-bottom: 1px solid var(--vbg-border-subtle); padding-bottom: var(--vbg-space-3);">
               <div>
-                <h2 class="text-sm font-bold text-white uppercase tracking-wider">Kết Quả Phân Loại TypeSafe Jev</h2>
-                <p class="text-[11px] text-slate-400 font-mono">Parallel Exact Probability Sampler</p>
+                <h2 style="margin: 0; font-size: var(--vbg-type-section); font-weight: var(--vbg-weight-semibold); letter-spacing: -0.02em; color: var(--vbg-text-primary);">
+                  Kết Quả Phân Loại
+                </h2>
+                <span class="vbg-caption" style="color: var(--vbg-text-secondary);">Phân phối xác suất toán học chuẩn hóa 100%</span>
               </div>
-            </div>
-            <div class="flex items-center gap-2 font-mono">
-              <span id="jevLatencyBadge" class="text-xs font-bold text-indigo-300 bg-indigo-500/15 px-2.5 py-1 rounded-lg border border-indigo-500/30">
-                Chờ lệnh
-              </span>
-            </div>
-          </div>
 
-          <!-- Top 1 Primary Decision Hero Banner -->
-          <div class="bg-[#0b0f19] p-4 rounded-xl border border-slate-800/80 space-y-2">
-            <div class="flex items-center justify-between text-[11px] text-slate-400 uppercase font-mono">
-              <span>🏆 Nhãn Chiến Thắng (Top 1 Winner)</span>
-              <span>Độ Tin Cậy (Confidence)</span>
-            </div>
-            <div class="flex items-baseline justify-between gap-3">
-              <div id="jevWinnerLabel" class="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-cyan-400 to-emerald-300 truncate max-w-[320px] sm:max-w-md">
-                --
-              </div>
-              <div id="jevWinnerConfidence" class="px-3 py-1 rounded-lg text-sm sm:text-base font-mono font-black bg-slate-800 text-slate-400 border border-slate-700">
-                --%
+              <div style="display: flex; align-items: center; gap: var(--vbg-space-2);">
+                <span id="jevLatencyBadge" class="vbg-mono" style="font-size: 12px; padding: 2px 8px; border: 1px solid var(--vbg-border-subtle); border-radius: 4px; background: var(--vbg-surface-secondary); color: var(--vbg-text-secondary);">
+                  Chờ lệnh
+                </span>
               </div>
             </div>
-          </div>
 
-          <!-- Probability Distribution Bars -->
-          <div class="space-y-3">
-            <div class="flex items-center justify-between text-xs pb-1 border-b border-slate-800/60">
-              <span class="text-slate-300 font-semibold">Phân bổ xác suất toán học (Tất cả nhãn):</span>
-              <span class="text-[10px] text-slate-500 font-mono">Tổng xác suất = 100%</span>
-            </div>
-            
-            <div id="jevBarsContainer" class="space-y-2.5 max-h-96 overflow-y-auto custom-scroll pr-2">
-              <div class="text-xs text-slate-500 py-12 text-center italic">
-                Nhập nội dung hoặc chọn mẫu recommend để bắt đầu phân loại...
+            <!-- Primary Decision / Top 1 Winner -->
+            <div class="vbg-winner-display">
+              <div style="min-width: 0;">
+                <span class="vbg-label" style="display: block; margin-bottom: 4px; color: var(--vbg-text-secondary);">
+                  Nhãn Chiến Thắng (Top 1)
+                </span>
+                <div id="jevWinnerLabel" class="vbg-winner-label">
+                  --
+                </div>
+              </div>
+
+              <div style="text-align: right;">
+                <span class="vbg-label" style="display: block; margin-bottom: 4px; color: var(--vbg-text-secondary);">
+                  Độ Tin Cậy
+                </span>
+                <div id="jevWinnerConfidence" class="vbg-winner-pct">
+                  --%
+                </div>
               </div>
             </div>
-          </div>
 
-          <!-- Telemetry Footer -->
-          <div class="pt-3 border-t border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-500 font-mono">
-            <div class="flex items-center gap-3">
-              <span>tokens_out: <strong class="text-slate-300">0</strong></span>
-              <span>&bull;</span>
-              <span>latency: <span id="telemetryLatency" class="text-indigo-400 font-bold">-- ms</span></span>
+            <!-- Probability Bars List -->
+            <div style="display: flex; flex-direction: column; gap: var(--vbg-space-2); margin-top: var(--vbg-space-2);">
+              <div style="display: flex; justify-content: space-between; font-size: var(--vbg-type-metadata); color: var(--vbg-text-secondary); padding: 0 var(--vbg-space-3);">
+                <span>Thứ Hạng & Nhãn</span>
+                <span>Xác Suất</span>
+              </div>
+
+              <div id="jevBarsContainer" style="display: flex; flex-direction: column; gap: 4px; max-height: 460px; overflow-y: auto; padding-right: 4px;">
+                <div style="text-align: center; padding: 60px 0; color: var(--vbg-text-secondary); font-size: var(--vbg-type-compact);">
+                  Nhập văn bản hoặc chọn mẫu thử nghiệm để phân loại...
+                </div>
+              </div>
             </div>
-            <div class="flex items-center gap-2">
-              <span class="text-indigo-400 font-semibold">TypeSafe Jev Engine</span>
-              <span>&bull;</span>
-              <span class="text-slate-400">Zero-Shot Pretrained</span>
+
+            <!-- Telemetry Audit Row -->
+            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--vbg-space-3); pt-3; border-top: 1px solid var(--vbg-border-subtle); padding-top: var(--vbg-space-3); font-size: 12px; font-family: var(--vbg-font-mono); color: var(--vbg-text-secondary);">
+              <div style="display: flex; align-items: center; gap: var(--vbg-space-3);">
+                <span>tokens_out: 0</span>
+                <span>&bull;</span>
+                <span>latency: <span id="telemetryLatency">-- ms</span></span>
+              </div>
+              <div style="display: flex; align-items: center; gap: var(--vbg-space-2);">
+                <span>$0.042/MTok</span>
+                <span>&bull;</span>
+                <span>TypeSafe Jev Fast</span>
+              </div>
             </div>
+
           </div>
 
         </div>
 
       </div>
+    </main>
 
-    </div>
-
+    <!-- Vercel Official Authorship Footer -->
+    <footer class="vbg-footer" style="margin-block-start: clamp(48px, 8vw, 80px); display: flex; align-items: center; justify-content: space-between; font-size: var(--vbg-type-compact); color: var(--vbg-text-secondary);">
+      <div style="display: flex; align-items: center; gap: var(--vbg-space-3);">
+        <span class="vbg-logo" role="img" aria-label="Vercel"></span>
+        <span>Classifier Studio &bull; TypeSafe AI Jev</span>
+      </div>
+      <span class="vbg-mono" style="font-size: 11px;">jev-test.gohans.org</span>
+    </footer>
   </div>
 
   <!-- Config Import/Export Modal -->
-  <div id="configModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-[#131b2e] border border-slate-800 rounded-2xl max-w-lg w-full p-5 space-y-4 shadow-2xl">
-      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-        <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-          <span>📋</span> Quản Lý Cấu Hình (JSON)
+  <div id="configModal" class="vbg-modal-backdrop" style="display: none;">
+    <div class="vbg-modal-content">
+      <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--vbg-border-subtle); padding-bottom: var(--vbg-space-3);">
+        <h3 style="margin: 0; font-size: var(--vbg-type-subsection); font-weight: var(--vbg-weight-semibold); color: var(--vbg-text-primary);">
+          Quản Lý Cấu Hình (JSON)
         </h3>
-        <button onclick="closeConfigModal()" class="text-slate-400 hover:text-white text-base">✕</button>
+        <button onclick="closeConfigModal()" style="background: none; border: none; color: var(--vbg-text-secondary); cursor: pointer; font-size: 16px;">✕</button>
       </div>
 
-      <p class="text-xs text-slate-400 leading-relaxed">
-        Sao chép dữ liệu JSON bên dưới để lưu lại, hoặc dán dữ liệu JSON mới vào rồi bấm <strong>Nạp Cấu Hình</strong>:
+      <p class="vbg-caption" style="color: var(--vbg-text-secondary); margin: 0;">
+        Dữ liệu JSON chứa toàn bộ Nhãn và các Mẫu thử nghiệm hiện tại. Sao chép để lưu trữ hoặc dán JSON mới để nạp vào:
       </p>
 
       <textarea id="configJsonText" rows="10" 
-        class="w-full bg-[#0b0f19] border border-slate-800 rounded-lg p-3 text-xs font-mono text-indigo-300 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 custom-scroll"></textarea>
+        style="width: 100%; box-sizing: border-box; padding: var(--vbg-space-3); font-family: var(--vbg-font-mono); font-size: 11px; border: 1px solid var(--vbg-border-default); border-radius: var(--vbg-radius-small); background: var(--vbg-background-200); color: var(--vbg-text-primary); outline: none; resize: vertical;"></textarea>
 
-      <div class="flex items-center justify-between gap-2 pt-2 border-t border-slate-800">
-        <button onclick="copyConfigJson()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg text-xs font-medium border border-slate-700 transition-colors">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: var(--vbg-space-2); pt-2; border-top: 1px solid var(--vbg-border-subtle); padding-top: var(--vbg-space-3);">
+        <button onclick="copyConfigJson()" class="vbg-button" data-variant="secondary">
           Sao Chép JSON
         </button>
-        <div class="flex items-center gap-2">
-          <button onclick="closeConfigModal()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs transition-colors">
-            Đóng
-          </button>
-          <button onclick="importConfigJson()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors">
-            Nạp Cấu Hình
-          </button>
+        <div style="display: flex; gap: var(--vbg-space-2);">
+          <button onclick="closeConfigModal()" class="vbg-button" data-variant="tertiary">Đóng</button>
+          <button onclick="importConfigJson()" class="vbg-button" data-variant="primary">Nạp Cấu Hình</button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Toast Notification -->
-  <div id="toastNotification" class="fixed bottom-5 right-5 z-50 transform translate-y-12 opacity-0 transition-all duration-300 pointer-events-none">
-    <div id="toastContent" class="px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-semibold shadow-xl border border-indigo-400/30 flex items-center gap-2">
-      <span>✓</span>
-      <span id="toastMsg">Thông báo</span>
-    </div>
+  <div id="toastNotification" class="vbg-toast">
+    <span id="toastMsg">Thông báo</span>
   </div>
 
   <script>
-    const STORAGE_KEY_LABELS = 'classifier_studio_labels_v6';
-    const STORAGE_KEY_RECOMMENDS = 'classifier_studio_recommends_v1';
+    const STORAGE_KEY_LABELS = 'classifier_studio_labels_vn_v1';
+    const STORAGE_KEY_RECOMMENDS = 'classifier_studio_recommends_vn_v1';
 
     const DEFAULT_LABELS = [
-      "artificial intelligence",
-      "software engineering",
-      "cybersecurity",
-      "cryptocurrency",
-      "finance & stocks",
-      "venture capital",
-      "gaming & esports",
-      "scam & phishing",
-      "spam & marketing",
-      "hate speech & toxicity",
-      "politics & government",
-      "breaking world news",
-      "science & astronomy",
-      "health & medicine",
-      "fitness & workout",
-      "food & culinary",
-      "travel & tourism",
-      "humor & viral memes",
-      "movies & cinema",
-      "music & pop culture",
-      "customer support issue",
-      "job & career advice",
-      "personal rant & rage",
-      "mental health & wellness",
-      "ecommerce & shopping",
-      "climate & environment",
-      "education & tutorials",
-      "sports & athletics",
-      "legal & compliance",
-      "automotive & evs",
-      "social media drama",
-      "other"
+      "não cặc",
+      "thiểu năng",
+      "bố láo",
+      "mất dạy",
+      "gaming",
+      "động vật",
+      "thiên hà",
+      "liên minh huyền thoại",
+      "valorant",
+      "sức khỏe",
+      "công nghệ",
+      "người nổi tiếng",
+      "coding",
+      "thông minh",
+      "thân thiện",
+      "tình dục",
+      "ngoan ngoãn",
+      "đẳng cấp",
+      "thiên tài",
+      "đồ chơi",
+      "nhanh nhẹn",
+      "minecraft",
+      "roblox",
+      "âm nhạc",
+      "lịch sử",
+      "địa lý",
+      "chính trị",
+      "vũ trụ",
+      "tiền bạc",
+      "đần độn",
+      "gay",
+      "thời trang",
+      "tức giận"
     ];
 
     const DEFAULT_RECOMMENDS = [
-      { id: "s1", title: "🪙 Crypto Surge ($BTC)", text: "Bitcoin breaks past $105,000 as institutional spot ETF inflows shatter all historical volume records on Wall Street!" },
-      { id: "s2", title: "🤖 AI Agent Launch", text: "Anthropic unveiled Claude 3.7 Sonnet featuring hybrid reasoning, sub-agent orchestration, and native computer use tools." },
-      { id: "s3", title: "🚨 Phishing Scam", text: "URGENT AIRDROP: Connect your Web3 MetaMask wallet right now to claim 5,000 free governance tokens before the claim window closes!" },
-      { id: "s4", title: "💻 C++ Memory Bug", text: "Encountered a fatal Segmentation Fault (SIGSEGV) in C++ memory pointer allocation inside the multithreaded worker loop." },
-      { id: "s5", title: "🎮 GTA 6 Leak", text: "Rockstar Games just leaked the official GTA VI gameplay trailer showcasing dynamic weather physics and 4K raytracing in Vice City." },
-      { id: "s6", title: "😡 Airline Rant", text: "Worst customer service ever! The airline delayed our international flight for 9 hours without offering hotel vouchers or water bottles." },
-      { id: "s7", title: "📈 Fed Interest Rates", text: "Federal Reserve chair signals imminent interest rate cuts as monthly inflation drops below the 2.0% target." },
-      { id: "s8", title: "🛡️ Zero-Day Exploit", text: "Critical zero-day remote code execution vulnerability discovered in widespread open-source logging library. Patch immediately!" },
-      { id: "s9", title: "🍔 Texas BBQ Brisket", text: "Smoked Texas beef brisket slow-cooked for 14 hours over post oak wood with homemade barbecue glaze and creamy mac & cheese." },
-      { id: "s10", title: "🚀 NASA Webb Telescope", text: "NASA's James Webb Space Telescope detects potential biosignature gases in the atmosphere of habitable-zone exoplanet K2-18b." },
-      { id: "s11", title: "💼 $420k Engineer Job", text: "We are hiring a Principal Distributed Systems Engineer in San Francisco / Remote. $280k-$420k base + generous equity package." },
-      { id: "s12", title: "⚽ Champions League", text: "Real Madrid pulls off an unbelievable 94th-minute comeback victory in the UEFA Champions League semifinal thriller!" },
-      { id: "s13", title: "🎬 Nolan IMAX Movie", text: "Christopher Nolan announces his next sci-fi IMAX epic starring Matt Damon and Zendaya, scheduled for worldwide release in July 2026." },
-      { id: "s14", title: "🧘 Cardio & Health", text: "Daily 20-minute resistance training and zone-2 cardio significantly lowers resting heart rate and reduces systemic inflammation." },
-      { id: "s15", title: "🗳️ Privacy Law", text: "Parliament passes landmark digital privacy legislation restricting commercial harvesting of biometric and location data." },
-      { id: "s16", title: "😂 99 Bugs Meme", text: "My code has 99 compiler bugs. I fix one bug, now my code has 127 bugs and the linker is threatening to delete my hard drive." }
+      {
+        "id": "rec_1789932070820",
+        "title": "tiền bạc",
+        "text": "mới dc cho 100$, để đi mua đồ ăn phát"
+      },
+      {
+        "id": "rec_1789932042644",
+        "title": "gay",
+        "text": "tao mới qua thái lan chuyển giới, từ giờ tao chỉ thích con trai thôi"
+      },
+      {
+        "id": "rec_1789932019831",
+        "title": "hải phòng",
+        "text": "hải phòng hôm nay mát vl, ko biết là có nhiều cây hay do gì"
+      },
+      {
+        "id": "rec_1789931995637",
+        "title": "iron golem",
+        "text": "wtf is this iron golem doing?"
+      },
+      {
+        "id": "rec_1789931975368",
+        "title": "killed by spider",
+        "text": "bro killed by a spider lol"
+      },
+      {
+        "id": "rec_1789931955141",
+        "title": "mặt trời",
+        "text": "nhỡ mặt trời nổ tung thì sao nhỉ, mình còn sống ko"
+      },
+      {
+        "id": "rec_1789931933644",
+        "title": "hôn hít",
+        "text": "hôm nay mới hôn hít với bồ"
+      },
+      {
+        "id": "rec_1789931915479",
+        "title": "chill",
+        "text": "sáng ăn cơm, chiều đi dạo, tối chơi game, 1 ngày thế là đủ"
+      },
+      {
+        "id": "rec_1789931872751",
+        "title": "ngu",
+        "text": "1 + 1 bằng mấy nhỉ, bằng 3 à"
+      },
+      {
+        "id": "rec_1789931844094",
+        "title": "khen",
+        "text": "gg, nice try"
+      },
+      {
+        "id": "rec_1789931828019",
+        "title": "chatgpt",
+        "text": "openai mới ra model nào thế, có ngon hơn gemini ko"
+      },
+      {
+        "id": "rec_1789931806166",
+        "title": "lịch sử",
+        "text": "năm 1945 hình như việt nam độc lập thì phải"
+      },
+      {
+        "id": "rec_1789931785419",
+        "title": "lễ phép",
+        "text": "con chào bác ạ"
+      },
+      {
+        "id": "rec_1789931771395",
+        "title": "yasuo",
+        "text": "yasuo mới ra skin mới đẹp vl"
+      },
+      {
+        "id": "rec_1789931756539",
+        "title": "lego",
+        "text": "hôm nay mới mua bộ lego về chơi, quên cả ăn cơm"
+      },
+      {
+        "id": "rec_1789931737875",
+        "title": "thiên tài",
+        "text": "thằng kia đi thi học sinh giỏi dc 10 điểm, hơn cả tao"
+      },
+      {
+        "id": "rec_1789931710095",
+        "title": "động vật",
+        "text": "hôm nay xem thế giới động vật có con khỉ cute quá"
+      },
+      {
+        "id": "rec_1789931689668",
+        "title": "tức giận",
+        "text": "địt con mẹ nhà mày"
+      },
+      {
+        "id": "rec_1789931652871",
+        "title": "xin chào",
+        "text": "xin chào bạn"
+      },
+      {
+        "id": "rec_1789931642665",
+        "title": "chính trị",
+        "text": "thằng donald trump lại đánh thuế tao"
+      },
+      {
+        "id": "rec_1789931622902",
+        "title": "minecraft",
+        "text": "mày ra tạo cái cuốc đi"
+      },
+      {
+        "id": "rec_1789931604651",
+        "title": "phàn nàn",
+        "text": "sơn tùng hát hay vl"
+      },
+      {
+        "id": "rec_1789931560944",
+        "title": "khen",
+        "text": "áo này màu hồng đẹp quá"
+      },
+      {
+        "id": "rec_1789931544857",
+        "title": "Chửi 2",
+        "text": "Địt con mẹ team ngu vãi lồn"
+      },
+      {
+        "id": "rec_1789931519453",
+        "title": "Buồn",
+        "text": "Hôm nay bị điểm kém"
+      },
+      {
+        "id": "rec_1789931504236",
+        "title": "Chửi",
+        "text": "Địt mẹ thằng ngu"
+      }
     ];
 
     const state = {
@@ -409,23 +737,18 @@
       jevMs: null
     };
 
-    // ==================== TOAST NOTIFICATION ====================
-    function showToast(msg, isError = false) {
-      const el = document.getElementById('toastNotification');
-      const content = document.getElementById('toastContent');
+    // Toast
+    function showToast(msg) {
+      const toast = document.getElementById('toastNotification');
       const text = document.getElementById('toastMsg');
       text.textContent = msg;
-      content.className = isError 
-        ? "px-4 py-2.5 rounded-xl bg-rose-600 text-white text-xs font-semibold shadow-xl border border-rose-400/30 flex items-center gap-2"
-        : "px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-semibold shadow-xl border border-indigo-400/30 flex items-center gap-2";
-
-      el.classList.remove('translate-y-12', 'opacity-0');
+      toast.classList.add('show');
       setTimeout(() => {
-        el.classList.add('translate-y-12', 'opacity-0');
+        toast.classList.remove('show');
       }, 3000);
     }
 
-    // ==================== STORAGE & URL SHARING ====================
+    // Storage & URL Configuration
     function loadSavedLabels() {
       try {
         const saved = localStorage.getItem(STORAGE_KEY_LABELS);
@@ -497,12 +820,12 @@
             loaded = true;
           }
           if (loaded) {
-            showToast("Đã nạp thành công bộ Nhãn & Recommend từ liên kết chia sẻ!");
+            showToast("Đã nạp bộ Nhãn & Recommend từ liên kết chia sẻ!");
             return true;
           }
         }
       } catch (e) {
-        console.warn("Không đọc được cấu hình từ URL hash:", e);
+        console.warn("Không đọc được cấu hình từ URL:", e);
       }
       return false;
     }
@@ -517,13 +840,13 @@
       const shareUrl = `${window.location.origin}${window.location.pathname}#config=${encoded}`;
       
       navigator.clipboard.writeText(shareUrl).then(() => {
-        showToast("Đã sao chép link chia sẻ vào bộ nhớ tạm! Gửi link này cho người khác để test.");
-      }).catch(err => {
-        prompt("Sao chép link này để chia sẻ:", shareUrl);
+        showToast("Đã sao chép link chia sẻ!");
+      }).catch(() => {
+        prompt("Sao chép link này:", shareUrl);
       });
     }
 
-    // ==================== CONFIG MODAL ====================
+    // Modal
     function openConfigModal() {
       const modal = document.getElementById('configModal');
       const textarea = document.getElementById('configJsonText');
@@ -532,11 +855,11 @@
         recommends: state.recommends
       };
       textarea.value = JSON.stringify(config, null, 2);
-      modal.classList.remove('hidden');
+      modal.style.display = "flex";
     }
 
     function closeConfigModal() {
-      document.getElementById('configModal').classList.add('hidden');
+      document.getElementById('configModal').style.display = "none";
     }
 
     function copyConfigJson() {
@@ -564,30 +887,30 @@
         }
 
         closeConfigModal();
-        showToast("Đã nạp cấu hình mới thành công!");
+        showToast("Đã nạp cấu hình mới!");
         runClassification();
       } catch (e) {
-        alert("Lỗi phân tích cú pháp JSON: " + e.message);
+        alert("Lỗi JSON: " + e.message);
       }
     }
 
-    // ==================== RECOMMEND SAMPLES ====================
+    // Recommend Samples Management
     function renderRecommends() {
       const container = document.getElementById('recommendChips');
       const countEl = document.getElementById('recommendCount');
-      countEl.textContent = state.recommends.length;
+      countEl.textContent = `(${state.recommends.length})`;
 
       if (state.recommends.length === 0) {
-        container.innerHTML = `<span class="text-xs text-slate-500 italic p-1">Chưa có mẫu nào. Bấm "+ Thêm Recommend" để tạo!</span>`;
+        container.innerHTML = `<span class="vbg-caption" style="color: var(--vbg-text-secondary); padding: 4px 0;">Chưa có mẫu nào. Bấm "+ Thêm Mẫu" để tạo.</span>`;
         return;
       }
 
       container.innerHTML = state.recommends.map((rec, idx) => `
-        <div class="group inline-flex items-center rounded-lg bg-slate-800/90 hover:bg-indigo-600 border border-slate-700 hover:border-indigo-500 transition-all text-slate-300 hover:text-white shadow-sm overflow-hidden">
-          <button onclick="applyRecommend(${idx})" class="px-2.5 py-1 text-[11px] font-medium flex items-center gap-1 truncate max-w-[200px]" title="${rec.title}">
+        <div class="vbg-rec-item">
+          <button onclick="applyRecommend(${idx})" class="vbg-rec-btn" title="${rec.title}">
             ${rec.title}
           </button>
-          <button onclick="deleteRecommend(${idx}, event)" class="px-1.5 py-1 text-slate-400 hover:text-rose-400 hover:bg-slate-900/60 border-l border-slate-700/80 text-[10px] transition-colors" title="Xóa mẫu này">
+          <button onclick="deleteRecommend(${idx}, event)" class="vbg-rec-del" title="Xóa mẫu">
             ✕
           </button>
         </div>
@@ -604,8 +927,9 @@
 
     function toggleAddRecommendForm() {
       const form = document.getElementById('addRecommendForm');
-      form.classList.toggle('hidden');
-      if (!form.classList.contains('hidden')) {
+      const isHidden = form.style.display === "none";
+      form.style.display = isHidden ? "flex" : "none";
+      if (isHidden) {
         document.getElementById('newRecTitle').focus();
       }
     }
@@ -634,9 +958,8 @@
       titleInput.value = "";
       textInput.value = "";
       toggleAddRecommendForm();
-      showToast(`Đã thêm mẫu "${title}"!`);
+      showToast(`Đã thêm: "${title}"`);
 
-      // Tự động chọn mẫu vừa thêm
       document.getElementById('inputText').value = text;
       runClassification(true);
     }
@@ -647,34 +970,33 @@
       state.recommends.splice(idx, 1);
       saveRecommends();
       renderRecommends();
-      showToast(`Đã xóa mẫu "${rec ? rec.title : ''}"`);
+      showToast(`Đã xóa "${rec ? rec.title : ''}"`);
     }
 
     function resetDefaultRecommends() {
-      if (confirm("Khôi phục danh sách mẫu recommend về mặc định ban đầu?")) {
+      if (confirm("Khôi phục danh sách mẫu mặc định ban đầu?")) {
         state.recommends = [...DEFAULT_RECOMMENDS];
         saveRecommends();
         renderRecommends();
-        showToast("Đã khôi phục danh sách mẫu recommend mặc định!");
+        showToast("Đã khôi phục mẫu mặc định!");
       }
     }
 
-    // ==================== LABELS MANAGEMENT ====================
+    // Labels Management
     function renderLabels() {
       const container = document.getElementById('labelChips');
       const countBadge = document.getElementById('labelCount');
-      countBadge.textContent = state.labels.length;
+      countBadge.textContent = `(${state.labels.length})`;
 
       if (state.labels.length === 0) {
-        container.innerHTML = `<span class="text-xs text-rose-400 italic p-1">Chưa có nhãn nào! Vui lòng thêm tối thiểu 2 nhãn.</span>`;
+        container.innerHTML = `<span class="vbg-caption" style="color: var(--vbg-color-error);">Chưa có nhãn nào! Vui lòng thêm tối thiểu 2 nhãn.</span>`;
         return;
       }
 
       container.innerHTML = state.labels.map((lbl, idx) => `
-        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs bg-[#131b2e] border border-slate-800 text-slate-200">
-          <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+        <span class="vbg-chip">
           <span>${lbl}</span>
-          <button onclick="removeLabel(${idx})" class="text-slate-500 hover:text-rose-400 transition-colors ml-0.5" title="Xóa nhãn này">✕</button>
+          <button onclick="removeLabel(${idx})" class="vbg-chip-btn" title="Xóa nhãn">✕</button>
         </span>
       `).join('');
     }
@@ -692,13 +1014,13 @@
         showToast(`Đã thêm nhãn "${val}"`);
         runClassification();
       } else {
-        showToast(`Nhãn "${val}" đã tồn tại!`, true);
+        showToast(`Nhãn "${val}" đã tồn tại!`);
       }
     }
 
     function removeLabel(index) {
       if (state.labels.length <= 2) {
-        alert("Cần tối thiểu 2 nhãn để mô hình tính toán phân phối xác suất!");
+        alert("Cần tối thiểu 2 nhãn để mô hình tính toán xác suất!");
         return;
       }
       const removed = state.labels.splice(index, 1);
@@ -720,7 +1042,7 @@
     }
 
     function clearAllLabels() {
-      if (confirm("Bạn có chắc chắn muốn xóa hết tất cả các nhãn hiện tại?")) {
+      if (confirm("Xóa toàn bộ nhãn hiện tại?")) {
         state.labels = [];
         saveLabels();
         renderLabels();
@@ -729,16 +1051,16 @@
     }
 
     function resetDefaultLabels() {
-      if (confirm("Khôi phục danh sách nhãn về mặc định ban đầu?")) {
+      if (confirm("Khôi phục danh sách nhãn mặc định?")) {
         state.labels = [...DEFAULT_LABELS];
         saveLabels();
         renderLabels();
-        showToast("Đã khôi phục danh sách nhãn mặc định!");
+        showToast("Đã khôi phục nhãn mặc định!");
         runClassification();
       }
     }
 
-    // ==================== CLASSIFICATION LOGIC ====================
+    // Classification
     function clearInput() {
       document.getElementById('inputText').value = "";
       state.lastText = "";
@@ -751,8 +1073,8 @@
       document.getElementById('jevLatencyBadge').textContent = "Chờ lệnh";
       document.getElementById('telemetryLatency').textContent = "-- ms";
       document.getElementById('jevBarsContainer').innerHTML = `
-        <div class="text-xs text-slate-500 py-12 text-center italic">
-          Nhập nội dung hoặc chọn mẫu recommend để bắt đầu phân loại...
+        <div style="text-align: center; padding: 60px 0; color: var(--vbg-text-secondary); font-size: var(--vbg-type-compact);">
+          Nhập văn bản hoặc chọn mẫu thử nghiệm để phân loại...
         </div>
       `;
     }
@@ -772,7 +1094,7 @@
       const elapsed = Math.round(performance.now() - start);
       if (!res.ok) {
         const errText = await res.text();
-        throw new Error(`Jev HTTP ${res.status}: ${errText}`);
+        throw new Error(`HTTP ${res.status}: ${errText}`);
       }
 
       const data = await res.json();
@@ -786,20 +1108,17 @@
         return;
       }
       if (state.labels.length < 2) {
-        showToast("Cần tối thiểu 2 nhãn để phân loại!", true);
+        showToast("Cần tối thiểu 2 nhãn để phân loại!");
         return;
       }
 
       state.lastText = text;
       state.isClassifying = true;
 
-      const btnIcon = document.getElementById('btnIcon');
       const btnText = document.getElementById('btnText');
-      btnIcon.textContent = "⏳";
-      btnText.textContent = "Đang phân loại...";
-
+      btnText.textContent = "Đang xử lý...";
       const indicator = document.getElementById('typingIndicator');
-      indicator.classList.remove('hidden');
+      indicator.style.display = "block";
 
       state.jevData = null;
       state.jevMs = null;
@@ -810,11 +1129,10 @@
         state.jevMs = res.ms;
         renderJevResults(res.data, res.ms);
       } catch (err) {
-        console.error("Lỗi gọi TypeSafe Jev:", err);
+        console.error("Lỗi TypeSafe Jev:", err);
         renderJevError(err.message);
       } finally {
-        indicator.classList.add('hidden');
-        btnIcon.textContent = "⚡";
+        indicator.style.display = "none";
         btnText.textContent = "Phân loại ngay";
         state.isClassifying = false;
       }
@@ -836,10 +1154,7 @@
       }
 
       document.getElementById('jevWinnerLabel').textContent = chosenLabel;
-      const confEl = document.getElementById('jevWinnerConfidence');
-      confEl.textContent = winnerPct.toFixed(1) + "%";
-      confEl.className = "px-3 py-1 rounded-lg text-sm sm:text-base font-mono font-black " + 
-        (winnerPct >= 70 ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30" : "bg-slate-800 text-slate-300 border border-slate-700");
+      document.getElementById('jevWinnerConfidence').textContent = winnerPct.toFixed(1) + "%";
 
       const allLabels = Array.from(new Set([...state.labels, ...Object.keys(scores)]));
       const sorted = allLabels.sort((a, b) => (scores[b] || 0) - (scores[a] || 0));
@@ -849,19 +1164,22 @@
         const score = (typeof scores[lbl] === 'number') ? scores[lbl] : 0;
         const pct = (score * 100).toFixed(1);
         const isWinner = lbl === chosenLabel;
-        const barColor = isWinner ? "bg-gradient-to-r from-indigo-500 via-cyan-400 to-emerald-400" : "bg-slate-700";
 
         return `
-          <div class="space-y-1 p-2 rounded-lg ${isWinner ? 'bg-indigo-950/30 border border-indigo-500/20' : 'hover:bg-slate-800/40'} transition-all">
-            <div class="flex items-center justify-between text-xs">
-              <div class="flex items-center gap-2">
-                <span class="text-[10px] font-mono text-slate-500 w-4">${idx + 1}.</span>
-                <span class="${isWinner ? 'text-indigo-300 font-bold text-sm' : 'text-slate-300 font-medium'}">${isWinner ? '🏆 ' : ''}${lbl}</span>
+          <div class="vbg-score-row" data-winner="${isWinner}">
+            <div style="display: flex; align-items: baseline; justify-content: space-between; font-size: var(--vbg-type-compact);">
+              <div style="display: flex; align-items: baseline; gap: var(--vbg-space-2); min-width: 0;">
+                <span class="vbg-mono" style="font-size: 11px; color: var(--vbg-text-secondary); width: 22px; flex-shrink: 0;">#${idx + 1}</span>
+                <span style="font-weight: ${isWinner ? 'var(--vbg-weight-semibold)' : 'var(--vbg-weight-regular)'}; color: ${isWinner ? 'var(--vbg-text-primary)' : 'var(--vbg-text-secondary)'}; truncate; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                  ${lbl}
+                </span>
               </div>
-              <span class="font-mono ${isWinner ? 'text-indigo-300 font-bold text-sm' : 'text-slate-400 font-semibold'}">${pct}%</span>
+              <span class="vbg-mono" style="font-variant-numeric: tabular-nums; font-weight: ${isWinner ? 'var(--vbg-weight-semibold)' : 'var(--vbg-weight-regular)'}; color: ${isWinner ? 'var(--vbg-text-primary)' : 'var(--vbg-text-secondary)'};">
+                ${pct}%
+              </span>
             </div>
-            <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-              <div class="h-full rounded-full transition-all duration-300 ${barColor}" style="width: ${pct}%;"></div>
+            <div class="vbg-progress-track">
+              <div class="vbg-progress-fill ${isWinner ? 'vbg-progress-fill-winner' : ''}" style="width: ${pct}%;"></div>
             </div>
           </div>
         `;
@@ -873,21 +1191,15 @@
       document.getElementById('jevWinnerConfidence').textContent = "--";
       document.getElementById('telemetryLatency').textContent = "Error";
       document.getElementById('jevBarsContainer').innerHTML = `
-        <div class="p-4 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-xl text-xs space-y-1">
-          <div class="font-bold flex items-center gap-1.5">
-            <span>⚠️</span> Không thể gọi API classifier.dev
-          </div>
-          <p class="text-slate-400">${msg}</p>
+        <div style="padding: var(--vbg-space-4); border: 1px solid var(--vbg-border-default); border-radius: var(--vbg-radius-small); background: var(--vbg-surface-secondary); color: var(--vbg-color-error); font-size: var(--vbg-type-compact);">
+          <strong>Lỗi gọi API:</strong> ${msg}
         </div>
       `;
     }
 
-    // ==================== INITIALIZATION ====================
+    // Initialization
     function init() {
-      // 1. Check URL for shared config first
       const hasUrlConfig = loadConfigFromUrl();
-
-      // 2. If no URL config, load from localStorage
       if (!hasUrlConfig) {
         state.labels = loadSavedLabels();
         state.recommends = loadSavedRecommends();
@@ -896,7 +1208,6 @@
       renderLabels();
       renderRecommends();
 
-      // Setup realtime debounce
       const inputEl = document.getElementById('inputText');
       inputEl.addEventListener('input', (e) => {
         const isRealtime = document.getElementById('realtimeToggle').checked;
@@ -905,7 +1216,7 @@
         const text = e.target.value.trim();
         if (text === state.lastText) return;
 
-        document.getElementById('typingIndicator').classList.remove('hidden');
+        document.getElementById('typingIndicator').style.display = "block";
         clearTimeout(state.typingTimeout);
 
         state.typingTimeout = setTimeout(() => {
@@ -913,7 +1224,6 @@
         }, 350);
       });
 
-      // Load initial recommend sample if input is empty
       if (!inputEl.value.trim() && state.recommends.length > 0) {
         inputEl.value = state.recommends[0].text;
       }

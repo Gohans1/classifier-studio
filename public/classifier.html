@@ -154,17 +154,21 @@
       border: 1px solid var(--vbg-border-subtle);
       border-radius: var(--vbg-radius);
       background: var(--vbg-surface-secondary);
-      padding: var(--vbg-space-4) var(--vbg-space-5);
+      padding: 28px 32px;
+      min-height: 120px;
       display: flex;
-      align-items: baseline;
+      align-items: center;
       justify-content: space-between;
       gap: var(--vbg-space-4);
+      box-sizing: border-box;
     }
 
     .vbg-winner-label {
-      font-size: clamp(1.5rem, 3vw, 2.25rem);
+      font-size: clamp(1.75rem, 3.5vw, 2.5rem);
       font-weight: var(--vbg-weight-semibold);
       letter-spacing: -0.03em;
+      line-height: 1.25;
+      margin-top: 4px;
       color: var(--vbg-text-primary);
       overflow: hidden;
       text-overflow: ellipsis;
@@ -196,32 +200,6 @@
     .vbg-score-row[data-winner="true"] {
       background: var(--vbg-gray-alpha-100);
       border: 1px solid var(--vbg-border-subtle);
-    }
-
-    /* Modal Backdrop conforming to VBG */
-    .vbg-modal-backdrop {
-      position: fixed;
-      inset: 0;
-      z-index: 100;
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(4px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: var(--vbg-space-4);
-    }
-
-    .vbg-modal-content {
-      background: var(--vbg-surface-primary);
-      border: 1px solid var(--vbg-border-default);
-      border-radius: var(--vbg-radius);
-      width: 100%;
-      max-width: 520px;
-      padding: var(--vbg-space-6);
-      display: flex;
-      flex-direction: column;
-      gap: var(--vbg-space-4);
-      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
     }
 
     /* Toast notification */
@@ -273,16 +251,10 @@
         <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--vbg-space-4);">
           <h1 class="vbg-title" style="margin: 0;">Classifier Studio</h1>
           
-          <div style="display: flex; align-items: center; gap: var(--vbg-space-2); flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: var(--vbg-space-2);">
             <a href="/" class="vbg-button" data-variant="secondary" style="text-decoration: none;">
               Trang Chủ
             </a>
-            <button onclick="copyShareableLink()" id="btnShareLink" class="vbg-button" data-variant="secondary">
-              Sao chép Link chia sẻ
-            </button>
-            <button onclick="openConfigModal()" class="vbg-button" data-variant="tertiary">
-              Cấu hình JSON
-            </button>
           </div>
         </div>
 
@@ -375,7 +347,7 @@
             </div>
 
             <!-- Chips Container -->
-            <div id="recommendChips" style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 180px; overflow-y: auto; padding: 2px 0;">
+            <div id="recommendChips" style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 600px; overflow-y: auto; padding: 2px 0;">
               <!-- Injected by JS -->
             </div>
 
@@ -412,7 +384,7 @@
             </div>
 
             <!-- Labels Chips -->
-            <div id="labelChips" style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 160px; overflow-y: auto; padding: 2px 0;">
+            <div id="labelChips" style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 520px; overflow-y: auto; padding: 2px 0;">
               <!-- Injected by JS -->
             </div>
 
@@ -457,7 +429,7 @@
             <!-- Primary Decision / Top 1 Winner -->
             <div class="vbg-winner-display">
               <div style="min-width: 0;">
-                <span class="vbg-label" style="display: block; margin-bottom: 4px; color: var(--vbg-text-secondary);">
+                <span class="vbg-label" style="display: block; margin-bottom: 6px; color: var(--vbg-text-secondary); font-size: 13px;">
                   Nhãn Chiến Thắng (Top 1)
                 </span>
                 <div id="jevWinnerLabel" class="vbg-winner-label">
@@ -465,8 +437,8 @@
                 </div>
               </div>
 
-              <div style="text-align: right;">
-                <span class="vbg-label" style="display: block; margin-bottom: 4px; color: var(--vbg-text-secondary);">
+              <div style="text-align: right; flex-shrink: 0;">
+                <span class="vbg-label" style="display: block; margin-bottom: 6px; color: var(--vbg-text-secondary); font-size: 13px;">
                   Độ Tin Cậy
                 </span>
                 <div id="jevWinnerConfidence" class="vbg-winner-pct">
@@ -482,7 +454,7 @@
                 <span>Xác Suất</span>
               </div>
 
-              <div id="jevBarsContainer" style="display: flex; flex-direction: column; gap: 4px; max-height: 460px; overflow-y: auto; padding-right: 4px;">
+              <div id="jevBarsContainer" style="display: flex; flex-direction: column; gap: 4px; max-height: 850px; overflow-y: auto; padding-right: 4px;">
                 <div style="text-align: center; padding: 60px 0; color: var(--vbg-text-secondary); font-size: var(--vbg-type-compact);">
                   Nhập văn bản hoặc chọn mẫu thử nghiệm để phân loại...
                 </div>
@@ -520,34 +492,6 @@
     </footer>
   </div>
 
-  <!-- Config Import/Export Modal -->
-  <div id="configModal" class="vbg-modal-backdrop" style="display: none;">
-    <div class="vbg-modal-content">
-      <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--vbg-border-subtle); padding-bottom: var(--vbg-space-3);">
-        <h3 style="margin: 0; font-size: var(--vbg-type-subsection); font-weight: var(--vbg-weight-semibold); color: var(--vbg-text-primary);">
-          Quản Lý Cấu Hình (JSON)
-        </h3>
-        <button onclick="closeConfigModal()" style="background: none; border: none; color: var(--vbg-text-secondary); cursor: pointer; font-size: 16px;">✕</button>
-      </div>
-
-      <p class="vbg-caption" style="color: var(--vbg-text-secondary); margin: 0;">
-        Dữ liệu JSON chứa toàn bộ Nhãn và các Mẫu thử nghiệm hiện tại. Sao chép để lưu trữ hoặc dán JSON mới để nạp vào:
-      </p>
-
-      <textarea id="configJsonText" rows="10" 
-        style="width: 100%; box-sizing: border-box; padding: var(--vbg-space-3); font-family: var(--vbg-font-mono); font-size: 11px; border: 1px solid var(--vbg-border-default); border-radius: var(--vbg-radius-small); background: var(--vbg-background-200); color: var(--vbg-text-primary); outline: none; resize: vertical;"></textarea>
-
-      <div style="display: flex; align-items: center; justify-content: space-between; gap: var(--vbg-space-2); pt-2; border-top: 1px solid var(--vbg-border-subtle); padding-top: var(--vbg-space-3);">
-        <button onclick="copyConfigJson()" class="vbg-button" data-variant="secondary">
-          Sao Chép JSON
-        </button>
-        <div style="display: flex; gap: var(--vbg-space-2);">
-          <button onclick="closeConfigModal()" class="vbg-button" data-variant="tertiary">Đóng</button>
-          <button onclick="importConfigJson()" class="vbg-button" data-variant="primary">Nạp Cấu Hình</button>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- Toast Notification -->
   <div id="toastNotification" class="vbg-toast">
@@ -795,104 +739,7 @@
       }
     }
 
-    function loadConfigFromUrl() {
-      try {
-        const hash = window.location.hash;
-        const params = new URLSearchParams(window.location.search);
-        let encoded = null;
-        if (hash && hash.startsWith('#config=')) {
-          encoded = hash.substring(8);
-        } else if (params.get('config')) {
-          encoded = params.get('config');
-        }
-        if (encoded) {
-          const decoded = decodeURIComponent(atob(encoded));
-          const parsed = JSON.parse(decoded);
-          let loaded = false;
-          if (parsed.labels && Array.isArray(parsed.labels) && parsed.labels.length >= 2) {
-            state.labels = parsed.labels;
-            saveLabels();
-            loaded = true;
-          }
-          if (parsed.recommends && Array.isArray(parsed.recommends) && parsed.recommends.length > 0) {
-            state.recommends = parsed.recommends;
-            saveRecommends();
-            loaded = true;
-          }
-          if (loaded) {
-            showToast("Đã nạp bộ Nhãn & Recommend từ liên kết chia sẻ!");
-            return true;
-          }
-        }
-      } catch (e) {
-        console.warn("Không đọc được cấu hình từ URL:", e);
-      }
-      return false;
-    }
 
-    function copyShareableLink() {
-      const payload = {
-        labels: state.labels,
-        recommends: state.recommends
-      };
-      const jsonStr = JSON.stringify(payload);
-      const encoded = btoa(encodeURIComponent(jsonStr));
-      const shareUrl = `${window.location.origin}${window.location.pathname}#config=${encoded}`;
-      
-      navigator.clipboard.writeText(shareUrl).then(() => {
-        showToast("Đã sao chép link chia sẻ!");
-      }).catch(() => {
-        prompt("Sao chép link này:", shareUrl);
-      });
-    }
-
-    // Modal
-    function openConfigModal() {
-      const modal = document.getElementById('configModal');
-      const textarea = document.getElementById('configJsonText');
-      const config = {
-        labels: state.labels,
-        recommends: state.recommends
-      };
-      textarea.value = JSON.stringify(config, null, 2);
-      modal.style.display = "flex";
-    }
-
-    function closeConfigModal() {
-      document.getElementById('configModal').style.display = "none";
-    }
-
-    function copyConfigJson() {
-      const text = document.getElementById('configJsonText').value;
-      navigator.clipboard.writeText(text).then(() => {
-        showToast("Đã sao chép JSON cấu hình!");
-      });
-    }
-
-    function importConfigJson() {
-      try {
-        const text = document.getElementById('configJsonText').value.trim();
-        const parsed = JSON.parse(text);
-        if (!parsed || typeof parsed !== 'object') throw new Error("JSON không hợp lệ");
-
-        if (Array.isArray(parsed.labels) && parsed.labels.length >= 2) {
-          state.labels = parsed.labels;
-          saveLabels();
-          renderLabels();
-        }
-        if (Array.isArray(parsed.recommends) && parsed.recommends.length > 0) {
-          state.recommends = parsed.recommends;
-          saveRecommends();
-          renderRecommends();
-        }
-
-        closeConfigModal();
-        showToast("Đã nạp cấu hình mới!");
-        runClassification();
-      } catch (e) {
-        alert("Lỗi JSON: " + e.message);
-      }
-    }
 
     // Recommend Samples Management
     function renderRecommends() {
@@ -1199,11 +1046,8 @@
 
     // Initialization
     function init() {
-      const hasUrlConfig = loadConfigFromUrl();
-      if (!hasUrlConfig) {
-        state.labels = loadSavedLabels();
-        state.recommends = loadSavedRecommends();
-      }
+      state.labels = loadSavedLabels();
+      state.recommends = loadSavedRecommends();
 
       renderLabels();
       renderRecommends();
